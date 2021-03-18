@@ -23,31 +23,33 @@
     var NexT = window.NexT || {};
     var CONFIG = {"hostname":"hemengting.xyz","root":"/","images":"/images","scheme":"Muse","version":"8.2.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
   </script>
-<meta name="description" content="多看多学多记">
-<meta property="og:type" content="website">
-<meta property="og:title" content="贺梦婷的博客">
-<meta property="og:url" content="https://hemengting.xyz/index.html">
+<meta name="description" content="ES6新特性：总结自廖雪峰JavaScript教程 fcc -&gt; ES6  多行字符串表示方法123console.log(&#96;This isa multi-linestring&#96;);  123this isa multi-linestring 模板字符串表示方法与多行字符串一样，自动替换字符串中的变量。 1234var name &#x3D; &quot;小明&quot;;var age &#x3D; 20;v">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ES6新特性总结“">
+<meta property="og:url" content="https://hemengting.xyz/2021/03/16/ES6%E6%96%B0%E7%89%B9%E6%80%A7%E6%80%BB%E7%BB%93/index.html">
 <meta property="og:site_name" content="贺梦婷的博客">
-<meta property="og:description" content="多看多学多记">
+<meta property="og:description" content="ES6新特性：总结自廖雪峰JavaScript教程 fcc -&gt; ES6  多行字符串表示方法123console.log(&#96;This isa multi-linestring&#96;);  123this isa multi-linestring 模板字符串表示方法与多行字符串一样，自动替换字符串中的变量。 1234var name &#x3D; &quot;小明&quot;;var age &#x3D; 20;v">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-03-16T12:20:59.000Z">
+<meta property="article:modified_time" content="2021-03-18T12:09:15.547Z">
 <meta property="article:author" content="He Mengting">
 <meta property="article:tag" content="前端">
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="https://hemengting.xyz/">
+<link rel="canonical" href="https://hemengting.xyz/2021/03/16/ES6%E6%96%B0%E7%89%B9%E6%80%A7%E6%80%BB%E7%BB%93/">
 
 
 <script class="page-configurations">
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome : true,
-    isPost : false,
+    isHome : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
-<title>贺梦婷的博客</title>
+<title>ES6新特性总结“ | 贺梦婷的博客</title>
   
 
 
@@ -134,7 +136,7 @@
 
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-overview-active">
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目录
@@ -147,6 +149,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#ES6%E6%96%B0%E7%89%B9%E6%80%A7%EF%BC%9A"><span class="nav-number">1.</span> <span class="nav-text">ES6新特性：</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%A4%9A%E8%A1%8C%E5%AD%97%E7%AC%A6%E4%B8%B2%E8%A1%A8%E7%A4%BA%E6%96%B9%E6%B3%95"><span class="nav-number">1.0.0.0.0.1.</span> <span class="nav-text">多行字符串表示方法</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%A8%A1%E6%9D%BF%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="nav-number">1.0.0.0.0.2.</span> <span class="nav-text">模板字符串</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#Map%E5%92%8CSet%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.0.0.0.0.3.</span> <span class="nav-text">Map和Set数据类型</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#for%E2%80%A6of"><span class="nav-number">1.0.0.0.0.4.</span> <span class="nav-text">for…of</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#reset%E5%8F%82%E6%95%B0"><span class="nav-number">1.0.0.0.0.5.</span> <span class="nav-text">reset参数</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#let%E5%85%B3%E9%94%AE%E5%AD%97"><span class="nav-number">1.0.0.0.0.6.</span> <span class="nav-text">let关键字</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#const%E5%85%B3%E9%94%AE%E5%AD%97"><span class="nav-number">1.0.0.0.0.7.</span> <span class="nav-text">const关键字</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E8%A7%A3%E6%9E%84%E8%B5%8B%E5%80%BC"><span class="nav-number">1.0.0.0.0.8.</span> <span class="nav-text">解构赋值</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#Arrow-Function%E7%AE%AD%E5%A4%B4%E5%87%BD%E6%95%B0"><span class="nav-number">1.0.0.0.0.9.</span> <span class="nav-text">Arrow Function箭头函数</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#generator%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.0.0.0.0.10.</span> <span class="nav-text">generator数据类型</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#class"><span class="nav-number">1.0.0.0.0.11.</span> <span class="nav-text">class</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#promise"><span class="nav-number">1.0.0.0.0.12.</span> <span class="nav-text">promise</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#Symbol%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.0.0.0.0.13.</span> <span class="nav-text">Symbol数据类型</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E7%AE%80%E6%B4%81%E7%9A%84%E5%87%BD%E6%95%B0%E5%A3%B0%E6%98%8E"><span class="nav-number">1.0.0.0.0.14.</span> <span class="nav-text">简洁的函数声明</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-getter-%E5%92%8C-setter-%E6%9D%A5%E6%8E%A7%E5%88%B6%E5%AF%B9%E8%B1%A1%E7%9A%84%E8%AE%BF%E9%97%AE"><span class="nav-number">1.0.0.0.0.15.</span> <span class="nav-text">使用 getter 和 setter 来控制对象的访问</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#import-%E5%92%8C-require-%E4%B9%8B%E9%97%B4%E7%9A%84%E5%B7%AE%E5%BC%82"><span class="nav-number">1.0.0.0.0.16.</span> <span class="nav-text">import 和 require 之间的差异</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E7%94%A8-export-%E6%9D%A5%E9%87%8D%E7%94%A8%E4%BB%A3%E7%A0%81%E5%9D%97"><span class="nav-number">1.0.0.0.0.17.</span> <span class="nav-text">用 export 来重用代码块</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -188,16 +191,17 @@
 </noscript>
 
 
-    <div class="main-inner index posts-expand">
+    <div class="main-inner post posts-expand">
 
-    
+
+  
 
 
 <div class="post-block">
   
   
 
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://hemengting.xyz/2021/03/16/ES6%E6%96%B0%E7%89%B9%E6%80%A7%E6%80%BB%E7%BB%93/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -210,9 +214,9 @@
       <meta itemprop="name" content="贺梦婷的博客">
     </span>
       <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/03/16/ES6%E6%96%B0%E7%89%B9%E6%80%A7%E6%80%BB%E7%BB%93/" class="post-title-link" itemprop="url">ES6新特性总结“</a>
-        </h2>
+        <h1 class="post-title" itemprop="name headline">
+          ES6新特性总结“
+        </h1>
 
         <div class="post-meta-container">
           <div class="post-meta">
@@ -242,7 +246,7 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h1 id="ES6新特性："><a href="#ES6新特性：" class="headerlink" title="ES6新特性："></a>ES6新特性：</h1><p>总结自<a target="_blank" rel="noopener" href="https://www.liaoxuefeng.com/wiki/1022910821149312">廖雪峰JavaScript教程</a></p>
+        <h1 id="ES6新特性："><a href="#ES6新特性：" class="headerlink" title="ES6新特性："></a>ES6新特性：</h1><p>总结自<a target="_blank" rel="noopener" href="https://www.liaoxuefeng.com/wiki/1022910821149312">廖雪峰JavaScript教程</a></p>
 <p><a target="_blank" rel="noopener" href="https://learn.freecodecamp.one/">fcc -&gt; ES6</a></p>
 <ol>
 <li><h6 id="多行字符串表示方法"><a href="#多行字符串表示方法" class="headerlink" title="多行字符串表示方法"></a>多行字符串表示方法</h6><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">console</span>.log(<span class="string">`This is</span></span><br><span class="line"><span class="string">a multi-line</span></span><br><span class="line"><span class="string">string`</span>);</span><br></pre></td></tr></table></figure>
@@ -348,7 +352,6 @@
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> capitalizeString = <span class="function">(<span class="params">string</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> string.charAt(<span class="number">0</span>).toUpperCase() + string.slice(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> foo = <span class="string">&quot;bar&quot;</span>;</span><br><span class="line"><span class="keyword">export</span> &#123; capitalizeString, foo &#125;</span><br></pre></td></tr></table></figure></li>
 </ol>
 
-      
     </div>
 
     
@@ -356,150 +359,22 @@
     
 
     <footer class="post-footer">
-        <div class="post-eof"></div>
-      
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/03/10/test-my-site/" rel="prev" title="test_my_site">
+                  <i class="fa fa-chevron-left"></i> test_my_site
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
     </footer>
   </article>
 </div>
 
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://hemengting.xyz/2021/03/10/test-my-site/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="He Mengting">
-      <meta itemprop="description" content="多看多学多记">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="贺梦婷的博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/03/10/test-my-site/" class="post-title-link" itemprop="url">test_my_site</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-03-10 20:06:55" itemprop="dateCreated datePublished" datetime="2021-03-10T20:06:55+08:00">2021-03-10</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://hemengting.xyz/2021/03/10/hello-world/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="He Mengting">
-      <meta itemprop="description" content="多看多学多记">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="贺梦婷的博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/03/10/hello-world/" class="post-title-link" itemprop="url">Hello World</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-03-10 18:17:49" itemprop="dateCreated datePublished" datetime="2021-03-10T18:17:49+08:00">2021-03-10</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
 
 
 

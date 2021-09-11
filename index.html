@@ -71,6 +71,408 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-webpack入门六、性能调优" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/09/10/webpack%E5%85%A5%E9%97%A8%E5%85%AD%E3%80%81%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/" class="article-date">
+  <time class="dt-published" datetime="2021-09-10T14:40:22.000Z" itemprop="datePublished">2021-09-10</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/09/10/webpack%E5%85%A5%E9%97%A8%E5%85%AD%E3%80%81%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/">webpack入门六、性能调优</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="webpack性能调优"><a href="#webpack性能调优" class="headerlink" title="webpack性能调优"></a><code>webpack</code>性能调优</h1><h4 id="学习目标"><a href="#学习目标" class="headerlink" title="学习目标"></a>学习目标</h4><ul>
+<li>打包结果优化</li>
+<li>构建过程优化</li>
+<li>tree-shaking</li>
+</ul>
+<p><code>webpack</code>在生产环境下会自动压缩代码</p>
+<h4 id="预制terser-plugin：实现插件定制"><a href="#预制terser-plugin：实现插件定制" class="headerlink" title="预制terser plugin：实现插件定制"></a>预制<code>terser plugin</code>：实现插件定制</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> TerserPlugin = <span class="built_in">require</span>(<span class="string">&#x27;terser-webpack-plugin&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>配置：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">optimization: &#123;</span><br><span class="line">       <span class="attr">minimizer</span>: [<span class="keyword">new</span> TerserPlugin(&#123;</span><br><span class="line">           <span class="comment">// 使用缓存，加快构建速度</span></span><br><span class="line">           <span class="attr">cache</span>: <span class="literal">true</span>,</span><br><span class="line">           <span class="attr">parallel</span>: <span class="literal">true</span>,</span><br><span class="line">           <span class="comment">// 打包多线程</span></span><br><span class="line">           <span class="attr">TerserOptions</span>: &#123;</span><br><span class="line">               <span class="attr">compress</span>: &#123;</span><br><span class="line">                   <span class="comment">// 移除无用代码,debugger、console等</span></span><br><span class="line">                   <span class="attr">unused</span>: <span class="literal">true</span>,</span><br><span class="line">                   <span class="attr">drop_debugger</span>: <span class="literal">true</span>,</span><br><span class="line">                   <span class="attr">drop_console</span>: <span class="literal">true</span>,</span><br><span class="line">                   <span class="attr">dead_code</span>: <span class="literal">true</span></span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;)]</span><br><span class="line">   &#125;,</span><br></pre></td></tr></table></figure>
+
+<p>打包结果可视化分析：<code>webpack.bundle-analyzer</code>，可以看到哪一部分占的体积更大</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install webpack-bundle-analyzer</span><br></pre></td></tr></table></figure>
+
+<p>配置：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> BundleAnalyzerPlugin()</span><br></pre></td></tr></table></figure>
+
+<p>报错</p>
+<blockquote>
+<p>[webpack-cli] TypeError: BundleAnalyzerPlugin is not a constructor</p>
+</blockquote>
+<p>解决：解构赋值引用</p>
+<h4 id="其他调优方式："><a href="#其他调优方式：" class="headerlink" title="其他调优方式："></a>其他调优方式：</h4><ul>
+<li>减少解析：配置不解析的文件：</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">noParse: /node_modules\/(jquery\.js)/,</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>减少查找：include只打包某些文件</li>
+</ul>
+<ul>
+<li>利用多线程提高构建速度，并发执行子进程：</li>
+</ul>
+<ol>
+<li><code>thread-loader</code>把loader放在worker线程池里，必须放在所有<code>loader</code>之前</li>
+<li><code>HappyPack</code>：多进程</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 根据cpu数量创建线程池</span></span><br><span class="line"><span class="keyword">const</span> happyThreadPool = HappyPack.ThreadPool(&#123;<span class="attr">size</span>: os.cpus().length&#125;)</span><br><span class="line"><span class="comment">// url-loader file-loader不支持happypack</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>预编译：</p>
+</li>
+<li><p>缓存：fast-sass-loader并行处理sass文件</p>
+</li>
+</ul>
+<ul>
+<li>source-map</li>
+</ul>
+<h4 id="tree-shaking"><a href="#tree-shaking" class="headerlink" title="tree-shaking"></a>tree-shaking</h4><p>消除无用JavaScript代码<code>DCE</code>， 例如：引用未执行的模块</p>
+<p>development：去掉无用引用</p>
+<p>run build：直接去掉</p>
+<p>总结：<code>webpack</code>是什么</p>
+<ul>
+<li><p>前端发展的产物</p>
+</li>
+<li><p>模块化打包方案</p>
+</li>
+<li><p>工程化方案 ，例如<code>create-react-app</code>也是基于<code>webpack</code></p>
+</li>
+</ul>
+<p>补充：了解进程与线程的概念，<code>webpack</code>优化是体现工作能力的地方</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://hemengting.xyz/2021/09/10/webpack%E5%85%A5%E9%97%A8%E5%85%AD%E3%80%81%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/" data-id="cktfs5cyc0005jcub8aqhf3ph" data-title="webpack入门六、性能调优" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/webpack/" rel="tag">webpack</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-webpack入门五、webpack构建工程" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/09/10/webpack%E5%85%A5%E9%97%A8%E4%BA%94%E3%80%81webpack%E6%9E%84%E5%BB%BA%E5%B7%A5%E7%A8%8B/" class="article-date">
+  <time class="dt-published" datetime="2021-09-10T14:05:39.000Z" itemprop="datePublished">2021-09-10</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/09/10/webpack%E5%85%A5%E9%97%A8%E4%BA%94%E3%80%81webpack%E6%9E%84%E5%BB%BA%E5%B7%A5%E7%A8%8B/">webpack入门五、webpack构建工程</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="webpack构建工程"><a href="#webpack构建工程" class="headerlink" title="webpack构建工程"></a><code>webpack</code>构建工程</h1><h4 id="学习目标"><a href="#学习目标" class="headerlink" title="学习目标"></a>学习目标</h4><ul>
+<li>使用<code>webpack</code>构建真实<code>react</code>工程</li>
+<li>掌握<code>babel</code>的用法，理解<code>babel</code>原理</li>
+<li>掌握高频<code>loader</code>和<code>plugin</code>的用法</li>
+<li>掌握生产级别的<code>webpack</code>配置方法</li>
+</ul>
+<h4 id="准备工作："><a href="#准备工作：" class="headerlink" title="准备工作："></a>准备工作：</h4><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mkdir learn<span class="literal">-webpack</span></span><br><span class="line"><span class="built_in">cd</span> learn<span class="literal">-webpack</span></span><br><span class="line">npm init</span><br><span class="line">npm init <span class="literal">-y</span> // 把所有预置项设置为npm默认</span><br><span class="line"><span class="built_in">ls</span></span><br><span class="line">npm install react react<span class="literal">-dom</span></span><br><span class="line">npm install webpack webpack<span class="literal">-cli</span> <span class="literal">-d</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="项目文件："><a href="#项目文件：" class="headerlink" title="项目文件："></a>项目文件：</h4><p><code>App.jsx</code>:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">&#x27;react&#x27;</span></span><br><span class="line"><span class="keyword">import</span> ReactDom <span class="keyword">from</span> <span class="string">&#x27;react-dom&#x27;</span></span><br><span class="line"><span class="keyword">import</span> &#123; isNull, isZero &#125; <span class="keyword">from</span> <span class="string">&#x27;./utils&#x27;</span></span><br><span class="line"></span><br><span class="line">isNull(&#123;&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> App = <span class="function">() =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">        <span class="xml"><span class="tag">&lt;<span class="name">div</span>&gt;</span></span></span><br><span class="line"><span class="xml">            <span class="tag">&lt;<span class="name">h1</span>&gt;</span>webpack学习<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></span><br><span class="line">    )</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> App</span><br><span class="line">ReactDom.render(<span class="xml"><span class="tag">&lt;<span class="name">App</span>/&gt;</span></span>, <span class="built_in">document</span>.getElementById(<span class="string">&#x27;app&#x27;</span>))</span><br></pre></td></tr></table></figure>
+
+<p><code>index.html</code></p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">&quot;en&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">&quot;X-UA-Compatible&quot;</span> <span class="attr">content</span>=<span class="string">&quot;IE=edge&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">&quot;viewport&quot;</span> <span class="attr">content</span>=<span class="string">&quot;width=device-width, initial-scale=1.0&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>React Webpack测试<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">&quot;app&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>webpack</code>读不懂<code>ES6</code>语法，也无法处理<code>html</code>文件。</p>
+<h4 id="babel："><a href="#babel：" class="headerlink" title="babel："></a>babel：</h4><p>把高版本代码编译成低版本代码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install @babel/core @babel/cli -g</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">babel test.js --presets=@babel/preset-env</span><br></pre></td></tr></table></figure>
+
+<p><code>--presets=@babel/preset-env</code>是配置参数，指定转换规则。<code>presets-env</code>可以把高版本代码转换为低版本。写在配置文件中：</p>
+<p><code>package.json</code>或者<code>.babelrc</code>文件(优先查询)</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;babel&quot;</span>: &#123;</span><br><span class="line">	<span class="string">&quot;presets&quot;</span>: [<span class="string">&quot;@babel/presets-env&quot;</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="在webpack中使用babel"><a href="#在webpack中使用babel" class="headerlink" title="在webpack中使用babel"></a>在<code>webpack</code>中使用<code>babel</code></h4><p><code>webpack.config.js</code>:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">module</span>.exports = &#123;</span><br><span class="line">    <span class="attr">module</span>: &#123;</span><br><span class="line">        <span class="attr">rules</span>: [</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="attr">test</span>: <span class="regexp">/\.jsx?/</span>,</span><br><span class="line">                exclude: <span class="regexp">/node_modules/</span>, <span class="comment">// 不对node_module进行编译</span></span><br><span class="line">            &#125;</span><br><span class="line">        ]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>安装loader和规则：解决代码转译问题：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm install babel-loader</span><br><span class="line">npm install @babel/preset-env @babel/preset-react</span><br></pre></td></tr></table></figure>
+
+<p>填写规则：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">options: &#123;</span><br><span class="line">    <span class="attr">babelrc</span>: <span class="literal">false</span>,</span><br><span class="line">    <span class="attr">presets</span>: [</span><br><span class="line">        <span class="built_in">require</span>.resolve(<span class="string">&#x27;@babel/preset-react&#x27;</span>),</span><br><span class="line">        <span class="comment">// 转义jsx</span></span><br><span class="line">        [<span class="built_in">require</span>.resolve(<span class="string">&#x27;@babel/preset-env&#x27;</span>, &#123;<span class="attr">modules</span>: <span class="literal">false</span>&#125;)]</span><br><span class="line">        <span class="comment">// 转义ES6，webpack可以识别import语法</span></span><br><span class="line">    ],</span><br><span class="line">    <span class="attr">cacheDirectory</span>: <span class="literal">true</span>, <span class="comment">// 是否对转译结果做缓存</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="html文件处理：plugin"><a href="#html文件处理：plugin" class="headerlink" title="html文件处理：plugin"></a><code>html</code>文件处理：<code>plugin</code></h4><p><code>plugin</code>实现节点层面的处理，以构造函数的形式存在</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install html-webpack-plugin -d</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">plugins: [</span><br><span class="line">        <span class="keyword">new</span> HtmlWebPackPlugin(&#123;</span><br><span class="line">            <span class="attr">template</span>: path.join(__dirname, <span class="string">&#x27;src/index.html&#x27;</span>),</span><br><span class="line">            <span class="comment">// 需要被处理的文件的路径</span></span><br><span class="line">            <span class="attr">filename</span>: <span class="string">&#x27;index.html&#x27;</span></span><br><span class="line">        &#125;)</span><br><span class="line">    ]</span><br></pre></td></tr></table></figure>
+
+<p>入口文件<code>index.jsx</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">import App from &#x27;./App&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>import省略文件后缀：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">resolve: &#123;</span><br><span class="line">       <span class="attr">extensions</span>: [<span class="string">&#x27;.wasm&#x27;</span>, <span class="string">&#x27;.mjs&#x27;</span>, <span class="string">&#x27;.js&#x27;</span>, <span class="string">&#x27;.jsx&#x27;</span>, <span class="string">&#x27;json&#x27;</span>]</span><br><span class="line">&#125;,</span><br><span class="line">    <span class="attr">entry</span>: path.resolve(__dirname, <span class="string">&#x27;src/index.jsx&#x27;</span>), <span class="comment">// 入口文件</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>ERROR in ./src/index.html 1:0<br>Module parse failed: Unexpected token (1:0)<br>You may need an appropriate loader to handle this file type, currently no loaders are configured to process this file. See <a target="_blank" rel="noopener" href="https://webpack.js.org/concepts#loaders">https://webpack.js.org/concepts#loaders</a></p>
+<blockquote>
+<!DOCTYPE html>
+<p>| <html lang="en"><br>| <head></p>
+</blockquote>
+<p>webpack 5.52.0 compiled with 1 error in 93 ms</p>
+</blockquote>
+<p>babel与babel-loader版本应该相匹配<a target="_blank" rel="noopener" href="https://www.npmjs.com/package/babel-loader">https://www.npmjs.com/package/babel-loader</a></p>
+<h4 id="打包"><a href="#打包" class="headerlink" title="打包"></a>打包</h4><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">webpack<span class="literal">-dev</span><span class="literal">-server</span> -<span class="literal">-config</span> // 指定读取的config文件,比如webpack.config.dev.js</span><br><span class="line">webpack<span class="literal">-dev</span><span class="literal">-server</span> -<span class="literal">-open</span> // 打开浏览器</span><br></pre></td></tr></table></figure>
+
+<p>自定义命令：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;scripts&quot;</span>: &#123;</span><br><span class="line">    <span class="string">&quot;test&quot;</span>: <span class="string">&quot;echo \&quot;Error: no test specified\&quot; &amp;&amp; exit 1&quot;</span>,</span><br><span class="line">    <span class="string">&quot;build&quot;</span>: <span class="string">&quot;webpack --mode production&quot;</span>, <span class="comment">// 打包</span></span><br><span class="line">    <span class="string">&quot;start&quot;</span>: <span class="string">&quot;webpack-dev-server --mode development --open&quot;</span> <span class="comment">// 预览</span></span><br><span class="line">  &#125;,</span><br></pre></td></tr></table></figure>
+
+<p><code>HMR</code>热更新（热替换）， 在不刷新页面的情况下更新修改部分：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">devServer: &#123;</span><br><span class="line">	<span class="attr">hot</span>: <span class="literal">true</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="attr">Plugins</span>: [</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">new</span> webpack.HotModuleReplacementPlugin()</span><br><span class="line">    ...</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<p><code>index.jsx</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="built_in">module</span>.hot) &#123;</span><br><span class="line">    <span class="built_in">module</span>.hot.accept(<span class="function"><span class="params">error</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">if</span>(error) &#123;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">&quot;热替换出错&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://hemengting.xyz/2021/09/10/webpack%E5%85%A5%E9%97%A8%E4%BA%94%E3%80%81webpack%E6%9E%84%E5%BB%BA%E5%B7%A5%E7%A8%8B/" data-id="cktfs5cyd0009jcubbdmd33um" data-title="webpack入门五、webpack构建工程" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/webpack/" rel="tag">webpack</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-webpack入门四、webpack核心特性" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/09/10/webpack%E5%85%A5%E9%97%A8%E5%9B%9B%E3%80%81webpack%E6%A0%B8%E5%BF%83%E7%89%B9%E6%80%A7/" class="article-date">
+  <time class="dt-published" datetime="2021-09-10T13:28:46.000Z" itemprop="datePublished">2021-09-10</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/09/10/webpack%E5%85%A5%E9%97%A8%E5%9B%9B%E3%80%81webpack%E6%A0%B8%E5%BF%83%E7%89%B9%E6%80%A7/">webpack入门四、webpack核心特性</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="webpack核心特性"><a href="#webpack核心特性" class="headerlink" title="webpack核心特性"></a>webpack核心特性</h1><h4 id="学习目标"><a href="#学习目标" class="headerlink" title="学习目标"></a>学习目标</h4><ul>
+<li>使用webpack构建简单工程</li>
+<li>了解webpack配置文件</li>
+<li>掌握“一切皆模块与loaders”的思想</li>
+<li>理解webpack中的“关键人物”—入口文件、出口文件、loaders、plugins</li>
+</ul>
+<p><code>index.html</code></p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">&quot;en&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">&quot;X-UA-Compatible&quot;</span> <span class="attr">content</span>=<span class="string">&quot;IE=edge&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">&quot;viewport&quot;</span> <span class="attr">content</span>=<span class="string">&quot;width=device-width, initial-scale=1.0&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>React Webpack测试<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">src</span>=<span class="string">&#x27;/dist/bunle.js&#x27;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>moduleLog.js</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="built_in">document</span>.write(<span class="string">&#x27;moduleLog is loaded&#x27;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>src/index.js</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> moduleLog <span class="keyword">from</span> <span class="string">&#x27;../moduleLog&#x27;</span></span><br><span class="line"><span class="built_in">document</span>.write(<span class="string">&#x27;入口js is loaded&#x27;</span>);</span><br><span class="line">moduleLog();</span><br></pre></td></tr></table></figure>
+
+<h4 id="安装webpack和webpack-cli"><a href="#安装webpack和webpack-cli" class="headerlink" title="安装webpack和webpack-cli:"></a>安装webpack和webpack-cli:</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm install webpack</span><br><span class="line">npm install webpack-cli -g</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>报错：无法将“WEBPACK”项识别为 CMDLET、函数、脚本文件或可运行程序的名称</p>
+</blockquote>
+<p>出现这个错误的原因是：windows10中，你的webpack是局部安装的，并没有加入到系统环境变量中，所以控制台找不到webpack命令，有以下方法可以解决：</p>
+<ul>
+<li>找到项目根目录下的<strong>package.json</strong>文件，配置<code>&#39;scripts&#39;</code>这个选项，配置加上<code>&quot;build&quot;：&quot;webpack&quot;</code>，然后运行<code>npm run build</code></li>
+<li>全局安装webpack</li>
+</ul>
+<p>默认入口文件：src/index.js </p>
+<p>出口：dist/main.js</p>
+<h4 id="自定义配置文件："><a href="#自定义配置文件：" class="headerlink" title="自定义配置文件："></a>自定义配置文件：</h4><p><code>webpack.config.js</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> path = <span class="built_in">require</span>(<span class="string">&#x27;path&#x27;</span>);</span><br><span class="line"><span class="built_in">module</span>.exports = &#123;</span><br><span class="line">    <span class="attr">entry</span>: <span class="string">&#x27;./app.js&#x27;</span>, <span class="comment">// 修改入口文件</span></span><br><span class="line">    <span class="attr">output</span>: &#123;</span><br><span class="line">        <span class="attr">path</span>: path.join(__dirname, <span class="string">&#x27;dist&#x27;</span>),</span><br><span class="line">        <span class="attr">filename</span>: <span class="string">&#x27;bundle.js&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>警告：WARNING in configuration<br>The ‘mode’ option has not been set, webpack will fallback to ‘production’<br>for this value.<br>Set ‘mode’ option to ‘development’ or ‘production’ to enable defaults for<br>each environment.</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mode: &#x27;development&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>但是每次修改都要保存、打包很麻烦，有没有自动的方法呢？</p>
+<h4 id="自动打包工具：webpack-dev-server"><a href="#自动打包工具：webpack-dev-server" class="headerlink" title="自动打包工具：webpack-dev-server"></a>自动打包工具：webpack-dev-server</h4><p>启动<code>webpack-dev-server</code>可以监听工程目录文件的改动，修改源文件并再次保存可以实现动态实时打包，自动刷新浏览器。</p>
+<p>不管cli还是webpack-dev-server都是可执行文件，一种方法是全局安装，或者进入node_module/.bin/server执行</p>
+<blockquote>
+<p>报错：.\webpack-dev-server : 无法加载文件 C:\Users\hh\github\learnwebpack\node_<br>modules.bin\webpack-dev-server.ps1，因为在此系统上禁止运行脚本。有关详细<br>信息，请参阅 https:/go.microsoft.com/fwlink/?LinkID=135170 中的 about_Exe<br>cution_Policies。</p>
+</blockquote>
+<ol>
+<li>以管理员身份运行powershell</li>
+<li>输入set-executionpolicy remotesigned，回车</li>
+<li>输入yes</li>
+</ol>
+<p>指定本地服务端口：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">devServer: &#123;</span><br><span class="line">	<span class="attr">port</span>: <span class="number">3000</span>, <span class="comment">// 服务端口</span></span><br><span class="line">	<span class="attr">publicPath</span>: <span class="string">&#x27;/dist&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>此时删除bundle.js依然可以运行，说明只在内存中生成了一个bundle.js，当浏览器发出请求时才会运行。</p>
+<p>所有资源（图片、css等）都是模块</p>
+<h4 id="文件编译：loader"><a href="#文件编译：loader" class="headerlink" title="文件编译：loader"></a>文件编译：loader</h4><p>安装css loader和style loader</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm install css<span class="literal">-loader</span> -<span class="literal">-save</span><span class="literal">-dev</span></span><br><span class="line">npm install style<span class="literal">-loader</span> -<span class="literal">-save</span><span class="literal">-dev</span></span><br></pre></td></tr></table></figure>
+
+<p>loader本质上是文件加载器</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">test</span>: <span class="regexp">/\.css$/</span>,</span><br><span class="line">        use: [</span><br><span class="line">            <span class="string">&#x27;style-loader&#x27;</span>, <span class="comment">// 加载样式</span></span><br><span class="line">            <span class="string">&#x27;css-loader&#x27;</span> <span class="comment">// 编译css文件，注意配置顺序与加载顺序相反</span></span><br><span class="line">        ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="plugins："><a href="#plugins：" class="headerlink" title="plugins："></a>plugins：</h4><p>监听事件，改变文件打包输出结果，比如压缩资源体积，去掉代码中的注释。</p>
+<p>举例：引入uglify之前的打包结果：<code>asset bundle.js 4.26 KiB [emitted] (name: main) </code></p>
+<p>安装：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install uglifyjs-webpack-plugin --save-dev</span><br></pre></td></tr></table></figure>
+
+<p>引入：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> UglifyJSPlugin = <span class="built_in">require</span>(<span class="string">&quot;uglifyjs-webpack-plugin&quot;</span>)</span><br><span class="line">...</span><br><span class="line"><span class="attr">Plugins</span>: [</span><br><span class="line">	<span class="keyword">new</span> UglifyJSPlugin()</span><br><span class="line">]</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p><code>asset bundle.js 1.82 KiB [emitted] (name: main)</code></p>
+<p>代码体积减小了。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://hemengting.xyz/2021/09/10/webpack%E5%85%A5%E9%97%A8%E5%9B%9B%E3%80%81webpack%E6%A0%B8%E5%BF%83%E7%89%B9%E6%80%A7/" data-id="cktfs5cyc0007jcub17xs4q7p" data-title="webpack入门四、webpack核心特性" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/webpack/" rel="tag">webpack</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-webpack入门三、配置开发环境-npm与包管理器" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/09/10/webpack%E5%85%A5%E9%97%A8%E4%B8%89%E3%80%81%E9%85%8D%E7%BD%AE%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83-npm%E4%B8%8E%E5%8C%85%E7%AE%A1%E7%90%86%E5%99%A8/" class="article-date">
+  <time class="dt-published" datetime="2021-09-10T12:58:27.000Z" itemprop="datePublished">2021-09-10</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/09/10/webpack%E5%85%A5%E9%97%A8%E4%B8%89%E3%80%81%E9%85%8D%E7%BD%AE%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83-npm%E4%B8%8E%E5%8C%85%E7%AE%A1%E7%90%86%E5%99%A8/">webpack入门三、配置开发环境-npm与包管理器</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="配置开发环境——npm与包管理器"><a href="#配置开发环境——npm与包管理器" class="headerlink" title="配置开发环境——npm与包管理器"></a>配置开发环境——<code>npm</code>与包管理器</h1><h4 id="学习目标"><a href="#学习目标" class="headerlink" title="学习目标"></a>学习目标</h4><ul>
+<li>理解包管理器</li>
+<li>熟悉<code>npm</code>核心特性</li>
+<li>理解<code>npm</code>”仓库“与”依赖“的概念</li>
+<li>理解<code>npm</code>”语义化版本“</li>
+<li>掌握使用<code>npm</code>自定义工程脚本的方法</li>
+</ul>
+<h4 id="什么是包管理器？"><a href="#什么是包管理器？" class="headerlink" title="什么是包管理器？"></a>什么是包管理器？</h4><p>使开发者能够便捷的管理代码和分发代码的工具</p>
+<h6 id="npm依赖node环境，安装node会自动安装npm，查看node版本和npm版本："><a href="#npm依赖node环境，安装node会自动安装npm，查看node版本和npm版本：" class="headerlink" title="npm依赖node环境，安装node会自动安装npm，查看node版本和npm版本："></a><code>npm</code>依赖<code>node</code>环境，安装<code>node</code>会自动安装<code>npm</code>，查看<code>node</code>版本和<code>npm</code>版本：</h6><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">node -v // 查看node版本</span><br><span class="line">npm -v // 查看npm版本</span><br></pre></td></tr></table></figure>
+
+<h6 id="初始化工程："><a href="#初始化工程：" class="headerlink" title="初始化工程："></a>初始化工程：</h6><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm-init </span><br></pre></td></tr></table></figure>
+
+<h6 id="package-json："><a href="#package-json：" class="headerlink" title="package.json："></a><code>package.json</code>：</h6><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;name&quot;</span>: <span class="string">&quot;learn-webpack&quot;</span>, <span class="comment">// 包名称</span></span><br><span class="line">  <span class="attr">&quot;version&quot;</span>: <span class="string">&quot;1.0.0&quot;</span>, <span class="comment">// 版本号</span></span><br><span class="line">  <span class="attr">&quot;description&quot;</span>: <span class="string">&quot;&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;main&quot;</span>: <span class="string">&quot;index.js&quot;</span>, <span class="comment">// 执行入口</span></span><br><span class="line">  <span class="attr">&quot;scripts&quot;</span>: &#123;</span><br><span class="line">    <span class="attr">&quot;test&quot;</span>: <span class="string">&quot;echo \&quot;Error: no test specified\&quot; &amp;&amp; exit 1&quot;</span>,</span><br><span class="line">  &#125;, <span class="comment">// 自定义脚本，自动化执行命令</span></span><br><span class="line">  <span class="attr">&quot;author&quot;</span>: <span class="string">&quot;&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;license&quot;</span>: <span class="string">&quot;ISC&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h6 id="设置国内镜像："><a href="#设置国内镜像：" class="headerlink" title="设置国内镜像："></a>设置国内镜像：</h6><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm config <span class="built_in">set</span> registry https://registry.npm.taobao.org</span><br></pre></td></tr></table></figure>
+
+<h6 id="安装包："><a href="#安装包：" class="headerlink" title="安装包："></a>安装包：</h6><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install lodash --save</span><br></pre></td></tr></table></figure>
+
+<p><code>--save</code>或<code> -s</code>将下载的包写入<code>package.json</code>的<em>生产环境</em>下的依赖<code>dependencies</code>中，<code>npm</code>5.0版本之后默认<code>--save</code></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm install jquary -<span class="literal">-save</span><span class="literal">-dev</span></span><br><span class="line"><span class="literal">-d</span></span><br></pre></td></tr></table></figure>
+
+<p><code>--save-dev</code>或<code>-d</code>添加到<em>开发环境</em>下的依赖<code>devDepencies</code>，主要是构建工具，质量检测工具比如<code>eslint</code>等本地开发用到的包。</p>
+<p>项目迁移时，执行<code>npm install</code>即可安装`开发环境和生产环境下的包。</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install -<span class="literal">-only</span>=dev</span><br></pre></td></tr></table></figure>
+
+<p>只安装开发环境下的包</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install --only=prod</span><br></pre></td></tr></table></figure>
+
+<p>只安装生产环境中的包，由此可以实现环境区分。</p>
+<h6 id="删除并重装"><a href="#删除并重装" class="headerlink" title="删除并重装"></a>删除并重装</h6><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">rm</span> <span class="literal">-rf</span> node_modules &amp;&amp; npm install</span><br></pre></td></tr></table></figure>
+
+<h4 id="版本号，语义化版本"><a href="#版本号，语义化版本" class="headerlink" title="版本号，语义化版本"></a>版本号，语义化版本</h4><ul>
+<li><p>^version: 中版本和小版本</p>
+<p>^1.0.1 -&gt; 1.x.x</p>
+</li>
+<li><p>~version: 小版本</p>
+<p>~1.0.1 -&gt; 1.0.x</p>
+<p>方便推送小的新版本（fix bug等)</p>
+</li>
+<li><p>version：固定特定版本</p>
+</li>
+</ul>
+<h4 id="scripts自定义命令执行脚本"><a href="#scripts自定义命令执行脚本" class="headerlink" title="scripts自定义命令执行脚本"></a>scripts自定义命令执行脚本</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;    </span><br><span class="line">    <span class="attr">test</span>: <span class="string">&quot;echo \&quot;Error: no test specified\&quot; &amp;&amp; exit 1&quot;</span></span><br><span class="line">    <span class="attr">dev</span>: <span class="string">&quot;webpack-dev-sever&quot;</span><span class="comment">//启动ewbpack服务	</span></span><br><span class="line">    <span class="attr">build</span>: <span class="string">&#x27;eslint ./src &amp;&amp; webpack&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="npm-install的过程："><a href="#npm-install的过程：" class="headerlink" title="npm install的过程："></a><code>npm install</code>的过程：</h4><p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/5tmND0G_ZkYVR7Dmug0ugQ">https://mp.weixin.qq.com/s/5tmND0G_ZkYVR7Dmug0ugQ</a></p>
+<ul>
+<li>寻找包版本信息文件<code>package.json</code>，依照它来进行安装</li>
+<li>查<code>package.json</code>中的依赖，并检查项目中其他版本信息文件，如果不存在，则按照<code>package.json</code>的依赖进行安装，并生成版本信息文件</li>
+<li>如果发现了新包，就更新版本信息文件</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://hemengting.xyz/2021/09/10/webpack%E5%85%A5%E9%97%A8%E4%B8%89%E3%80%81%E9%85%8D%E7%BD%AE%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83-npm%E4%B8%8E%E5%8C%85%E7%AE%A1%E7%90%86%E5%99%A8/" data-id="cktfs5cy50000jcubach65eb7" data-title="webpack入门三、配置开发环境-npm与包管理器" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/webpack/" rel="tag">webpack</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-for-of-与-for-in的区别" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2021/09/10/for-of-%E4%B8%8E-for-in%E7%9A%84%E5%8C%BA%E5%88%AB/" class="article-date">
@@ -133,9 +535,9 @@
 
 
   
-    <article id="post-webpack入门-二、模块化方案进化史" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+    <article id="post-webpack入门一、前端模块化" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
-    <a href="/2021/09/07/webpack%E5%85%A5%E9%97%A8-%E4%BA%8C%E3%80%81%E6%A8%A1%E5%9D%97%E5%8C%96%E6%96%B9%E6%A1%88%E8%BF%9B%E5%8C%96%E5%8F%B2/" class="article-date">
+    <a href="/2021/09/07/webpack%E5%85%A5%E9%97%A8%E4%B8%80%E3%80%81%E5%89%8D%E7%AB%AF%E6%A8%A1%E5%9D%97%E5%8C%96/" class="article-date">
   <time class="dt-published" datetime="2021-09-07T08:53:08.000Z" itemprop="datePublished">2021-09-07</time>
 </a>
     
@@ -147,80 +549,7 @@
         
   
     <h1 itemprop="name">
-      <a class="p-name article-title" href="/2021/09/07/webpack%E5%85%A5%E9%97%A8-%E4%BA%8C%E3%80%81%E6%A8%A1%E5%9D%97%E5%8C%96%E6%96%B9%E6%A1%88%E8%BF%9B%E5%8C%96%E5%8F%B2/">webpack入门:二、模块化方案进化史</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <h1 id="模块化方案进化史"><a href="#模块化方案进化史" class="headerlink" title="模块化方案进化史"></a>模块化方案进化史</h1><p> <code>AMD</code>（Asynchronous Module Definition）异步模块定义</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 求和模块的定义</span></span><br><span class="line"><span class="function"><span class="title">define</span>(<span class="params"><span class="string">&#x27;getSum&#x27;</span>, [<span class="string">&#x27;math&#x27;</span>], <span class="keyword">function</span>(math)</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params">a, b</span>) </span>&#123;</span><br><span class="line">    	<span class="built_in">console</span>.log(<span class="string">&quot;sum: &quot;</span> + math.sum(a, b));</span><br><span class="line">	&#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
-
-<p><code>COMMONJS</code></p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 通过require函数来引入</span></span><br><span class="line"><span class="keyword">const</span> math = <span class="built_in">require</span>(<span class="string">&#x27;/math&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 通过exports将其导出</span></span><br><span class="line"><span class="built_in">exports</span>.getSum = <span class="function"><span class="keyword">function</span>(<span class="params">a, b</span>) </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>ES6 MODULE</code></p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// import导出</span></span><br><span class="line"><span class="keyword">import</span> math <span class="keyword">from</span> <span class="string">&#x27;./math&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// export导出</span></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">sum</span>(<span class="params">a, b</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="webpack的打包机制"><a href="#webpack的打包机制" class="headerlink" title="webpack的打包机制"></a><code>webpack</code>的打包机制</h4><p>学习目标</p>
-<ul>
-<li><code>webpack</code>与立即执行函数之间的关系</li>
-<li><code>webpack</code>打包的核心逻辑</li>
-</ul>
-<p>唤起<code>webpack</code></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">webpack</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//src/index.js</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">test</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="built_in">console</span>.log(<span class="string">&#x27;我是一个小测试&#x27;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">test()</span><br></pre></td></tr></table></figure>
-
-<p>打包目标文件：<code>dist/main.js</code></p>
-<p>为了压缩文件体积，变量名用尽可能少的字母表示</p>
-<p>打包结果还是立即执行函数，引入<code>loadash</code>:</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> _ form loadash</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">test</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="built_in">console</span>.log(<span class="string">&#x27;我是一个小测试&#x27;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">test()</span><br></pre></td></tr></table></figure>
-
-<p>立即执行函数一个入参是<code>test.js</code>，另一个是<code>lodash</code>的逻辑，</p>
-<p>所有依赖模块放在modules数组中作为参数，等待代码运行时调用</p>
-<p><code>webpack</code>打包过程：</p>
-<ul>
-<li>从入口文件开始，分析整个应用的依赖树，</li>
-<li>将每个依赖模块包装起来，放到一个数组中等待调用</li>
-<li>实现模块加载的方法，并把他放到模块执行的环境中，确保模块间可以互相调用</li>
-<li>把执行入口文件的逻辑放在一个函数表达式中，并立即执行这个函数</li>
-</ul>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://hemengting.xyz/2021/09/07/webpack%E5%85%A5%E9%97%A8-%E4%BA%8C%E3%80%81%E6%A8%A1%E5%9D%97%E5%8C%96%E6%96%B9%E6%A1%88%E8%BF%9B%E5%8C%96%E5%8F%B2/" data-id="ckt9x285d00001cubalas9usl" data-title="webpack入门:二、模块化方案进化史" class="article-share-link">Share</a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/webpack/" rel="tag">webpack</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-webpack入门-一、前端模块化" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2021/09/07/webpack%E5%85%A5%E9%97%A8-%E4%B8%80%E3%80%81%E5%89%8D%E7%AB%AF%E6%A8%A1%E5%9D%97%E5%8C%96/" class="article-date">
-  <time class="dt-published" datetime="2021-09-07T08:53:08.000Z" itemprop="datePublished">2021-09-07</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2021/09/07/webpack%E5%85%A5%E9%97%A8-%E4%B8%80%E3%80%81%E5%89%8D%E7%AB%AF%E6%A8%A1%E5%9D%97%E5%8C%96/">webpack入门:一、前端模块化</a>
+      <a class="p-name article-title" href="/2021/09/07/webpack%E5%85%A5%E9%97%A8%E4%B8%80%E3%80%81%E5%89%8D%E7%AB%AF%E6%A8%A1%E5%9D%97%E5%8C%96/">webpack入门一、前端模块化</a>
     </h1>
   
 
@@ -229,11 +558,9 @@
     <div class="e-content article-entry" itemprop="articleBody">
       
         <h1 id="webpack是什么"><a href="#webpack是什么" class="headerlink" title="webpack是什么"></a>webpack是什么</h1><blockquote>
-<p>webpack 是一个用于现代** JavaScript** 应用程序的 <em>静态模块打包工具</em>。当 webpack 处理应用程序时，它会在内部从一个或多个入口点构建一个 <a target="_blank" rel="noopener" href="https://webpack.docschina.org/concepts/dependency-graph/">依赖图(dependency graph)</a>，然后将你项目中所需的每一个模块组合成一个或多个 <em>bundles</em>，它们均为静态资源，用于展示你的内容。</p>
+<p>webpack 是一个用于现代 JavaScript 应用程序的 <em>静态模块打包工具</em>。当 webpack 处理应用程序时，它会在内部从一个或多个入口点构建一个 <a target="_blank" rel="noopener" href="https://webpack.docschina.org/concepts/dependency-graph/">依赖图(dependency graph)</a>，然后将你项目中所需的每一个模块组合成一个或多个 <em>bundles</em>，它们均为静态资源，用于展示你的内容。</p>
 </blockquote>
-<h4 id="1、首先，为什么需要打包？"><a href="#1、首先，为什么需要打包？" class="headerlink" title="1、首先，为什么需要打包？"></a>1、首先，为什么需要打包？</h4><ul>
-<li>逻辑多、文件多，项目复杂度提高了。</li>
-</ul>
+<h4 id="1、首先，为什么需要打包？"><a href="#1、首先，为什么需要打包？" class="headerlink" title="1、首先，为什么需要打包？"></a>1、首先，为什么需要打包？</h4><p>逻辑多、文件多，项目复杂度提高了。</p>
 <h4 id="2、在打包之外，webpack还有哪些功能和特点？"><a href="#2、在打包之外，webpack还有哪些功能和特点？" class="headerlink" title="2、在打包之外，webpack还有哪些功能和特点？"></a>2、在打包之外，webpack还有哪些功能和特点？</h4><p><code>loader</code>：用于对模块的源代码进行转换。</p>
 <p><code>plugin</code>：打包优化，资源管理，注入环境变量。</p>
 <p><code>loader</code>和<code>plugin</code>的特点：可插拔 =&gt;webpack不仅强大，而且灵活</p>
@@ -287,7 +614,87 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hemengting.xyz/2021/09/07/webpack%E5%85%A5%E9%97%A8-%E4%B8%80%E3%80%81%E5%89%8D%E7%AB%AF%E6%A8%A1%E5%9D%97%E5%8C%96/" data-id="ckte9st8r0000vgubdcof4a9c" data-title="webpack入门:一、前端模块化" class="article-share-link">Share</a>
+      <a data-url="http://hemengting.xyz/2021/09/07/webpack%E5%85%A5%E9%97%A8%E4%B8%80%E3%80%81%E5%89%8D%E7%AB%AF%E6%A8%A1%E5%9D%97%E5%8C%96/" data-id="cktfs5cy90001jcubg06rbs3u" data-title="webpack入门一、前端模块化" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/webpack/" rel="tag">webpack</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-webpack入门二、模块化方案进化史" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/09/07/webpack%E5%85%A5%E9%97%A8%E4%BA%8C%E3%80%81%E6%A8%A1%E5%9D%97%E5%8C%96%E6%96%B9%E6%A1%88%E8%BF%9B%E5%8C%96%E5%8F%B2/" class="article-date">
+  <time class="dt-published" datetime="2021-09-07T08:53:08.000Z" itemprop="datePublished">2021-09-07</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/09/07/webpack%E5%85%A5%E9%97%A8%E4%BA%8C%E3%80%81%E6%A8%A1%E5%9D%97%E5%8C%96%E6%96%B9%E6%A1%88%E8%BF%9B%E5%8C%96%E5%8F%B2/">webpack入门二、模块化方案进化史</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="模块化方案进化史"><a href="#模块化方案进化史" class="headerlink" title="模块化方案进化史"></a>模块化方案进化史</h1><p> <code>AMD</code>（Asynchronous Module Definition）异步模块定义</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 求和模块的定义</span></span><br><span class="line"><span class="function"><span class="title">define</span>(<span class="params"><span class="string">&#x27;getSum&#x27;</span>, [<span class="string">&#x27;math&#x27;</span>], <span class="keyword">function</span>(math)</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params">a, b</span>) </span>&#123;</span><br><span class="line">    	<span class="built_in">console</span>.log(<span class="string">&quot;sum: &quot;</span> + math.sum(a, b));</span><br><span class="line">	&#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p><code>COMMONJS</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 通过require函数来引入</span></span><br><span class="line"><span class="keyword">const</span> math = <span class="built_in">require</span>(<span class="string">&#x27;/math&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 通过exports将其导出</span></span><br><span class="line"><span class="built_in">exports</span>.getSum = <span class="function"><span class="keyword">function</span>(<span class="params">a, b</span>) </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>ES6 MODULE</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// import导出</span></span><br><span class="line"><span class="keyword">import</span> math <span class="keyword">from</span> <span class="string">&#x27;./math&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// export导出</span></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">sum</span>(<span class="params">a, b</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="webpack的打包机制"><a href="#webpack的打包机制" class="headerlink" title="webpack的打包机制"></a><code>webpack</code>的打包机制</h1><h4 id="学习目标"><a href="#学习目标" class="headerlink" title="学习目标"></a>学习目标</h4><ul>
+<li><code>webpack</code>与立即执行函数之间的关系</li>
+<li><code>webpack</code>打包的核心逻辑</li>
+</ul>
+<h4 id="项目文件内容"><a href="#项目文件内容" class="headerlink" title="项目文件内容"></a>项目文件内容</h4><p><code>index.html</code></p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">&quot;en&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">&quot;X-UA-Compatible&quot;</span> <span class="attr">content</span>=<span class="string">&quot;IE=edge&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">&quot;viewport&quot;</span> <span class="attr">content</span>=<span class="string">&quot;width=device-width, initial-scale=1.0&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>React Webpack测试<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">&quot;app&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">&quot;./src/index.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>/src/index.js</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">test</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="built_in">console</span>.log(<span class="string">&#x27;我是一个小测试&#x27;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">test()</span><br></pre></td></tr></table></figure>
+
+<h4 id="唤起webpack"><a href="#唤起webpack" class="headerlink" title="唤起webpack"></a>唤起<code>webpack</code></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">webpack</span><br></pre></td></tr></table></figure>
+
+<p><code>webpack</code>默认查找<code>/src/index.js</code>，打包<code>index.js</code>的代码逻辑，目标文件：<code>/dist/main.js</code>。此时，<code>index.html</code>中引入<code>/dist/main.js</code>的效果是一样的。</p>
+<p><code>main.js</code>中为了压缩文件体积，变量名用尽可能少的字母表示，打包结果还是立即执行函数。</p>
+<p>引入<code>loadash</code>:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> _ form loadash</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">test</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="built_in">console</span>.log(<span class="string">&#x27;我是一个小测试&#x27;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">test()</span><br></pre></td></tr></table></figure>
+
+<p>此时打包结果中立即执行函数一个入参是<code>test函数</code>，另一个是<code>lodash</code>的逻辑，都作为依赖模块放在modules<em>数组</em>中作为参数，等待代码运行时调用。</p>
+<p>大体结构：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="keyword">function</span>(<span class="params">modules</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> installedModules = &#123;&#125;; <span class="comment">// 已经加载的模块</span></span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">__webpack_require__</span>(<span class="params">moduleId</span>) </span>&#123; <span class="comment">// 浏览器环境下的require</span></span><br><span class="line">        <span class="comment">/* code */</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    <span class="keyword">return</span> __webpack_require__(<span class="number">0</span>); <span class="comment">// entry file加载工程入口模块</span></span><br><span class="line">&#125;)&#123;[ <span class="comment">/* modules array */</span>]&#125;</span><br></pre></td></tr></table></figure>
+
+<p>核心方法：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">__webpack_require__</span>(<span class="params">moduleId</span>) </span>&#123;</span><br><span class="line">	<span class="comment">// Check if module is in cache</span></span><br><span class="line">	<span class="keyword">if</span>(installedModules[moduleId]) &#123;</span><br><span class="line">		<span class="keyword">return</span> installedModules[moduleId].exports;</span><br><span class="line">	&#125;</span><br><span class="line">    <span class="comment">// Create a new module &#123;and put it into the cache&#125;</span></span><br><span class="line">    <span class="keyword">var</span> <span class="built_in">module</span> = installesModules[moduleId] = &#123;</span><br><span class="line">        <span class="attr">i</span>: moduleId,</span><br><span class="line">        <span class="attr">l</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="attr">exports</span>: &#123;&#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// Execute the module function</span></span><br><span class="line">    modules[moduleId].call(</span><br><span class="line">    	<span class="built_in">module</span>.exports,</span><br><span class="line">        <span class="built_in">module</span>, <span class="built_in">module</span>.export,</span><br><span class="line">        __webpack_requrie__</span><br><span class="line">    );</span><br><span class="line">    <span class="comment">// Flag the module as loaded</span></span><br><span class="line">    <span class="built_in">module</span>.l = <span class="literal">true</span>;</span><br><span class="line">    Return <span class="built_in">module</span>.exports;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>webpack</code>打包过程：</p>
+<ul>
+<li>从入口文件开始，分析整个应用的<em>依赖树</em>，</li>
+<li>将每个依赖模块包装起来，放到一个数组中等待调用</li>
+<li>实现模块加载的方法，并把他放到模块执行的环境中，确保模块间可以互相调用(<strong>webpack_require</strong>)</li>
+<li>把执行入口文件的逻辑放在一个函数表达式中，并立即执行这个函数</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://hemengting.xyz/2021/09/07/webpack%E5%85%A5%E9%97%A8%E4%BA%8C%E3%80%81%E6%A8%A1%E5%9D%97%E5%8C%96%E6%96%B9%E6%A1%88%E8%BF%9B%E5%8C%96%E5%8F%B2/" data-id="cktfs5cyb0003jcubdoyo86lb" data-title="webpack入门二、模块化方案进化史" class="article-share-link">Share</a>
       
       
       
@@ -346,15 +753,23 @@
       <ul>
         
           <li>
+            <a href="/2021/09/10/webpack%E5%85%A5%E9%97%A8%E5%85%AD%E3%80%81%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/">webpack入门六、性能调优</a>
+          </li>
+        
+          <li>
+            <a href="/2021/09/10/webpack%E5%85%A5%E9%97%A8%E4%BA%94%E3%80%81webpack%E6%9E%84%E5%BB%BA%E5%B7%A5%E7%A8%8B/">webpack入门五、webpack构建工程</a>
+          </li>
+        
+          <li>
+            <a href="/2021/09/10/webpack%E5%85%A5%E9%97%A8%E5%9B%9B%E3%80%81webpack%E6%A0%B8%E5%BF%83%E7%89%B9%E6%80%A7/">webpack入门四、webpack核心特性</a>
+          </li>
+        
+          <li>
+            <a href="/2021/09/10/webpack%E5%85%A5%E9%97%A8%E4%B8%89%E3%80%81%E9%85%8D%E7%BD%AE%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83-npm%E4%B8%8E%E5%8C%85%E7%AE%A1%E7%90%86%E5%99%A8/">webpack入门三、配置开发环境-npm与包管理器</a>
+          </li>
+        
+          <li>
             <a href="/2021/09/10/for-of-%E4%B8%8E-for-in%E7%9A%84%E5%8C%BA%E5%88%AB/">for...of 与 for...in的区别</a>
-          </li>
-        
-          <li>
-            <a href="/2021/09/07/webpack%E5%85%A5%E9%97%A8-%E4%BA%8C%E3%80%81%E6%A8%A1%E5%9D%97%E5%8C%96%E6%96%B9%E6%A1%88%E8%BF%9B%E5%8C%96%E5%8F%B2/">webpack入门:二、模块化方案进化史</a>
-          </li>
-        
-          <li>
-            <a href="/2021/09/07/webpack%E5%85%A5%E9%97%A8-%E4%B8%80%E3%80%81%E5%89%8D%E7%AB%AF%E6%A8%A1%E5%9D%97%E5%8C%96/">webpack入门:一、前端模块化</a>
           </li>
         
       </ul>

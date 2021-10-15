@@ -6,15 +6,16 @@
   
   <title>翻译:viewports的故事-第一部分 | hmt的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="原文地址：https:&#x2F;&#x2F;www.quirksmode.org&#x2F;mobile&#x2F;viewports.html 以下为翻译： 在这个短系列中我将阐述viewports和一些重要的元素的widths属性是如何工作的，比如标签、窗口和屏幕。 这一篇是关于桌面浏览器的，它的唯一目的是为移动浏览器的类似讨论奠定基础。许多web开发者已经对许多有关桌面的概念有了直观的理解。在手机端我们将会看到相同的概念，只不过">
+  <meta name="description" content="原文地址：https:&#x2F;&#x2F;www.quirksmode.org&#x2F;mobile&#x2F;viewports.html 本文从像素的概念入手，介绍了浏览器窗口缩放带来的变化，viewport属性和获取viewport大小的属性。以下为翻译： 在这个短系列中我将阐述viewports和一些重要的元素的widths属性是如何工作的，比如标签、窗口和屏幕。 这一篇是关于桌面浏览器的，它的唯一目的是为移动浏览器的类似">
 <meta property="og:type" content="article">
 <meta property="og:title" content="翻译:viewports的故事-第一部分">
 <meta property="og:url" content="http://hemengting.xyz/2021/09/23/%E7%BF%BB%E8%AF%91-viewports%E7%9A%84%E6%95%85%E4%BA%8B-part-one/index.html">
 <meta property="og:site_name" content="hmt的博客">
-<meta property="og:description" content="原文地址：https:&#x2F;&#x2F;www.quirksmode.org&#x2F;mobile&#x2F;viewports.html 以下为翻译： 在这个短系列中我将阐述viewports和一些重要的元素的widths属性是如何工作的，比如标签、窗口和屏幕。 这一篇是关于桌面浏览器的，它的唯一目的是为移动浏览器的类似讨论奠定基础。许多web开发者已经对许多有关桌面的概念有了直观的理解。在手机端我们将会看到相同的概念，只不过">
+<meta property="og:description" content="原文地址：https:&#x2F;&#x2F;www.quirksmode.org&#x2F;mobile&#x2F;viewports.html 本文从像素的概念入手，介绍了浏览器窗口缩放带来的变化，viewport属性和获取viewport大小的属性。以下为翻译： 在这个短系列中我将阐述viewports和一些重要的元素的widths属性是如何工作的，比如标签、窗口和屏幕。 这一篇是关于桌面浏览器的，它的唯一目的是为移动浏览器的类似">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://www.quirksmode.org/mobile/pix/viewport/csspixels_100.gif">
 <meta property="og:image" content="https://www.quirksmode.org/mobile/pix/viewport/csspixels_out.gif">
+<meta property="og:image" content="https://www.quirksmode.org/mobile/pix/viewport/csspixels_in.gif">
 <meta property="og:image" content="https://www.quirksmode.org/mobile/pix/viewport/desktop_screen.jpg">
 <meta property="og:image" content="https://www.quirksmode.org/mobile/pix/viewport/desktop_inner.jpg">
 <meta property="og:image" content="https://www.quirksmode.org/mobile/pix/viewport/desktop_inner_zoomed.jpg">
@@ -30,7 +31,7 @@
 <meta property="og:image" content="https://www.quirksmode.org/mobile/pix/viewport/desktop_pageXY.jpg">
 <meta property="og:image" content="https://www.quirksmode.org/mobile/pix/viewport/desktop_mediaqueries.jpg">
 <meta property="article:published_time" content="2021-09-23T07:11:28.000Z">
-<meta property="article:modified_time" content="2021-09-23T10:01:48.455Z">
+<meta property="article:modified_time" content="2021-10-15T15:15:26.075Z">
 <meta property="article:author" content="He Mengting">
 <meta property="article:tag" content="html,翻译">
 <meta name="twitter:card" content="summary">
@@ -114,22 +115,24 @@
     <div class="e-content article-entry" itemprop="articleBody">
       
         <p>原文地址：<a target="_blank" rel="noopener" href="https://www.quirksmode.org/mobile/viewports.html">https://www.quirksmode.org/mobile/viewports.html</a></p>
-<p>以下为翻译：</p>
+<p>本文从像素的概念入手，介绍了浏览器窗口缩放带来的变化，<code>viewport</code>属性和获取<code>viewport</code>大小的属性。以下为翻译：</p>
 <p><strong>在这个短系列中我将阐述<code>viewports</code>和一些重要的元素的widths属性是如何工作的，比如<html>标签、窗口和屏幕。</strong></p>
 <p>这一篇是关于桌面浏览器的，它的唯一目的是为移动浏览器的类似讨论奠定基础。许多web开发者已经对许多有关桌面的概念有了直观的理解。在手机端我们将会看到相同的概念，只不过更加复杂，一个关于大家都知道的术语的先导讨论将会极大帮助地你理解手机浏览器。</p>
 <h3 id="概念：设备像素和css像素"><a href="#概念：设备像素和css像素" class="headerlink" title="概念：设备像素和css像素"></a>概念：设备像素和<code>css</code>像素</h3><p>第一个需要理解的概念是<code>CSS</code>像素以及它和设备像素的区别。</p>
 <p>设备像素就是我们直觉上认为“正确”的像素。这些像素就是你正在使用的设备的正式分辨率，通常可以通过<code>screen.width/height</code>读取。</p>
 <p>如果你给某个元素设置<code>width: 128px</code>，而你的显示器的宽度是<code>1024px</code>，并且你把浏览器窗口最大化，那么这个元素可以在你的显示器上填充8次（粗略地;让我们忽略棘手的部分）。</p>
 <p>然而，如果用户缩放，这个计算关系将会改变。如果用户放大至200%，你的<code>width: 128px</code>的元素将只能在<code>1024px</code>的显示器填充4次。</p>
-<p>在现代浏览器中实现的缩放只不过是“扩展”像素。也就是说，不是元素的宽度从128变为256像素；而是<em>实际像素</em>的大小翻倍。形式上，元素的宽度仍然是128 ·<code>CSS</code>像素，即使它恰好占用256个设备像素的空间。</p>
+<p>在现代浏览器中实现的缩放只不过是“扩展”像素。也就是说，不是元素的宽度从128变为256像素；而是<em>实际像素</em>的大小翻倍。形式上，元素的宽度仍然是128 <code>CSS</code>像素，即使它恰好占用256个设备像素的空间。</p>
 <p>换句话说，放大200%使<code>CSS</code>像素扩大为设备像素的四倍。（宽度两倍，高度两倍，总共四倍）。</p>
 <p>一些图片可以明确这些概念。这是在100%缩放级别的四个像素，<code>CSS</code>像素与设备像素完全重叠。</p>
 <p><img src="https://www.quirksmode.org/mobile/pix/viewport/csspixels_100.gif" alt="img"></p>
 <p>现在让我们缩小。<code>CSS</code>像素开始收缩，这意味着一个设备像素现在重叠了几个<code>CSS</code>像素。</p>
 <p><img src="https://www.quirksmode.org/mobile/pix/viewport/csspixels_out.gif" alt="img"></p>
 <p>如果你放大，会发生相反的情况。<code>CSS</code>像素开始增长，现在一个<code>CSS</code>像素重叠了几个设备像素。</p>
+<p><img src="https://www.quirksmode.org/mobile/pix/viewport/csspixels_in.gif" alt="img"></p>
 <p>关键点在于<em>我们只关心<code>CSS</code>像素</em>。正是这些像素决定了样式表的呈现方式。</p>
 <p>设备像素几乎没用。不是对用户；用户会放大或缩小页面，直到可以舒服地阅读它。然而，缩放级别对你来说并不重要。浏览器会自动确保你的<code>CSS</code>布局被拉伸或压缩。</p>
+<p>（结论：缩小就是缩小<code>CSS</code>像素，放大就是放大<code>CSS</code>像素）</p>
 <h3 id="100-缩放"><a href="#100-缩放" class="headerlink" title="100%缩放"></a>100%缩放</h3><p>我一开始用假设缩放级别为100%举例。现在是时候更严格地定义它了：</p>
 <blockquote>
 <p>在缩放级别100%，一个<code>CSS</code>像素完全等于一个设备像素。</p>
@@ -137,12 +140,12 @@
 <p>100%缩放的概念在接下来的说明中非常有用，但在日常工作中你不应该过度关注它。在桌面，你通常会用100%的缩放来测试你的网站，但即使用户放大或缩小，神奇的<code>CSS</code>像素也会确保你的布局保持相同的比例。</p>
 <h3 id="屏幕尺寸-Screen-size"><a href="#屏幕尺寸-Screen-size" class="headerlink" title="屏幕尺寸 Screen size"></a>屏幕尺寸 Screen size</h3><p>让我们看看一些实际的测量方法。我们从<code>screen.width</code>和<code>screen.height</code>开始。它们包含用户屏幕的总宽度和高度。这些尺寸用设备像素来衡量，因为它们永远不会改变：它们是显示器的特性，而不是浏览器的特性。</p>
 <p><img src="https://www.quirksmode.org/mobile/pix/viewport/desktop_screen.jpg" alt="img"></p>
-<p>有趣！但是我们要怎么处理这些信息呢？</p>
-<p>基本上没什么用。用户显示器的大小对我们来说并不重要，除非你想在web统计数据库中使用它。</p>
+<p>有趣！但这些信息基本上没什么用。用户显示器的大小对我们来说并不重要，除非你想在web统计数据库中使用它。</p>
 <h3 id="窗口尺寸-Window-size"><a href="#窗口尺寸-Window-size" class="headerlink" title="窗口尺寸 Window size"></a>窗口尺寸 Window size</h3><p>相反，我们想知道的是浏览器窗口的内部尺寸。它会告诉你用户当前有多少空间用来展示你的<code>CSS</code>布局。你可以通过<code>Window.innerWidth</code>和<code>window.innerHeight</code>来查询这些尺寸。</p>
 <p><img src="https://www.quirksmode.org/mobile/pix/viewport/desktop_inner.jpg" alt="img"></p>
 <p>显然，窗口的内部宽度是以<code>CSS</code>像素衡量的。你需要知道你的布局有多少可以挤进浏览器窗口，并且这个数量会随着用户的放大而减少。如果用户放大你会得到更少的可用空间，<code>innerWidth/Height</code>的递减可以反映这一点。</p>
-<p>(Opera是个例外，当用户放大时，它的<code>innerWidth/Height</code>不会减少：它们是以设备像素衡量的。这在台式机上很烦人，但在移动设备上却是致命的，我们稍后会看到。)</p>
+<p>（zoom的时候虽然看起来浏览器窗口大小没有变化，但是innerWidth变化了，就像放大镜效果一样，能看见内容的区域变化了）</p>
+<p>（Opera是个例外，当用户放大时，它的<code>innerWidth/Height</code>不会减少：它们是以设备像素衡量的。这在台式机上很烦人，但在移动设备上却是致命的，我们稍后会看到。)</p>
 <p><img src="https://www.quirksmode.org/mobile/pix/viewport/desktop_inner_zoomed.jpg" alt="img"></p>
 <p>注意，测量的宽度和高度包括滚动条。它们也被认为是内窗的一部分。(这主要是由于历史原因。)</p>
 <h3 id="滚动抵消-Scrolling-offset"><a href="#滚动抵消-Scrolling-offset" class="headerlink" title="滚动抵消 Scrolling offset"></a>滚动抵消 Scrolling offset</h3><p><code>window.pageXOffset</code>和<code>window.pageYOffset</code>包含文档的水平和垂直滚动偏移量。这样你就可以知道用户滚动了多少。</p>
@@ -181,7 +184,7 @@
 <p>这两个属性对之间有一个形式上的区别：<code>document.documentElement.clientWidth</code>和<code>-Height</code>不包括滚动条，而<code>window.innerWidth/Height</code>包括。不过，这基本上是一种吹毛求疵。</p>
 <p>我们有两个属性对的现状是浏览器之战遗留下来的。那时<code>Netscape</code>只支持<code>window.innerWidth/Height</code>而IE仅支持<code>document.documentElement.clientWidth</code>和<code>-Height</code>。从那时起，所有其他浏览器都开始支持<code>clientWidth/Height</code>，但IE没有选择<code>window.innerWidth/Height</code>。</p>
 <p>在台式机上有两个可用的属性对是一个小麻烦——但在移动设备上却是一个福音，正如我们将看到的。</p>
-<h3 id="测量元素"><a href="#测量元素" class="headerlink" title="测量元素"></a>测量<html>元素</h3><p>所以<code>clientWidth/Height</code>给出了所有情况下的视口尺寸。但是我们在哪里可以找到<html>元素本身的尺寸呢?它们存储在<code>document.documentelement.offsewidth</code>和<code>-Height</code>中。</p>
+<h3 id="测量元素"><a href="#测量元素" class="headerlink" title="测量元素"></a>测量<html>元素</h3><p>所以<code>clientWidth/Height</code>给出了所有情况下的视口尺寸。但是我们在哪里可以找到<html>元素本身的尺寸呢?它们存储在<code>document.documentElement.offsewidth</code>和<code>-Height</code>中。</p>
 <p><img src="https://www.quirksmode.org/mobile/pix/viewport/desktop_offset.jpg" alt="img"></p>
 <p>这些属性真正地让你以块级元素的方式访问<html>元素；如果你设置<code>width</code>，<code>offsetWidth</code>将反映它。</p>
 <p><img src="https://www.quirksmode.org/mobile/pix/viewport/desktop_offset_smallpage.jpg" alt="img"></p>

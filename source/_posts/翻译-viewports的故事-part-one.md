@@ -8,7 +8,7 @@ tags: html,翻译
 
 原文地址：https://www.quirksmode.org/mobile/viewports.html
 
-以下为翻译：
+本文从像素的概念入手，介绍了浏览器窗口缩放带来的变化，`viewport`属性和获取`viewport`大小的属性。以下为翻译：
 
 **在这个短系列中我将阐述`viewports`和一些重要的元素的widths属性是如何工作的，比如<html>标签、窗口和屏幕。**
 
@@ -24,7 +24,7 @@ tags: html,翻译
 
 然而，如果用户缩放，这个计算关系将会改变。如果用户放大至200%，你的`width: 128px`的元素将只能在`1024px`的显示器填充4次。
 
-在现代浏览器中实现的缩放只不过是“扩展”像素。也就是说，不是元素的宽度从128变为256像素；而是*实际像素*的大小翻倍。形式上，元素的宽度仍然是128 ·`CSS`像素，即使它恰好占用256个设备像素的空间。
+在现代浏览器中实现的缩放只不过是“扩展”像素。也就是说，不是元素的宽度从128变为256像素；而是*实际像素*的大小翻倍。形式上，元素的宽度仍然是128 `CSS`像素，即使它恰好占用256个设备像素的空间。
 
 换句话说，放大200%使`CSS`像素扩大为设备像素的四倍。（宽度两倍，高度两倍，总共四倍）。
 
@@ -38,9 +38,14 @@ tags: html,翻译
 
 如果你放大，会发生相反的情况。`CSS`像素开始增长，现在一个`CSS`像素重叠了几个设备像素。
 
+![img](https://www.quirksmode.org/mobile/pix/viewport/csspixels_in.gif)
+
+
 关键点在于*我们只关心`CSS`像素*。正是这些像素决定了样式表的呈现方式。
 
 设备像素几乎没用。不是对用户；用户会放大或缩小页面，直到可以舒服地阅读它。然而，缩放级别对你来说并不重要。浏览器会自动确保你的`CSS`布局被拉伸或压缩。
+
+（结论：缩小就是缩小`CSS`像素，放大就是放大`CSS`像素）
 
 ### 100%缩放
 
@@ -56,9 +61,7 @@ tags: html,翻译
 
 ![img](https://www.quirksmode.org/mobile/pix/viewport/desktop_screen.jpg)
 
-有趣！但是我们要怎么处理这些信息呢？
-
-基本上没什么用。用户显示器的大小对我们来说并不重要，除非你想在web统计数据库中使用它。
+有趣！但这些信息基本上没什么用。用户显示器的大小对我们来说并不重要，除非你想在web统计数据库中使用它。
 
 ### 窗口尺寸 Window size
 
@@ -68,7 +71,9 @@ tags: html,翻译
 
 显然，窗口的内部宽度是以`CSS`像素衡量的。你需要知道你的布局有多少可以挤进浏览器窗口，并且这个数量会随着用户的放大而减少。如果用户放大你会得到更少的可用空间，`innerWidth/Height`的递减可以反映这一点。
 
-(Opera是个例外，当用户放大时，它的`innerWidth/Height`不会减少：它们是以设备像素衡量的。这在台式机上很烦人，但在移动设备上却是致命的，我们稍后会看到。)
+（zoom的时候虽然看起来浏览器窗口大小没有变化，但是innerWidth变化了，就像放大镜效果一样，能看见内容的区域变化了）
+
+（Opera是个例外，当用户放大时，它的`innerWidth/Height`不会减少：它们是以设备像素衡量的。这在台式机上很烦人，但在移动设备上却是致命的，我们稍后会看到。)
 
 ![img](https://www.quirksmode.org/mobile/pix/viewport/desktop_inner_zoomed.jpg)
 
@@ -158,7 +163,7 @@ tags: html,翻译
 
 ### 测量<html>元素
 
-所以`clientWidth/Height`给出了所有情况下的视口尺寸。但是我们在哪里可以找到<html>元素本身的尺寸呢?它们存储在`document.documentelement.offsewidth`和`-Height`中。
+所以`clientWidth/Height`给出了所有情况下的视口尺寸。但是我们在哪里可以找到<html>元素本身的尺寸呢?它们存储在`document.documentElement.offsewidth`和`-Height`中。
 
 ![img](https://www.quirksmode.org/mobile/pix/viewport/desktop_offset.jpg)
 

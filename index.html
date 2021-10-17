@@ -71,6 +71,137 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-从0开始实现一个React" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/10/17/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAReact/" class="article-date">
+  <time class="dt-published" datetime="2021-10-17T04:18:53.000Z" itemprop="datePublished">2021-10-17</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/10/17/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAReact/">从0开始实现一个React</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>react用了这么久还是感觉对生命周期之类的概念理解得很模糊，最近看到一篇</p>
+<p>，感觉写的很好，而且交互也做得特别棒，在此翻译记录一下。</p>
+<p>这篇文章的主要目的是遵循React代码的体系结构一步步地写出一个简单的React，但没有所有的优化和非必要的功能。</p>
+<p>过程分为以下几个步骤：</p>
+<ol>
+<li>The <code>createElement</code> Function</li>
+<li>The <code>render</code> Function</li>
+<li>并发模型</li>
+<li>Fibers</li>
+<li>渲染和提交阶段</li>
+<li>协调</li>
+<li>函数组件</li>
+<li>Hooks</li>
+</ol>
+<h2 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h2><p>首先，<code>JSX</code>语法是通过Babel转换成JavaScript的，因此我们需要在项目中配置Babel。</p>
+<p>安装：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install --save-dev @babel/core @babel/cli @babel/preset-env @babel/preset-react</span><br></pre></td></tr></table></figure>
+
+<p>在根目录中添加<code>.babelrc</code>：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="string">&quot;presets&quot;</span>: [<span class="string">&quot;@babel/preset-env&quot;</span>, <span class="string">&quot;@babel/preset-react&quot;</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>.babel.config.js</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> presets = [</span><br><span class="line">  [</span><br><span class="line">    <span class="string">&quot;@babel/env&quot;</span>,</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">targets</span>: &#123;</span><br><span class="line">        <span class="attr">edge</span>: <span class="string">&quot;17&quot;</span>,</span><br><span class="line">        <span class="attr">firefox</span>: <span class="string">&quot;60&quot;</span>,</span><br><span class="line">        <span class="attr">chrome</span>: <span class="string">&quot;67&quot;</span>,</span><br><span class="line">        <span class="attr">safari</span>: <span class="string">&quot;11.1&quot;</span>,</span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="attr">useBuiltIns</span>: <span class="string">&quot;usage&quot;</span>,</span><br><span class="line">      <span class="attr">corejs</span>: <span class="string">&quot;3.6.4&quot;</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">  ],</span><br><span class="line">];</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = &#123; presets &#125;;</span><br></pre></td></tr></table></figure>
+
+<p>运行<code>npx src --out-dir lib</code>就可以把转换结果保存在lib文件夹下面了~</p>
+<h2 id="0：回顾"><a href="#0：回顾" class="headerlink" title="0：回顾"></a>0：回顾</h2><p>下面的代码展示了渲染一个React组件的过程：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> element = <span class="xml"><span class="tag">&lt;<span class="name">h1</span> <span class="attr">title</span>=<span class="string">&quot;foo&quot;</span>&gt;</span>Hello<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span> <span class="comment">// 定义React组件</span></span><br><span class="line"><span class="keyword">const</span> container = <span class="built_in">document</span>.getElementById(<span class="string">&quot;root&quot;</span>) <span class="comment">// 从DOM中获取一个节点container</span></span><br><span class="line">ReactDOM.render(element, container) <span class="comment">// 把React组件渲染到container</span></span><br></pre></td></tr></table></figure>
+
+<p>要实现一个React，首先要知道React的方法是如何实现的，用原生的JavaScript怎么写，再去封装成我们的方法。现在，让我们不使用React语法来实现一下这个过程。</p>
+<ol>
+<li><h4 id="定义组件"><a href="#定义组件" class="headerlink" title="定义组件"></a>定义组件</h4></li>
+</ol>
+<p>Babel转换<code>JSX</code>的规则就是用调用<code>createElement</code>替换<code>&lt;&gt;</code>内部的代码，将<code>tag name</code>、<code>props</code>和子元素作为参数传递：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> element = React.createElement(</span><br><span class="line">  <span class="string">&quot;h1&quot;</span>,</span><br><span class="line">  &#123; <span class="attr">title</span>: <span class="string">&quot;foo&quot;</span> &#125;,</span><br><span class="line">  <span class="string">&quot;Hello&quot;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p><code>React.createElement</code>会对参数做一些验证并返回一个对象，长这样：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> element = &#123;</span><br><span class="line">  <span class="attr">type</span>: <span class="string">&quot;h1&quot;</span>,</span><br><span class="line">  <span class="attr">props</span>: &#123;</span><br><span class="line">    <span class="attr">title</span>: <span class="string">&quot;foo&quot;</span>,</span><br><span class="line">    <span class="attr">children</span>: <span class="string">&quot;Hello&quot;</span>,</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>所以我们可以直接用这个对象替换函数调用。<code>type</code>属性是一个字符串，表明DOM节点的类型，就是在生成HTML元素时将要传给<code>document.createElement</code>的<code>tagName</code>。</p>
+<p><code>props</code>属性是一个对象，包括<code>JSX</code>属性的所有键值对，还有一个特殊的属性：<code>children</code>：</p>
+<p>在这个例子中<code>children</code>是一个字符串，但是它通常是一个包含多个元素的数组。所以元素实数型结构的。</p>
+<ol start="2">
+<li><h4 id="渲染"><a href="#渲染" class="headerlink" title="渲染"></a>渲染</h4></li>
+</ol>
+<p>（<code>container</code>是直接调用<code>document.getElementById</code>获取的不用管。）另一个我们要替换的React代码是<code>ReactDOM.render</code>的调用。<code>render</code>是React修改DOM的地方，因此我们要在这里实现DOM更新。</p>
+<p>首先我们用<code>type</code>属性创建一个节点*，本例中是<code>h1</code>。然后我们把元素的元素的属性分配给节点，本例中是title属性。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> node = <span class="built_in">document</span>.createElement(element.type)</span><br><span class="line">node[<span class="string">&quot;title&quot;</span>] = element.props.title</span><br></pre></td></tr></table></figure>
+
+<p>*为了避免混淆，下文中使用”元素”表示React元素，“节点”表示DOM节点。</p>
+<p>接下来我们创建子节点，本例中只有一个文本节点。使用<code>textNode</code>而不是<code>innerText</code>可以让我们用同样的方式处理所有元素（方便递归）。注意我们像处理<code>h1</code>的title一样给文本节点设置<code>nodeValue</code>：<code>&#123;nodeValue: &quot;hello&quot;&#125;</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> text = <span class="built_in">document</span>.createTextNode(<span class="string">&quot;&quot;</span>)</span><br><span class="line">text[<span class="string">&quot;nodeValue&quot;</span>] = element.props.children</span><br></pre></td></tr></table></figure>
+
+<p>最后，我们把<code>textNode</code>添加到<code>h1</code>，再把<code>h1</code>添加到<code>container</code>。</p>
+<p>这样我们就在不使用React的情况下实现了同样的功能。罗嗦了这么多，实现起来还是很简单的，用过React的同学应该都很熟悉：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> element = &#123;</span><br><span class="line">  <span class="attr">type</span>: <span class="string">&quot;h1&quot;</span>,</span><br><span class="line">  <span class="attr">props</span>: &#123;</span><br><span class="line">    <span class="attr">title</span>: <span class="string">&quot;foo&quot;</span>,</span><br><span class="line">    <span class="attr">children</span>: <span class="string">&quot;Hello&quot;</span>,</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> container = <span class="built_in">document</span>.getElementById(<span class="string">&quot;root&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> node = <span class="built_in">document</span>.createElement(element.type)</span><br><span class="line">node[<span class="string">&quot;title&quot;</span>] = element.props.title</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> text = <span class="built_in">document</span>.createTextNode(<span class="string">&quot;&quot;</span>)</span><br><span class="line">text[<span class="string">&quot;nodeValue&quot;</span>] = element.props.children</span><br><span class="line"></span><br><span class="line">node.appendChild(text)</span><br><span class="line">container.appendChild(node)</span><br></pre></td></tr></table></figure>
+
+<h2 id="1：createElement函数"><a href="#1：createElement函数" class="headerlink" title="1：createElement函数"></a>1：<code>createElement</code>函数</h2><p>（上一步中，我们直接定义了element对象）接下来，我们就该真正实现一个自己的<code>createElement</code>函数了。首先把<code>JSX</code>转换成<code>JS</code>研究一下<code>createElement</code>是如何调用的：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> element = React.createElement(</span><br><span class="line">  <span class="string">&quot;div&quot;</span>,</span><br><span class="line">  &#123; <span class="attr">id</span>: <span class="string">&quot;foo&quot;</span> &#125;,</span><br><span class="line">  React.createElement(<span class="string">&quot;a&quot;</span>, <span class="literal">null</span>, <span class="string">&quot;bar&quot;</span>),</span><br><span class="line">  React.createElement(<span class="string">&quot;b&quot;</span>)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>还记得我们上一步中定义的element对象吗？我们的函数的功能应该是创建一个具有<code>type</code>和<code>props</code>属性的对象：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">createElement</span>(<span class="params">type, props, ...children</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> &#123;</span><br><span class="line">    type,</span><br><span class="line">    <span class="attr">props</span>: &#123;</span><br><span class="line">      ...props,</span><br><span class="line">      children,</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里使用了展开运算符处理<code>props</code>，使用剩余参数处理<code>children</code>，因为我们希望<code>children</code>属性是一个数组。例如，<code>createElement(&quot;div&quot;)</code>返回</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;type&quot;</span>: <span class="string">&quot;div&quot;</span>,</span><br><span class="line">  <span class="string">&quot;props&quot;</span>: &#123; <span class="string">&quot;children&quot;</span>: [] &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>createElement(&quot;div&quot;, null, a)</code>返回</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;type&quot;</span>: <span class="string">&quot;div&quot;</span>,</span><br><span class="line">  <span class="string">&quot;props&quot;</span>: &#123; <span class="string">&quot;children&quot;</span>: [a] &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>createElement(&quot;div&quot;, null, a, b)</code>返回</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;type&quot;</span>: <span class="string">&quot;div&quot;</span>,</span><br><span class="line">  <span class="string">&quot;props&quot;</span>: &#123; <span class="string">&quot;children&quot;</span>: [a, b] &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>children</code>数组或许包含字符串或数字这样的原始值（树中的叶子节点）。所以我们应该包装不是对象的元素，再给它们一个特殊的属性：<code>TEXT_ELEMENT</code>。</p>
+<p>当没有子元素时，React并没有包装原始值或创建空数组，但我们更希望简化代码而不是追求代码性能😀。</p>
+<p>为了替换React，我们要给自己的库起个名字，就叫<code>Didact</code>吧！但是我们依然像使用<code>JSX</code>语法，怎么告诉<code>babel</code>要用<code>Didact</code>的<code>createElement</code>而不是<code>React</code>的呢？</p>
+<p>用这样一个注释，当babel编译<code>JSX</code>时，就会使用我们定义的函数辣：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** <span class="doctag">@jsx </span>Didact.createElement */</span></span><br><span class="line"><span class="keyword">const</span> element = (</span><br><span class="line">  <span class="xml"><span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">&quot;foo&quot;</span>&gt;</span></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;<span class="name">a</span>&gt;</span>bar<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;<span class="name">b</span> /&gt;</span></span></span><br><span class="line"><span class="xml">  <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>props: {</p>
+<p>​      …props,</p>
+<p>​      children: children**.**map(child =&gt; </p>
+<p>​        typeof child === ‘object’</p>
+<p>​          ? child</p>
+<p>​          : createTextNode(child)</p>
+<p>​      ),</p>
+<p>​    },</p>
+<p>手残多写了个大括号，一直报错！</p>
+<p>requestIdleCallback</p>
+<p>**<code>window.requestIdleCallback()</code>**方法插入一个函数，这个函数将在浏览器空闲时期被调用。这使开发者能够在主事件循环上执行后台和低优先级工作，而不会影响延迟关键事件，如动画和输入响应。函数一般会按先进先调用的顺序执行，然而，如果回调函数指定了执行超时时间<code>timeout</code>，则有可能为了在超时前执行函数而打乱执行顺序。</p>
+<p>遍历一颗fiber tree：</p>
+<p>一个节点有多个孩子也只有一个child指针</p>
+<p>child -&gt; sibling -&gt; uncle</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://hemengting.xyz/2021/10/17/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAReact/" data-id="ckuvbqlme0000h4ubhzj686e9" data-title="从0开始实现一个React" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/react-babel/" rel="tag">react babel</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-test" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2021/10/12/test/" class="article-date">
@@ -873,87 +1004,12 @@
 
 
   
-    <article id="post-webpack入门二、模块化方案进化史" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2021/09/07/webpack%E5%85%A5%E9%97%A8%E4%BA%8C%E3%80%81%E6%A8%A1%E5%9D%97%E5%8C%96%E6%96%B9%E6%A1%88%E8%BF%9B%E5%8C%96%E5%8F%B2/" class="article-date">
-  <time class="dt-published" datetime="2021-09-07T08:53:08.000Z" itemprop="datePublished">2021-09-07</time>
-</a>
+
+
+  <nav id="page-nav">
     
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2021/09/07/webpack%E5%85%A5%E9%97%A8%E4%BA%8C%E3%80%81%E6%A8%A1%E5%9D%97%E5%8C%96%E6%96%B9%E6%A1%88%E8%BF%9B%E5%8C%96%E5%8F%B2/">webpack入门二、模块化方案进化史</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <h1 id="模块化方案进化史"><a href="#模块化方案进化史" class="headerlink" title="模块化方案进化史"></a>模块化方案进化史</h1><p> <code>AMD</code>（Asynchronous Module Definition）异步模块定义</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 求和模块的定义</span></span><br><span class="line"><span class="function"><span class="title">define</span>(<span class="params"><span class="string">&#x27;getSum&#x27;</span>, [<span class="string">&#x27;math&#x27;</span>], <span class="keyword">function</span>(math)</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params">a, b</span>) </span>&#123;</span><br><span class="line">    	<span class="built_in">console</span>.log(<span class="string">&quot;sum: &quot;</span> + math.sum(a, b));</span><br><span class="line">	&#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
-
-<p><code>COMMONJS</code></p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 通过require函数来引入</span></span><br><span class="line"><span class="keyword">const</span> math = <span class="built_in">require</span>(<span class="string">&#x27;/math&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 通过exports将其导出</span></span><br><span class="line"><span class="built_in">exports</span>.getSum = <span class="function"><span class="keyword">function</span>(<span class="params">a, b</span>) </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>ES6 MODULE</code></p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// import导出</span></span><br><span class="line"><span class="keyword">import</span> math <span class="keyword">from</span> <span class="string">&#x27;./math&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// export导出</span></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">sum</span>(<span class="params">a, b</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="webpack的打包机制"><a href="#webpack的打包机制" class="headerlink" title="webpack的打包机制"></a><code>webpack</code>的打包机制</h1><h4 id="学习目标"><a href="#学习目标" class="headerlink" title="学习目标"></a>学习目标</h4><ul>
-<li><code>webpack</code>与立即执行函数之间的关系</li>
-<li><code>webpack</code>打包的核心逻辑</li>
-</ul>
-<h4 id="项目文件内容"><a href="#项目文件内容" class="headerlink" title="项目文件内容"></a>项目文件内容</h4><p><code>index.html</code></p>
-<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">&quot;en&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">&quot;X-UA-Compatible&quot;</span> <span class="attr">content</span>=<span class="string">&quot;IE=edge&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">&quot;viewport&quot;</span> <span class="attr">content</span>=<span class="string">&quot;width=device-width, initial-scale=1.0&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>React Webpack测试<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">&quot;app&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">&quot;./src/index.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p><code>/src/index.js</code></p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">test</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="built_in">console</span>.log(<span class="string">&#x27;我是一个小测试&#x27;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">test()</span><br></pre></td></tr></table></figure>
-
-<h4 id="唤起webpack"><a href="#唤起webpack" class="headerlink" title="唤起webpack"></a>唤起<code>webpack</code></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">webpack</span><br></pre></td></tr></table></figure>
-
-<p><code>webpack</code>默认查找<code>/src/index.js</code>，打包<code>index.js</code>的代码逻辑，目标文件：<code>/dist/main.js</code>。此时，<code>index.html</code>中引入<code>/dist/main.js</code>的效果是一样的。</p>
-<p><code>main.js</code>中为了压缩文件体积，变量名用尽可能少的字母表示，打包结果还是立即执行函数。</p>
-<p>引入<code>loadash</code>:</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> _ form loadash</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">test</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="built_in">console</span>.log(<span class="string">&#x27;我是一个小测试&#x27;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">test()</span><br></pre></td></tr></table></figure>
-
-<p>此时打包结果中立即执行函数一个入参是<code>test函数</code>，另一个是<code>lodash</code>的逻辑，都作为依赖模块放在modules<em>数组</em>中作为参数，等待代码运行时调用。</p>
-<p>大体结构：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="keyword">function</span>(<span class="params">modules</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> installedModules = &#123;&#125;; <span class="comment">// 已经加载的模块</span></span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">__webpack_require__</span>(<span class="params">moduleId</span>) </span>&#123; <span class="comment">// 浏览器环境下的require</span></span><br><span class="line">        <span class="comment">/* code */</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    <span class="keyword">return</span> __webpack_require__(<span class="number">0</span>); <span class="comment">// entry file加载工程入口模块</span></span><br><span class="line">&#125;)&#123;[ <span class="comment">/* modules array */</span>]&#125;</span><br></pre></td></tr></table></figure>
-
-<p>核心方法：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">__webpack_require__</span>(<span class="params">moduleId</span>) </span>&#123;</span><br><span class="line">	<span class="comment">// Check if module is in cache</span></span><br><span class="line">	<span class="keyword">if</span>(installedModules[moduleId]) &#123;</span><br><span class="line">		<span class="keyword">return</span> installedModules[moduleId].exports;</span><br><span class="line">	&#125;</span><br><span class="line">    <span class="comment">// Create a new module &#123;and put it into the cache&#125;</span></span><br><span class="line">    <span class="keyword">var</span> <span class="built_in">module</span> = installesModules[moduleId] = &#123;</span><br><span class="line">        <span class="attr">i</span>: moduleId,</span><br><span class="line">        <span class="attr">l</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="attr">exports</span>: &#123;&#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// Execute the module function</span></span><br><span class="line">    modules[moduleId].call(</span><br><span class="line">    	<span class="built_in">module</span>.exports,</span><br><span class="line">        <span class="built_in">module</span>, <span class="built_in">module</span>.export,</span><br><span class="line">        __webpack_requrie__</span><br><span class="line">    );</span><br><span class="line">    <span class="comment">// Flag the module as loaded</span></span><br><span class="line">    <span class="built_in">module</span>.l = <span class="literal">true</span>;</span><br><span class="line">    Return <span class="built_in">module</span>.exports;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>webpack</code>打包过程：</p>
-<ul>
-<li>从入口文件开始，分析整个应用的<em>依赖树</em>，</li>
-<li>将每个依赖模块包装起来，放到一个数组中等待调用</li>
-<li>实现模块加载的方法，并把他放到模块执行的环境中，确保模块间可以互相调用(<strong>webpack_require</strong>)</li>
-<li>把执行入口文件的逻辑放在一个函数表达式中，并立即执行这个函数</li>
-</ul>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://hemengting.xyz/2021/09/07/webpack%E5%85%A5%E9%97%A8%E4%BA%8C%E3%80%81%E6%A8%A1%E5%9D%97%E5%8C%96%E6%96%B9%E6%A1%88%E8%BF%9B%E5%8C%96%E5%8F%B2/" data-id="cktfs5cyb0003jcubdoyo86lb" data-title="webpack入门二、模块化方案进化史" class="article-share-link">Share</a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/webpack/" rel="tag">webpack</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+  </nav>
 
 </section>
         
@@ -966,7 +1022,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/JavaScript/" rel="tag">JavaScript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/html-%E7%BF%BB%E8%AF%91/" rel="tag">html,翻译</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/webpack/" rel="tag">webpack</a></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/JavaScript/" rel="tag">JavaScript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/html-%E7%BF%BB%E8%AF%91/" rel="tag">html,翻译</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/react-babel/" rel="tag">react babel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/webpack/" rel="tag">webpack</a></li></ul>
     </div>
   </div>
 
@@ -976,7 +1032,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/JavaScript/" style="font-size: 15px;">JavaScript</a> <a href="/tags/html-%E7%BF%BB%E8%AF%91/" style="font-size: 10px;">html,翻译</a> <a href="/tags/webpack/" style="font-size: 20px;">webpack</a>
+      <a href="/tags/JavaScript/" style="font-size: 15px;">JavaScript</a> <a href="/tags/html-%E7%BF%BB%E8%AF%91/" style="font-size: 10px;">html,翻译</a> <a href="/tags/react-babel/" style="font-size: 10px;">react babel</a> <a href="/tags/webpack/" style="font-size: 20px;">webpack</a>
     </div>
   </div>
 
@@ -998,6 +1054,10 @@
       <ul>
         
           <li>
+            <a href="/2021/10/17/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAReact/">从0开始实现一个React</a>
+          </li>
+        
+          <li>
             <a href="/2021/10/12/test/">test</a>
           </li>
         
@@ -1011,10 +1071,6 @@
         
           <li>
             <a href="/2021/09/10/webpack%E5%85%A5%E9%97%A8%E5%85%AD%E3%80%81%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/">webpack入门六、性能调优</a>
-          </li>
-        
-          <li>
-            <a href="/2021/09/10/webpack%E5%85%A5%E9%97%A8%E4%BA%94%E3%80%81webpack%E6%9E%84%E5%BB%BA%E5%B7%A5%E7%A8%8B/">webpack入门五、webpack构建工程</a>
           </li>
         
       </ul>

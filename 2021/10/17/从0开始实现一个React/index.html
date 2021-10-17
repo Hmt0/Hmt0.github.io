@@ -6,15 +6,15 @@
   
   <title>从0开始实现一个React | hmt的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="react用了这么久还是感觉对生命周期之类的概念理解得很模糊，最近看到一篇 ，感觉写的很好，而且交互也做得特别棒，在此翻译记录一下。 这篇文章的主要目的是遵循React代码的体系结构一步步地写出一个简单的React，但没有所有的优化和非必要的功能。 过程分为以下几个步骤：  The createElement Function The render Function 并发模型 Fibers 渲染和">
+  <meta name="description" content="react用了这么久还是感觉对生命周期之类的概念理解得很模糊，最近看到一篇教你构建一个React 的文章，感觉写的很好，而且交互也做得特别棒，在此翻译记录一下。 这篇文章的主要目的是遵循React代码的体系结构一步步地写出一个简单的React，但没有所有的优化和非必要的功能。 过程分为以下几个步骤：  The createElement Function The render Function 并">
 <meta property="og:type" content="article">
 <meta property="og:title" content="从0开始实现一个React">
 <meta property="og:url" content="http://hemengting.xyz/2021/10/17/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAReact/index.html">
 <meta property="og:site_name" content="hmt的博客">
-<meta property="og:description" content="react用了这么久还是感觉对生命周期之类的概念理解得很模糊，最近看到一篇 ，感觉写的很好，而且交互也做得特别棒，在此翻译记录一下。 这篇文章的主要目的是遵循React代码的体系结构一步步地写出一个简单的React，但没有所有的优化和非必要的功能。 过程分为以下几个步骤：  The createElement Function The render Function 并发模型 Fibers 渲染和">
+<meta property="og:description" content="react用了这么久还是感觉对生命周期之类的概念理解得很模糊，最近看到一篇教你构建一个React 的文章，感觉写的很好，而且交互也做得特别棒，在此翻译记录一下。 这篇文章的主要目的是遵循React代码的体系结构一步步地写出一个简单的React，但没有所有的优化和非必要的功能。 过程分为以下几个步骤：  The createElement Function The render Function 并">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2021-10-17T04:18:53.000Z">
-<meta property="article:modified_time" content="2021-10-17T14:28:01.371Z">
+<meta property="article:modified_time" content="2021-10-17T14:40:56.434Z">
 <meta property="article:author" content="He Mengting">
 <meta property="article:tag" content="react babel">
 <meta name="twitter:card" content="summary">
@@ -96,8 +96,7 @@
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <p>react用了这么久还是感觉对生命周期之类的概念理解得很模糊，最近看到一篇</p>
-<p>，感觉写的很好，而且交互也做得特别棒，在此翻译记录一下。</p>
+        <p>react用了这么久还是感觉对生命周期之类的概念理解得很模糊，最近看到一篇<a target="_blank" rel="noopener" href="https://pomb.us/build-your-own-react/">教你构建一个React</a> 的文章，感觉写的很好，而且交互也做得特别棒，在此翻译记录一下。</p>
 <p>这篇文章的主要目的是遵循React代码的体系结构一步步地写出一个简单的React，但没有所有的优化和非必要的功能。</p>
 <p>过程分为以下几个步骤：</p>
 <ol>

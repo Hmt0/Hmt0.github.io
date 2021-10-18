@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>hmt的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="hmt的博客">
+<meta property="og:url" content="http://hemengting.xyz/index.html">
+<meta property="og:site_name" content="hmt的博客">
+<meta property="og:locale" content="en_US">
+<meta property="article:author" content="He Mengting">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="hmt的博客" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">hmt的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://hemengting.xyz"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main">
+  
+    <article id="post-从0开始实现一个React" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/10/17/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAReact/" class="article-date">
+  <time class="dt-published" datetime="2021-10-17T04:18:53.000Z" itemprop="datePublished">2021-10-17</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/10/17/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAReact/">从0开始实现一个React</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>最近看到一篇<a target="_blank" rel="noopener" href="https://pomb.us/build-your-own-react/">教你构建一个React</a> 的文章，感觉写的很好，而且交互也做得特别棒，在此翻译记录一下。</p>
+<p>这篇文章的主要目的是遵循React代码的体系结构一步步地写出一个简单的React，但没有所有的优化和非必要的功能。</p>
+<p>过程分为以下几个步骤：</p>
+<ol>
+<li>The <code>createElement</code> Function</li>
+<li>The <code>render</code> Function</li>
+<li>并发模型</li>
+<li>Fibers</li>
+<li>渲染和提交阶段</li>
+<li>协调</li>
+<li>函数组件</li>
+<li>Hooks</li>
+</ol>
+<h2 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h2><p>首先，<code>JSX</code>语法是通过Babel转换成JavaScript的，因此我们需要在项目中配置Babel。</p>
+<p>安装：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install --save-dev @babel/core @babel/cli @babel/preset-env @babel/preset-react</span><br></pre></td></tr></table></figure>
+
+<p>在根目录中添加<code>.babelrc</code>：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="string">&quot;presets&quot;</span>: [<span class="string">&quot;@babel/preset-env&quot;</span>, <span class="string">&quot;@babel/preset-react&quot;</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>.babel.config.js</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> presets = [</span><br><span class="line">  [</span><br><span class="line">    <span class="string">&quot;@babel/env&quot;</span>,</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">targets</span>: &#123;</span><br><span class="line">        <span class="attr">edge</span>: <span class="string">&quot;17&quot;</span>,</span><br><span class="line">        <span class="attr">firefox</span>: <span class="string">&quot;60&quot;</span>,</span><br><span class="line">        <span class="attr">chrome</span>: <span class="string">&quot;67&quot;</span>,</span><br><span class="line">        <span class="attr">safari</span>: <span class="string">&quot;11.1&quot;</span>,</span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="attr">useBuiltIns</span>: <span class="string">&quot;usage&quot;</span>,</span><br><span class="line">      <span class="attr">corejs</span>: <span class="string">&quot;3.6.4&quot;</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">  ],</span><br><span class="line">];</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = &#123; presets &#125;;</span><br></pre></td></tr></table></figure>
+
+<p>运行<code>npx src --out-dir lib</code>就可以把转换结果保存在lib文件夹下面了~</p>
+<h2 id="0：回顾"><a href="#0：回顾" class="headerlink" title="0：回顾"></a>0：回顾</h2><p>下面的代码展示了渲染一个React组件的过程：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> element = <span class="xml"><span class="tag">&lt;<span class="name">h1</span> <span class="attr">title</span>=<span class="string">&quot;foo&quot;</span>&gt;</span>Hello<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span> <span class="comment">// 定义React组件</span></span><br><span class="line"><span class="keyword">const</span> container = <span class="built_in">document</span>.getElementById(<span class="string">&quot;root&quot;</span>) <span class="comment">// 从DOM中获取一个节点container</span></span><br><span class="line">ReactDOM.render(element, container) <span class="comment">// 把React组件渲染到container</span></span><br></pre></td></tr></table></figure>
+
+<p>要实现一个React，首先要知道React的方法是如何实现的，用原生的JavaScript怎么写，再去封装成我们的方法。现在，让我们不使用React语法来实现一下这个过程。</p>
+<ol>
+<li><h4 id="定义组件"><a href="#定义组件" class="headerlink" title="定义组件"></a>定义组件</h4></li>
+</ol>
+<p>Babel转换<code>JSX</code>的规则就是用调用<code>createElement</code>替换<code>&lt;&gt;</code>内部的代码，将<code>tag name</code>、<code>props</code>和子元素作为参数传递：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> element = React.createElement(</span><br><span class="line">  <span class="string">&quot;h1&quot;</span>,</span><br><span class="line">  &#123; <span class="attr">title</span>: <span class="string">&quot;foo&quot;</span> &#125;,</span><br><span class="line">  <span class="string">&quot;Hello&quot;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p><code>React.createElement</code>会对参数做一些验证并返回一个对象，长这样：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> element = &#123;</span><br><span class="line">  <span class="attr">type</span>: <span class="string">&quot;h1&quot;</span>,</span><br><span class="line">  <span class="attr">props</span>: &#123;</span><br><span class="line">    <span class="attr">title</span>: <span class="string">&quot;foo&quot;</span>,</span><br><span class="line">    <span class="attr">children</span>: <span class="string">&quot;Hello&quot;</span>,</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>所以我们可以直接用这个对象替换函数调用。<code>type</code>属性是一个字符串，表明DOM节点的类型，就是在生成HTML元素时将要传给<code>document.createElement</code>的<code>tagName</code>。</p>
+<p><code>props</code>属性是一个对象，包括<code>JSX</code>属性的所有键值对，还有一个特殊的属性：<code>children</code>：</p>
+<p>在这个例子中<code>children</code>是一个字符串，但是它通常是一个包含多个元素的数组。所以元素实数型结构的。</p>
+<ol start="2">
+<li><h4 id="渲染"><a href="#渲染" class="headerlink" title="渲染"></a>渲染</h4></li>
+</ol>
+<p>（<code>container</code>是直接调用<code>document.getElementById</code>获取的不用管。）另一个我们要替换的React代码是<code>ReactDOM.render</code>的调用。<code>render</code>是React修改DOM的地方，因此我们要在这里实现DOM更新。</p>
+<p>首先我们用<code>type</code>属性创建一个节点*，本例中是<code>h1</code>。然后我们把元素的元素的属性分配给节点，本例中是title属性。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> node = <span class="built_in">document</span>.createElement(element.type)</span><br><span class="line">node[<span class="string">&quot;title&quot;</span>] = element.props.title</span><br></pre></td></tr></table></figure>
+
+<p>*为了避免混淆，下文中使用”元素”表示React元素，“节点”表示DOM节点。</p>
+<p>接下来我们创建子节点，本例中只有一个文本节点。使用<code>textNode</code>而不是<code>innerText</code>可以让我们用同样的方式处理所有元素（方便递归）。注意我们像处理<code>h1</code>的title一样给文本节点设置<code>nodeValue</code>：<code>&#123;nodeValue: &quot;hello&quot;&#125;</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> text = <span class="built_in">document</span>.createTextNode(<span class="string">&quot;&quot;</span>)</span><br><span class="line">text[<span class="string">&quot;nodeValue&quot;</span>] = element.props.children</span><br></pre></td></tr></table></figure>
+
+<p>最后，我们把<code>textNode</code>添加到<code>h1</code>，再把<code>h1</code>添加到<code>container</code>。</p>
+<p>这样我们就在不使用React的情况下实现了同样的功能。罗嗦了这么多，实现起来还是很简单的，用过React的同学应该都很熟悉：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> element = &#123;</span><br><span class="line">  <span class="attr">type</span>: <span class="string">&quot;h1&quot;</span>,</span><br><span class="line">  <span class="attr">props</span>: &#123;</span><br><span class="line">    <span class="attr">title</span>: <span class="string">&quot;foo&quot;</span>,</span><br><span class="line">    <span class="attr">children</span>: <span class="string">&quot;Hello&quot;</span>,</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> container = <span class="built_in">document</span>.getElementById(<span class="string">&quot;root&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> node = <span class="built_in">document</span>.createElement(element.type)</span><br><span class="line">node[<span class="string">&quot;title&quot;</span>] = element.props.title</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> text = <span class="built_in">document</span>.createTextNode(<span class="string">&quot;&quot;</span>)</span><br><span class="line">text[<span class="string">&quot;nodeValue&quot;</span>] = element.props.children</span><br><span class="line"></span><br><span class="line">node.appendChild(text)</span><br><span class="line">container.appendChild(node)</span><br></pre></td></tr></table></figure>
+
+<h2 id="1：createElement函数"><a href="#1：createElement函数" class="headerlink" title="1：createElement函数"></a>1：<code>createElement</code>函数</h2><p>（上一步中，我们直接定义了element对象）接下来，我们就该真正实现一个自己的<code>createElement</code>函数了。首先把<code>JSX</code>转换成<code>JS</code>研究一下<code>createElement</code>是如何调用的：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> element = React.createElement(</span><br><span class="line">  <span class="string">&quot;div&quot;</span>,</span><br><span class="line">  &#123; <span class="attr">id</span>: <span class="string">&quot;foo&quot;</span> &#125;,</span><br><span class="line">  React.createElement(<span class="string">&quot;a&quot;</span>, <span class="literal">null</span>, <span class="string">&quot;bar&quot;</span>),</span><br><span class="line">  React.createElement(<span class="string">&quot;b&quot;</span>)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>还记得我们上一步中定义的element对象吗？我们的函数的功能应该是创建一个具有<code>type</code>和<code>props</code>属性的对象：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">createElement</span>(<span class="params">type, props, ...children</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> &#123;</span><br><span class="line">    type,</span><br><span class="line">    <span class="attr">props</span>: &#123;</span><br><span class="line">      ...props,</span><br><span class="line">      children,</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里使用了展开运算符处理<code>props</code>，使用剩余参数处理<code>children</code>，因为我们希望<code>children</code>属性是一个数组。例如，<code>createElement(&quot;div&quot;)</code>返回</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;type&quot;</span>: <span class="string">&quot;div&quot;</span>,</span><br><span class="line">  <span class="string">&quot;props&quot;</span>: &#123; <span class="string">&quot;children&quot;</span>: [] &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>createElement(&quot;div&quot;, null, a)</code>返回</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;type&quot;</span>: <span class="string">&quot;div&quot;</span>,</span><br><span class="line">  <span class="string">&quot;props&quot;</span>: &#123; <span class="string">&quot;children&quot;</span>: [a] &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>createElement(&quot;div&quot;, null, a, b)</code>返回</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;type&quot;</span>: <span class="string">&quot;div&quot;</span>,</span><br><span class="line">  <span class="string">&quot;props&quot;</span>: &#123; <span class="string">&quot;children&quot;</span>: [a, b] &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>children</code>数组或许包含字符串或数字这样的原始值（树中的叶子节点）。所以我们应该包装不是对象的元素，再给它们一个特殊的属性：<code>TEXT_ELEMENT</code>。</p>
+<p>当没有子元素时，React并没有包装原始值或创建空数组，但我们更希望简化代码而不是追求代码性能😀。</p>
+<p>为了替换React，我们要给自己的库起个名字，就叫<code>Didact</code>吧！但是我们依然想使用<code>JSX</code>语法，怎么告诉<code>babel</code>要用<code>Didact</code>的<code>createElement</code>而不是<code>React</code>的呢？</p>
+<p>用这样一个注释，当babel编译<code>JSX</code>时，就会使用我们定义的函数辣：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** <span class="doctag">@jsx </span>Didact.createElement */</span></span><br><span class="line"><span class="keyword">const</span> element = (</span><br><span class="line">  <span class="xml"><span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">&quot;foo&quot;</span>&gt;</span></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;<span class="name">a</span>&gt;</span>bar<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;<span class="name">b</span> /&gt;</span></span></span><br><span class="line"><span class="xml">  <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-render函数"><a href="#2-render函数" class="headerlink" title="2.render函数"></a>2.<code>render</code>函数</h2><p>接下来，我们要写一个自己的<code>ReactDOM.render</code>函数。现在呢，我们只关心向DOM中添加东西，之后我们再实现更新和删除。</p>
+<p>我们先根据<code>element type</code>生成一个DOM节点，再把这个新节点添加到container。</p>
+<p>我们要递归地对每个子节点执行相同的操作。别忘了文本元素，如果元素类型是<code>TEXT_ELEMENT</code>我们就会创建一个文本节点而不是常规节点：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">render</span>(<span class="params">element, container</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> dom =</span><br><span class="line">    element.type == <span class="string">&quot;TEXT_ELEMENT&quot;</span></span><br><span class="line">      ? <span class="built_in">document</span>.createTextNode(<span class="string">&quot;&quot;</span>)</span><br><span class="line">      : <span class="built_in">document</span>.createElement(element.type)</span><br><span class="line"></span><br><span class="line">  element.props.children.forEach(<span class="function"><span class="params">child</span> =&gt;</span></span><br><span class="line">    render(child, dom)</span><br><span class="line">  )</span><br></pre></td></tr></table></figure>
+
+<p>最后我们需要给节点分配元素属性：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> isProperty = <span class="function"><span class="params">key</span> =&gt;</span> key !== <span class="string">&quot;children&quot;</span></span><br><span class="line">  <span class="built_in">Object</span>.keys(element.props)</span><br><span class="line">    .filter(isProperty)</span><br><span class="line">    .forEach(<span class="function"><span class="params">name</span> =&gt;</span> &#123;</span><br><span class="line">      dom[name] = element.props[name]</span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure>
+
+<p>完成！我们实现了一个可以把<code>JSX</code>渲染到DOM中的库。</p>
+<h2 id="3-并发模型"><a href="#3-并发模型" class="headerlink" title="3.并发模型"></a>3.并发模型</h2><p>在实现更多功能前······我们需要重构一下代码。</p>
+<p>因为我们的递归调用有一个问题。一旦我们开始渲染，直到我们渲染完整棵element树都不会停下来。如果这棵element树很大的话，它可能会使主线程阻塞很久。而且如果浏览器需要实现一段平滑的动画或者处理用户输入这种高优先级的任务，它将会一直等待直到渲染完成。</p>
+<p>因此我们将把工作拆分成小的单元，而且每当我们完成了一个单元，如果有其他事情要做的话我们会让浏览器打断渲染。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> nextUnitOfWork = <span class="literal">null</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">workLoop</span>(<span class="params">deadline</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">let</span> shouldYield = <span class="literal">false</span></span><br><span class="line">  <span class="keyword">while</span> (nextUnitOfWork &amp;&amp; !shouldYield) &#123; </span><br><span class="line">    <span class="comment">// 任务列表中还有下一个单元而且还有空闲时间</span></span><br><span class="line">    nextUnitOfWork = performUnitOfWork(</span><br><span class="line">      <span class="comment">// 执行任务</span></span><br><span class="line">      nextUnitOfWork</span><br><span class="line">    )</span><br><span class="line">    shouldYield = deadline.timeRemaining() &lt; <span class="number">1</span></span><br><span class="line">   	<span class="comment">// 判断是否还有空闲时间</span></span><br><span class="line">  &#125;</span><br><span class="line">  requestIdleCallback(workLoop)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">requestIdleCallback(workLoop)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">performUnitOfWork</span>(<span class="params">nextUnitOfWork</span>) </span>&#123;</span><br><span class="line">  <span class="comment">// TODO</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们使用<code>requestIdleCallback</code>来实现循环。可以把<code>reuqestIdleCallback</code>看作一个<code>setTimeout    </code>,只不过不是我们告诉他什么时候运行，<strong>浏览器会在主线程空闲时运行回调函数</strong>。</p>
+<p>React不再使用<code>requestIdleCallback</code>了，现在人家用<em>the scheduler package</em>，但在本例中是一样的概念。</p>
+<p><code>requestIdleCallback</code>还给了我们一个deadline参数。我们就是用它来判断在浏览器获得掌控权之前我们还有多少时间的。</p>
+<p>我们通过设置任务中的第一个单元来启动循环，接下来写了一个<code>performUnitOfWork</code>函数，即执行了任务又返回了任务中的下一个单元。</p>
+<h2 id="4-Fibers"><a href="#4-Fibers" class="headerlink" title="4.Fibers"></a>4.<code>Fibers</code></h2><p>为了组织任务中的所有单元我们需要一种数据结构：那就是<code>fiber</code>树。</p>
+<p>每一个元素都有一个对应的<code>fiber</code>而且每个<code>fiber</code>都是任务中的一个单元。</p>
+<p>让我们来看一个例子，假设我们想要渲染一个这样的element树：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Didact.render(</span><br><span class="line">  <span class="xml"><span class="tag">&lt;<span class="name">div</span>&gt;</span></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;<span class="name">h1</span>&gt;</span></span></span><br><span class="line"><span class="xml">      <span class="tag">&lt;<span class="name">p</span> /&gt;</span></span></span><br><span class="line"><span class="xml">      <span class="tag">&lt;<span class="name">a</span> /&gt;</span></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;<span class="name">h2</span> /&gt;</span></span></span><br><span class="line"><span class="xml">  <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span>,</span><br><span class="line">  container</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>在<code>render</code>中我们将会创建一个<code>root fiber</code>，并把它设置为<code>nextUnitOfWork</code>。接下来的任务将会在<code>performUnitOfWork</code>中执行，我们将会对每个fiber做三件事情：</p>
+<ol>
+<li>把元素添加到DOM中</li>
+<li>为元素的孩子创建<code>fibers</code></li>
+<li>选择下一个任务</li>
+</ol>
+<p>（不知道你有没有看出来，其实还是递归，只不过我们没有在递归里面不假思索地渲染每一个节点！）</p>
+<p>学过数据结构的同学都应该知道树长啥样：</p>
+<p><img src="C:\Users\luna6\AppData\Roaming\Typora\typora-user-images\image-20211018223652632.png" alt="image-20211018223652632"></p>
+<p>就长fiber树这样！其实是fiber树就长树这样😀选择这种数据结构当然是为了方便遍历了，每个fiber都链接着它的第一个孩子节点，相邻的兄弟节点和它的父节点。</p>
+<p>当我们完成了一个fiber上的任务时，如果他有<code>child</code>节点，那么孩子fiber就会是任务执行的下一个单元。例如，当我们完成了<code>div</code>fiber上的任务时，下一个单元将会是<code>h1</code>fiber。</p>
+<p>如果一个fiber没有<code>child</code>，我们把<code>sibling</code>当作任务的下一个单元。比如，<code>p</code>fiber没有<code>child</code>，所以我们在它完成之后来到了<code>a</code>fiber。</p>
+<p>再如果一个fiber既没有<code>child</code>也没有<code>sibling</code>呢，我们找到它的“叔叔”：<code>parent</code>的<code>sibling</code>。就像<code>a</code>fiber和<code>h2</code>fiber的关系。</p>
+<p>当然啦，如果<code>parent</code>也没有<code>sibling</code>的话，我们就一直顺着<code>parent</code>s向上找，直到找到了一个具有<code>sibling</code>的fiber或者到达了root。如果我们到达了root，也就意味着我们完成了此次<code>render</code>的所有任务。（熟悉数据结构的同学一定很开心吧！这不就是先根遍历的过程嘛😄）</p>
+<p>接下来让我们实现代码部分：</p>
+<p>在<code>render</code>函数中我们把fiber tree的root设置为<code>nextUnitOfWork</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">render</span>(<span class="params">element, container</span>) </span>&#123;</span><br><span class="line">  nextUnitOfWork = &#123;</span><br><span class="line">    <span class="attr">dom</span>: container,</span><br><span class="line">    <span class="attr">props</span>: &#123;</span><br><span class="line">      <span class="attr">children</span>: [element],</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>接下来，当浏览器准备好时，它会回调我们的<code>workLoop</code>，我们将会从<code>root</code>开始执行任务。首先，我们创建一个新节点并把它添加到DOM中。我们用<code>fiber.dom</code>属性来跟踪这个DOM节点：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">performUnitOfWork</span>(<span class="params">fiber</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (!fiber.dom) &#123;</span><br><span class="line">    fiber.dom = createDom(fiber)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (fiber.parent) &#123;</span><br><span class="line">    fiber.parent.dom.appendChild(fiber.dom)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// TODO create new fibers</span></span><br><span class="line">  <span class="comment">// TODO return next unit of work</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>接下来我们为每个<code>child</code>创建一个新的fiber：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> elements = fiber.props.children</span><br><span class="line">  <span class="keyword">let</span> index = <span class="number">0</span></span><br><span class="line">  <span class="keyword">let</span> prevSibling = <span class="literal">null</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span> (index &lt; elements.length) &#123;</span><br><span class="line">    <span class="keyword">const</span> element = elements[index]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> newFiber = &#123;</span><br><span class="line">      <span class="attr">type</span>: element.type,</span><br><span class="line">      <span class="attr">props</span>: element.props,</span><br><span class="line">      <span class="attr">parent</span>: fiber,</span><br><span class="line">      <span class="attr">dom</span>: <span class="literal">null</span>,</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后我们把它作为一个<code>child</code>或者<code>sibling</code>加入fiber tree，这取决于它是不是第一个<code>child</code>：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (index === <span class="number">0</span>) &#123;</span><br><span class="line">      fiber.child = newFiber</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      prevSibling.sibling = newFiber</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    prevSibling = newFiber</span><br><span class="line">    index++</span><br></pre></td></tr></table></figure>
+
+<p>最后我们寻找任务中的下一个单元。我们首先寻找<code>child</code>，接下来是<code>sibling</code>，然后是<code>uncle</code>，以此类推。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (fiber.child) &#123;</span><br><span class="line">   <span class="keyword">return</span> fiber.child</span><br><span class="line"> &#125;</span><br><span class="line"> <span class="keyword">let</span> nextFiber = fiber</span><br><span class="line"> <span class="keyword">while</span> (nextFiber) &#123;</span><br><span class="line">   <span class="keyword">if</span> (nextFiber.sibling) &#123;</span><br><span class="line">     <span class="keyword">return</span> nextFiber.sibling</span><br><span class="line">   &#125;</span><br><span class="line">   nextFiber = nextFiber.parent</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>这就是我们的<code>performUnitOfWork</code>辣！</p>
+<p>props: {</p>
+<p>​      …props,</p>
+<p>​      children: children**.**map(child =&gt; </p>
+<p>​        typeof child === ‘object’</p>
+<p>​          ? child</p>
+<p>​          : createTextNode(child)</p>
+<p>​      ),</p>
+<p>​    },</p>
+<p>手残多写了个大括号，一直报错！</p>
+<p>requestIdleCallback</p>
+<p>**<code>window.requestIdleCallback()</code>**方法插入一个函数，这个函数将在浏览器空闲时期被调用。这使开发者能够在主事件循环上执行后台和低优先级工作，而不会影响延迟关键事件，如动画和输入响应。函数一般会按先进先调用的顺序执行，然而，如果回调函数指定了执行超时时间<code>timeout</code>，则有可能为了在超时前执行函数而打乱执行顺序。</p>
+<p>遍历一颗fiber tree：</p>
+<p>一个节点有多个孩子也只有一个child指针</p>
+<p>child -&gt; sibling -&gt; uncle</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://hemengting.xyz/2021/10/17/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAReact/" data-id="ckuwtunhv000gl4ubeeu61v0o" data-title="从0开始实现一个React" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/react-babel/" rel="tag">react babel</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-test" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/10/12/test/" class="article-date">
+  <time class="dt-published" datetime="2021-10-12T12:47:34.000Z" itemprop="datePublished">2021-10-12</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/10/12/test/">test</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>把hexo配置放在github上</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://hemengting.xyz/2021/10/12/test/" data-id="ckuwtunhj0000l4ube2wqhw3z" data-title="test" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-翻译-viewports的故事-part-one" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/09/23/%E7%BF%BB%E8%AF%91-viewports%E7%9A%84%E6%95%85%E4%BA%8B-part-one/" class="article-date">
+  <time class="dt-published" datetime="2021-09-23T07:11:28.000Z" itemprop="datePublished">2021-09-23</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/09/23/%E7%BF%BB%E8%AF%91-viewports%E7%9A%84%E6%95%85%E4%BA%8B-part-one/">翻译:viewports的故事-第一部分</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>原文地址：<a target="_blank" rel="noopener" href="https://www.quirksmode.org/mobile/viewports.html">https://www.quirksmode.org/mobile/viewports.html</a></p>
+<p>本文从像素的概念入手，介绍了浏览器窗口缩放带来的变化，<code>viewport</code>属性和获取<code>viewport</code>大小的属性。以下为翻译：</p>
+<p><strong>在这个短系列中我将阐述<code>viewports</code>和一些重要的元素的widths属性是如何工作的，比如<html>标签、窗口和屏幕。</strong></p>
+<p>这一篇是关于桌面浏览器的，它的唯一目的是为移动浏览器的类似讨论奠定基础。许多web开发者已经对许多有关桌面的概念有了直观的理解。在手机端我们将会看到相同的概念，只不过更加复杂，一个关于大家都知道的术语的先导讨论将会极大帮助地你理解手机浏览器。</p>
+<h3 id="概念：设备像素和css像素"><a href="#概念：设备像素和css像素" class="headerlink" title="概念：设备像素和css像素"></a>概念：设备像素和<code>css</code>像素</h3><p>第一个需要理解的概念是<code>CSS</code>像素以及它和设备像素的区别。</p>
+<p>设备像素就是我们直觉上认为“正确”的像素。这些像素就是你正在使用的设备的正式分辨率，通常可以通过<code>screen.width/height</code>读取。</p>
+<p>如果你给某个元素设置<code>width: 128px</code>，而你的显示器的宽度是<code>1024px</code>，并且你把浏览器窗口最大化，那么这个元素可以在你的显示器上填充8次（粗略地;让我们忽略棘手的部分）。</p>
+<p>然而，如果用户缩放，这个计算关系将会改变。如果用户放大至200%，你的<code>width: 128px</code>的元素将只能在<code>1024px</code>的显示器填充4次。</p>
+<p>在现代浏览器中实现的缩放只不过是“扩展”像素。也就是说，不是元素的宽度从128变为256像素；而是<em>实际像素</em>的大小翻倍。形式上，元素的宽度仍然是128 <code>CSS</code>像素，即使它恰好占用256个设备像素的空间。</p>
+<p>换句话说，放大200%使<code>CSS</code>像素扩大为设备像素的四倍。（宽度两倍，高度两倍，总共四倍）。</p>
+<p>一些图片可以明确这些概念。这是在100%缩放级别的四个像素，<code>CSS</code>像素与设备像素完全重叠。</p>
+<p><img src="https://www.quirksmode.org/mobile/pix/viewport/csspixels_100.gif" alt="img"></p>
+<p>现在让我们缩小。<code>CSS</code>像素开始收缩，这意味着一个设备像素现在重叠了几个<code>CSS</code>像素。</p>
+<p><img src="https://www.quirksmode.org/mobile/pix/viewport/csspixels_out.gif" alt="img"></p>
+<p>如果你放大，会发生相反的情况。<code>CSS</code>像素开始增长，现在一个<code>CSS</code>像素重叠了几个设备像素。</p>
+<p><img src="https://www.quirksmode.org/mobile/pix/viewport/csspixels_in.gif" alt="img"></p>
+<p>关键点在于<em>我们只关心<code>CSS</code>像素</em>。正是这些像素决定了样式表的呈现方式。</p>
+<p>设备像素几乎没用。不是对用户；用户会放大或缩小页面，直到可以舒服地阅读它。然而，缩放级别对你来说并不重要。浏览器会自动确保你的<code>CSS</code>布局被拉伸或压缩。</p>
+<p>（结论：缩小就是缩小<code>CSS</code>像素，放大就是放大<code>CSS</code>像素）</p>
+<h3 id="100-缩放"><a href="#100-缩放" class="headerlink" title="100%缩放"></a>100%缩放</h3><p>我一开始用假设缩放级别为100%举例。现在是时候更严格地定义它了：</p>
+<blockquote>
+<p>在缩放级别100%，一个<code>CSS</code>像素完全等于一个设备像素。</p>
+</blockquote>
+<p>100%缩放的概念在接下来的说明中非常有用，但在日常工作中你不应该过度关注它。在桌面，你通常会用100%的缩放来测试你的网站，但即使用户放大或缩小，神奇的<code>CSS</code>像素也会确保你的布局保持相同的比例。</p>
+<h3 id="屏幕尺寸-Screen-size"><a href="#屏幕尺寸-Screen-size" class="headerlink" title="屏幕尺寸 Screen size"></a>屏幕尺寸 Screen size</h3><p>让我们看看一些实际的测量方法。我们从<code>screen.width</code>和<code>screen.height</code>开始。它们包含用户屏幕的总宽度和高度。这些尺寸用设备像素来衡量，因为它们永远不会改变：它们是显示器的特性，而不是浏览器的特性。</p>
+<p><img src="https://www.quirksmode.org/mobile/pix/viewport/desktop_screen.jpg" alt="img"></p>
+<p>有趣！但这些信息基本上没什么用。用户显示器的大小对我们来说并不重要，除非你想在web统计数据库中使用它。</p>
+<h3 id="窗口尺寸-Window-size"><a href="#窗口尺寸-Window-size" class="headerlink" title="窗口尺寸 Window size"></a>窗口尺寸 Window size</h3><p>相反，我们想知道的是浏览器窗口的内部尺寸。它会告诉你用户当前有多少空间用来展示你的<code>CSS</code>布局。你可以通过<code>Window.innerWidth</code>和<code>window.innerHeight</code>来查询这些尺寸。</p>
+<p><img src="https://www.quirksmode.org/mobile/pix/viewport/desktop_inner.jpg" alt="img"></p>
+<p>显然，窗口的内部宽度是以<code>CSS</code>像素衡量的。你需要知道你的布局有多少可以挤进浏览器窗口，并且这个数量会随着用户的放大而减少。如果用户放大你会得到更少的可用空间，<code>innerWidth/Height</code>的递减可以反映这一点。</p>
+<p>（zoom的时候虽然看起来浏览器窗口大小没有变化，但是innerWidth变化了，就像放大镜效果一样，能看见内容的区域变化了）</p>
+<p>（Opera是个例外，当用户放大时，它的<code>innerWidth/Height</code>不会减少：它们是以设备像素衡量的。这在台式机上很烦人，但在移动设备上却是致命的，我们稍后会看到。)</p>
+<p><img src="https://www.quirksmode.org/mobile/pix/viewport/desktop_inner_zoomed.jpg" alt="img"></p>
+<p>注意，测量的宽度和高度包括滚动条。它们也被认为是内窗的一部分。(这主要是由于历史原因。)</p>
+<h3 id="滚动抵消-Scrolling-offset"><a href="#滚动抵消-Scrolling-offset" class="headerlink" title="滚动抵消 Scrolling offset"></a>滚动抵消 Scrolling offset</h3><p><code>window.pageXOffset</code>和<code>window.pageYOffset</code>包含文档的水平和垂直滚动偏移量。这样你就可以知道用户滚动了多少。</p>
+<p><img src="https://www.quirksmode.org/mobile/pix/viewport/desktop_page.jpg" alt="img"></p>
+<p>这些属性也是用<code>CSS</code>像素度量的。你想知道文档已经向上滚动了多少，不管缩放状态是什么。</p>
+<p>理论上，如果用户向上滚动，然后放大，<code>windw.pageX / YOffset</code>会改变。然而，浏览器试图保持网页的一致性，通过当用户放大时，在可见页面的顶部保持相同的元素来实现。这并不总是完美的，但这意味着在实践中<code>window.pageX/YOffset</code>并没有真正改变：已经滚动出窗口的<code>CSS</code>像素数量保持(大致)相同。</p>
+<p><img src="https://www.quirksmode.org/mobile/pix/viewport/desktop_page_zoomed.jpg" alt="img"></p>
+<h3 id="概念-视口the-viewport"><a href="#概念-视口the-viewport" class="headerlink" title="概念: 视口the viewport"></a>概念: 视口the <code>viewport</code></h3><p>在我们继续讨论更多的JavaScript属性之前，我们必须引入另一个概念：视口 <code>the viewport</code>。</p>
+<p><code>viewport</code>的功能是约束<html>元素，它是网页最上面的包含块。</p>
+<p>这听起来可能有点模糊，所以这里有一个实际的例子。假设你有一个流式布局，其中一个侧边栏宽度为10%。现在，边栏会随着你调整浏览器窗口的大小而整齐地增长和收缩。但这到底是怎么回事呢?</p>
+<p>从技术上讲，侧边栏的宽度是其父栏的10%。我们假设这是<body>(并且你没有给它设置宽度)。问题是<body>的宽度是多少。</p>
+<p>通常情况下，所有块级元素的宽度都是其父元素的100%(当然也有例外，但我们先忽略它们)。所以<body>和它的父元素<html>一样宽。</p>
+<html>元素有多宽？它和浏览器窗口一样宽。这就是为什么你的侧边栏`width:10%`将跨越整个浏览器窗口的10%。所有的web开发人员都直观地知道并使用这个事实。
+
+<p>你可能不知道这在理论上是如何运作的。理论上，<html>元素的宽度受<code>viewport</code>宽度的限制。<html>元素占<code>viewport</code>宽度的100%。</p>
+<p><code>viewport</code>，反过来，完全等于浏览器窗口：它是这样定义的。<code>viewport</code>不是HTML构造，因此不能通过<code>CSS</code>来影响它。它只是桌面浏览器窗口的宽度和高度。在移动平台上则要复杂得多。</p>
+<h3 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h3><p>这种情况产生了一些奇怪的后果。你可以在这个网站上看到其中一个。一直滚动到顶部，放大两到三倍，这样网站的内容就会溢出浏览器窗口。</p>
+<p>现在向右滚动，你会看到网站顶部的蓝色条不再正确排列。</p>
+<p><img src="https://www.quirksmode.org/mobile/pix/viewport/desktop_htmlbehaviour.jpg" alt="img"></p>
+<p>这种行为是<code>viewport</code>定义方式的结果。我给顶部的蓝色条定义<code>width:100%</code>。是谁的100%？<html>元素，它与<code>viewport</code>一样宽，<code>viewport</code>与浏览器窗口一样宽。</p>
+<p>关键点在于：虽然在100%缩放时可以正常工作，但现在我们已经缩小了<code>viewport</code>，它比我的网站的总宽度还小。这本身并不重要，内容现在从<html>元素溢出，但该元素具有<code>overflow: visible</code>，这意味着溢出的内容将在任何情况下显示。</p>
+<p>但是蓝色的条并没有溢出来。因为我给它设置了<code>width:100%</code>，毕竟，浏览器通过把<code>viewport</code>的宽度应用在蓝色条上来遵守这一设置。他们并不关心宽度现在太窄了。</p>
+<p><img src="https://www.quirksmode.org/mobile/pix/viewport/desktop_100percent.jpg" alt="img"></p>
+<h3 id="文档宽度"><a href="#文档宽度" class="headerlink" title="文档宽度?"></a>文档宽度?</h3><p>我真正需要知道的是整个页面的内容有多宽，包括那些突出的部分。据我所知，不可能找到这个值(除非你去计算页面上所有元素的宽度和页边距，但说得委婉些，这很容易出错)。</p>
+<p>我相信我们需要一个JavaScript属性对，来给出我所说的“文档宽度”(显然是<code>CSS</code>像素)。</p>
+<p><img src="https://www.quirksmode.org/mobile/pix/viewport/desktop_documentwidth.jpg" alt="img"></p>
+<p>如果我们真的觉得很难，为什么不把这个值也暴露给<code>CSS</code>呢？我希望能够使蓝色条的<code>width:100%</code>属性依赖于文档的宽度，而不是<html>元素的宽度。(不过，这肯定很棘手，如果无法实现，我也不会感到惊讶。)</p>
+<p>浏览器厂商们，你们怎么看?</p>
+<h3 id="测量viewport"><a href="#测量viewport" class="headerlink" title="测量viewport"></a>测量<code>viewport</code></h3><p>你可能想知道视口的尺寸。它们可以在<code>document.documentElement.clientWidth</code>和<code>-Height</code>中找到。</p>
+<p><img src="https://www.quirksmode.org/mobile/pix/viewport/desktop_client.jpg" alt="img"></p>
+<p>如果了解DOM，就会了解<code>document.documentElement</code>实际上是<html>元素：任何<code>html</code>文档的根元素。然而，可以说视口更高一级；它是包含<html>元素的元素。如果给<html>元素一个宽度，这可能很重要。(顺便说一下，我不建议这么做，但这是可能的。)</p>
+<p>在这种情况下，<code>document.documentElement.clientWidth</code>和<code>-Height</code>仍然给出视口的尺寸，而不是<html>元素的尺寸。(这是一个特殊的规则，只适用于这个元素，只适用于这个属性对。在所有其他情况下，使用元素的实际宽度。)</p>
+<p><img src="https://www.quirksmode.org/mobile/pix/viewport/desktop_client_smallpage.jpg" alt="img"></p>
+<p>因此<code>document.documentElement.clientWidth</code>和<code>-Height</code>总是给出视口的尺寸，而不管<html>元素的尺寸。</p>
+<h3 id="两个属性对"><a href="#两个属性对" class="headerlink" title="两个属性对"></a>两个属性对</h3><p>但是视窗宽度的尺寸不也是由<code>window.innerWidth/Height</code>给出的吗?是也不是。</p>
+<p>这两个属性对之间有一个形式上的区别：<code>document.documentElement.clientWidth</code>和<code>-Height</code>不包括滚动条，而<code>window.innerWidth/Height</code>包括。不过，这基本上是一种吹毛求疵。</p>
+<p>我们有两个属性对的现状是浏览器之战遗留下来的。那时<code>Netscape</code>只支持<code>window.innerWidth/Height</code>而IE仅支持<code>document.documentElement.clientWidth</code>和<code>-Height</code>。从那时起，所有其他浏览器都开始支持<code>clientWidth/Height</code>，但IE没有选择<code>window.innerWidth/Height</code>。</p>
+<p>在台式机上有两个可用的属性对是一个小麻烦——但在移动设备上却是一个福音，正如我们将看到的。</p>
+<h3 id="测量元素"><a href="#测量元素" class="headerlink" title="测量元素"></a>测量<html>元素</h3><p>所以<code>clientWidth/Height</code>给出了所有情况下的视口尺寸。但是我们在哪里可以找到<html>元素本身的尺寸呢?它们存储在<code>document.documentElement.offsewidth</code>和<code>-Height</code>中。</p>
+<p><img src="https://www.quirksmode.org/mobile/pix/viewport/desktop_offset.jpg" alt="img"></p>
+<p>这些属性真正地让你以块级元素的方式访问<html>元素；如果你设置<code>width</code>，<code>offsetWidth</code>将反映它。</p>
+<p><img src="https://www.quirksmode.org/mobile/pix/viewport/desktop_offset_smallpage.jpg" alt="img"></p>
+<h3 id="事件的坐标"><a href="#事件的坐标" class="headerlink" title="事件的坐标"></a>事件的坐标</h3><p>然后是事件坐标。当鼠标事件发生时，至少会暴露5个属性对以提供有关事件确切位置的信息。对于我们的讨论，其中三个是重要的：</p>
+<blockquote>
+<ol>
+<li><code>pageX/Y</code>以<code>CSS</code>像素给出元素相对于<html>元素的坐标。</li>
+<li><code>clientX/Y</code>以<code>CSS</code>像素给出元素相对于<code>viewport</code>的元素坐标。</li>
+<li><code>screenX/Y</code> 以<code>CSS</code>像素给出相对于屏幕的坐标。</li>
+</ol>
+</blockquote>
+<p><img src="https://www.quirksmode.org/mobile/pix/viewport/desktop_pageXY.jpg" alt="img"></p>
+<p>90%的时间你都会都使用<code>pageX/Y</code>；通常，你想知道事件相对于文档的位置。另外10%的时间你会使用<code>clientX/Y</code>。您永远不需要知道相对于屏幕的事件坐标。</p>
+<h3 id="媒体查询"><a href="#媒体查询" class="headerlink" title="媒体查询"></a>媒体查询</h3><p>最后，一些关于媒体查询的词汇。其思想非常简单：您可以定义特殊的<code>CSS</code>规则，这些规则只在页面宽度大于、等于或小于特定大小时执行。例如：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">div</span><span class="selector-class">.sidebar</span> &#123;</span><br><span class="line">	<span class="attribute">width</span>: <span class="number">300px</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@media</span> all <span class="keyword">and</span> (<span class="attribute">max-width</span>: <span class="number">400px</span>) &#123;</span><br><span class="line">	// styles assigned when <span class="attribute">width</span> is smaller than <span class="number">400px</span>;</span><br><span class="line">	<span class="selector-tag">div</span><span class="selector-class">.sidebar</span> &#123;</span><br><span class="line">		<span class="attribute">width</span>: <span class="number">100px</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>现在侧边栏是<code>300px</code>宽，除非宽度小于<code>400px</code>，在这种情况下侧边栏变成<code>100px</code>宽。</p>
+<p>问题当然是：我们测量的宽度是多少?</p>
+<p>有两个相关的媒体查询:``width/height<code>和</code>device-width/device-height`。</p>
+<ol>
+<li><code>width/height</code> 使用与<code>documentElement.clientwidth /Height</code>（换句话说，<code>viewport</code>）。它适用于<code>CSS</code>像素。</li>
+<li><code>device-width/device-height</code> 使用与<code>screen.width/height</code>相同的值。(换句话说，屏幕)。它适用于设备像素。</li>
+</ol>
+<p><img src="https://www.quirksmode.org/mobile/pix/viewport/desktop_mediaqueries.jpg" alt="img"></p>
+<p>你应该使用哪一种？显而易见，<code>width</code>。Web开发人员对设备宽度不感兴趣；重要的是浏览器窗口的宽度。</p>
+<p>所以在桌面使用宽度，而忘记设备宽度。我们将看到，移动平台的情况更加混乱。</p>
+<h3 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h3><p>这就是我们对桌面浏览器行为的探索。本系列的第二部分将这些概念移植到移动设备，并强调了与桌面设备的一些重要区别。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://hemengting.xyz/2021/09/23/%E7%BF%BB%E8%AF%91-viewports%E7%9A%84%E6%95%85%E4%BA%8B-part-one/" data-id="ckuwtunhw000jl4ubfjfk5297" data-title="翻译:viewports的故事-第一部分" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/html-%E7%BF%BB%E8%AF%91/" rel="tag">html,翻译</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-this是什么" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/09/19/this%E6%98%AF%E4%BB%80%E4%B9%88/" class="article-date">
+  <time class="dt-published" datetime="2021-09-19T13:14:26.000Z" itemprop="datePublished">2021-09-19</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/09/19/this%E6%98%AF%E4%BB%80%E4%B9%88/">this是什么</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="this是什么？"><a href="#this是什么？" class="headerlink" title="this是什么？"></a>this是什么？</h1><p>this是函数内部的一个对象，引用的是把函数当成<strong>方法</strong>的<strong>上下文</strong>对象。</p>
+<ul>
+<li><p>在标准函数中，this引用的是把函数当成方法<strong>调用</strong>的上下文对象。</p>
+</li>
+<li><p>在箭头函数中，this引用的是<strong>定义</strong>箭头函数的上下文。</p>
+</li>
+</ul>
+<p>那么上下文对象是什么呢？</p>
+<p>上下文是<strong>执行</strong>上下文的简称，主要有全局上下文和局部上下文两种，每个函数调用都有自己的上下文。变量或函数的上下文决定了它们可以访问哪些数据，以及他们的行为。每个上下文都有一个关联的<strong>变量对象</strong>，而这个上下文中定义的所有变量和函数都存在于这个对象上。</p>
+<p>我的理解呢就是，作用域链的数据结构类似于栈，每个函数都有自己的作用域链，<strong>定义</strong>时初始化，预装载全局变量。函数<strong>调用</strong>时，创建执行上下文，更新作用域链。</p>
+<p>先来看一下标准函数，我们常写的是下面这种方式，A是全局上下文中的对象，<code>sayHello</code>是作为A的方法调用的，因此<code>this</code>引用的是A：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> A = &#123;</span><br><span class="line">    <span class="attr">name</span>: <span class="string">&#x27;A&#x27;</span>,</span><br><span class="line">    <span class="attr">sayHello</span>: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">       <span class="built_in">console</span>.log(<span class="built_in">this</span>.name)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">A.sayHello() <span class="comment">// A</span></span><br></pre></td></tr></table></figure>
+
+<p>那么如果在A中执行呢？因为A定义是在全局作用域中，所以其实和直接在全局执行一样，立即执行函数的this引用的是Window：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> A = &#123;</span><br><span class="line">    <span class="attr">name</span>: <span class="string">&#x27;A&#x27;</span>,</span><br><span class="line">    <span class="attr">sayHello</span>: (<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">       <span class="built_in">console</span>.log(<span class="built_in">this</span>) <span class="comment">// Window</span></span><br><span class="line">    &#125;)()</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样就不难理解箭头函数中this的引用了：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> A = &#123;</span><br><span class="line">    <span class="attr">name</span>: <span class="string">&#x27;A&#x27;</span>,</span><br><span class="line">    <span class="attr">sayHello</span>: <span class="function">() =&gt;</span> &#123;</span><br><span class="line">       <span class="built_in">console</span>.log(<span class="built_in">this</span>.name)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">A.sayHello() <span class="comment">// Cannot read property &#x27;name&#x27; of undefined</span></span><br></pre></td></tr></table></figure>
+
+<p>在标准函数中this和arguments是在被调用时创建的，在闭包中使用this时，内部函数永远不可能直接访问外部函数的this和arguments变量：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> A = &#123;</span><br><span class="line">    <span class="attr">name</span>: <span class="string">&#x27;A&#x27;</span>,</span><br><span class="line">    <span class="attr">sayHello</span>: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="built_in">this</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">A.sayHello()() <span class="comment">// Window</span></span><br></pre></td></tr></table></figure>
+
+<p>可以通过把this保存到闭包可以访问的另一个变量来解决这个问题。下面的例子中，箭头函数是在标准函数中定义并返回的，this引用的是<code>A.sayHello</code>的上下文:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> A = &#123;</span><br><span class="line">    <span class="attr">name</span>: <span class="string">&#x27;A&#x27;</span>,</span><br><span class="line">    <span class="attr">sayHello</span>: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="function">() =&gt;</span> &#123;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="built_in">this</span>.name)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">A.sayHello()() <span class="comment">// A</span></span><br></pre></td></tr></table></figure>
+
+<p>在函数定义阶段呢，就是Window：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> A = &#123;</span><br><span class="line">    <span class="attr">name</span>: <span class="string">&#x27;A&#x27;</span>,</span><br><span class="line">    <span class="attr">sayHello</span>: (<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        (<span class="function">() =&gt;</span> &#123;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="built_in">this</span>) <span class="comment">// Window</span></span><br><span class="line">        &#125;)()</span><br><span class="line">    &#125;)()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://hemengting.xyz/2021/09/19/this%E6%98%AF%E4%BB%80%E4%B9%88/" data-id="ckuwtunhr0006l4ubg5ne202b" data-title="this是什么" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JavaScript/" rel="tag">JavaScript</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-webpack入门六、性能调优" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/09/10/webpack%E5%85%A5%E9%97%A8%E5%85%AD%E3%80%81%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/" class="article-date">
+  <time class="dt-published" datetime="2021-09-10T14:40:22.000Z" itemprop="datePublished">2021-09-10</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/09/10/webpack%E5%85%A5%E9%97%A8%E5%85%AD%E3%80%81%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/">webpack入门六、性能调优</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="webpack性能调优"><a href="#webpack性能调优" class="headerlink" title="webpack性能调优"></a><code>webpack</code>性能调优</h1><h4 id="学习目标"><a href="#学习目标" class="headerlink" title="学习目标"></a>学习目标</h4><ul>
+<li>打包结果优化</li>
+<li>构建过程优化</li>
+<li>tree-shaking</li>
+</ul>
+<p><code>webpack</code>在生产环境下会自动压缩代码</p>
+<h4 id="预制terser-plugin：实现插件定制"><a href="#预制terser-plugin：实现插件定制" class="headerlink" title="预制terser plugin：实现插件定制"></a>预制<code>terser plugin</code>：实现插件定制</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> TerserPlugin = <span class="built_in">require</span>(<span class="string">&#x27;terser-webpack-plugin&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>配置：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">optimization: &#123;</span><br><span class="line">       <span class="attr">minimizer</span>: [<span class="keyword">new</span> TerserPlugin(&#123;</span><br><span class="line">           <span class="comment">// 使用缓存，加快构建速度</span></span><br><span class="line">           <span class="attr">cache</span>: <span class="literal">true</span>,</span><br><span class="line">           <span class="attr">parallel</span>: <span class="literal">true</span>,</span><br><span class="line">           <span class="comment">// 打包多线程</span></span><br><span class="line">           <span class="attr">TerserOptions</span>: &#123;</span><br><span class="line">               <span class="attr">compress</span>: &#123;</span><br><span class="line">                   <span class="comment">// 移除无用代码,debugger、console等</span></span><br><span class="line">                   <span class="attr">unused</span>: <span class="literal">true</span>,</span><br><span class="line">                   <span class="attr">drop_debugger</span>: <span class="literal">true</span>,</span><br><span class="line">                   <span class="attr">drop_console</span>: <span class="literal">true</span>,</span><br><span class="line">                   <span class="attr">dead_code</span>: <span class="literal">true</span></span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;)]</span><br><span class="line">   &#125;,</span><br></pre></td></tr></table></figure>
+
+<p>打包结果可视化分析：<code>webpack.bundle-analyzer</code>，可以看到哪一部分占的体积更大</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install webpack-bundle-analyzer</span><br></pre></td></tr></table></figure>
+
+<p>配置：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> BundleAnalyzerPlugin()</span><br></pre></td></tr></table></figure>
+
+<p>报错</p>
+<blockquote>
+<p>[webpack-cli] TypeError: BundleAnalyzerPlugin is not a constructor</p>
+</blockquote>
+<p>解决：解构赋值引用</p>
+<h4 id="其他调优方式："><a href="#其他调优方式：" class="headerlink" title="其他调优方式："></a>其他调优方式：</h4><ul>
+<li>减少解析：配置不解析的文件：</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">noParse: /node_modules\/(jquery\.js)/,</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>减少查找：include只打包某些文件</li>
+</ul>
+<ul>
+<li>利用多线程提高构建速度，并发执行子进程：</li>
+</ul>
+<ol>
+<li><code>thread-loader</code>把loader放在worker线程池里，必须放在所有<code>loader</code>之前</li>
+<li><code>HappyPack</code>：多进程</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 根据cpu数量创建线程池</span></span><br><span class="line"><span class="keyword">const</span> happyThreadPool = HappyPack.ThreadPool(&#123;<span class="attr">size</span>: os.cpus().length&#125;)</span><br><span class="line"><span class="comment">// url-loader file-loader不支持happypack</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>预编译：</p>
+</li>
+<li><p>缓存：fast-sass-loader并行处理sass文件</p>
+</li>
+</ul>
+<ul>
+<li>source-map</li>
+</ul>
+<h4 id="tree-shaking"><a href="#tree-shaking" class="headerlink" title="tree-shaking"></a>tree-shaking</h4><p>消除无用JavaScript代码<code>DCE</code>， 例如：引用未执行的模块</p>
+<p>development：去掉无用引用</p>
+<p>run build：直接去掉</p>
+<p>总结：<code>webpack</code>是什么</p>
+<ul>
+<li><p>前端发展的产物</p>
+</li>
+<li><p>模块化打包方案</p>
+</li>
+<li><p>工程化方案 ，例如<code>create-react-app</code>也是基于<code>webpack</code></p>
+</li>
+</ul>
+<p>补充：了解进程与线程的概念，<code>webpack</code>优化是体现工作能力的地方</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://hemengting.xyz/2021/09/10/webpack%E5%85%A5%E9%97%A8%E5%85%AD%E3%80%81%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/" data-id="ckuwtunhs000bl4ubea160ny7" data-title="webpack入门六、性能调优" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/webpack/" rel="tag">webpack</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-webpack入门五、webpack构建工程" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/09/10/webpack%E5%85%A5%E9%97%A8%E4%BA%94%E3%80%81webpack%E6%9E%84%E5%BB%BA%E5%B7%A5%E7%A8%8B/" class="article-date">
+  <time class="dt-published" datetime="2021-09-10T14:05:39.000Z" itemprop="datePublished">2021-09-10</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/09/10/webpack%E5%85%A5%E9%97%A8%E4%BA%94%E3%80%81webpack%E6%9E%84%E5%BB%BA%E5%B7%A5%E7%A8%8B/">webpack入门五、webpack构建工程</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="webpack构建工程"><a href="#webpack构建工程" class="headerlink" title="webpack构建工程"></a><code>webpack</code>构建工程</h1><h4 id="学习目标"><a href="#学习目标" class="headerlink" title="学习目标"></a>学习目标</h4><ul>
+<li>使用<code>webpack</code>构建真实<code>react</code>工程</li>
+<li>掌握<code>babel</code>的用法，理解<code>babel</code>原理</li>
+<li>掌握高频<code>loader</code>和<code>plugin</code>的用法</li>
+<li>掌握生产级别的<code>webpack</code>配置方法</li>
+</ul>
+<h4 id="准备工作："><a href="#准备工作：" class="headerlink" title="准备工作："></a>准备工作：</h4><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mkdir learn<span class="literal">-webpack</span></span><br><span class="line"><span class="built_in">cd</span> learn<span class="literal">-webpack</span></span><br><span class="line">npm init</span><br><span class="line">npm init <span class="literal">-y</span> // 把所有预置项设置为npm默认</span><br><span class="line"><span class="built_in">ls</span></span><br><span class="line">npm install react react<span class="literal">-dom</span></span><br><span class="line">npm install webpack webpack<span class="literal">-cli</span> <span class="literal">-d</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="项目文件："><a href="#项目文件：" class="headerlink" title="项目文件："></a>项目文件：</h4><p><code>App.jsx</code>:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">&#x27;react&#x27;</span></span><br><span class="line"><span class="keyword">import</span> ReactDom <span class="keyword">from</span> <span class="string">&#x27;react-dom&#x27;</span></span><br><span class="line"><span class="keyword">import</span> &#123; isNull, isZero &#125; <span class="keyword">from</span> <span class="string">&#x27;./utils&#x27;</span></span><br><span class="line"></span><br><span class="line">isNull(&#123;&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> App = <span class="function">() =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">        <span class="xml"><span class="tag">&lt;<span class="name">div</span>&gt;</span></span></span><br><span class="line"><span class="xml">            <span class="tag">&lt;<span class="name">h1</span>&gt;</span>webpack学习<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></span><br><span class="line">    )</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> App</span><br><span class="line">ReactDom.render(<span class="xml"><span class="tag">&lt;<span class="name">App</span>/&gt;</span></span>, <span class="built_in">document</span>.getElementById(<span class="string">&#x27;app&#x27;</span>))</span><br></pre></td></tr></table></figure>
+
+<p><code>index.html</code></p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">&quot;en&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">&quot;X-UA-Compatible&quot;</span> <span class="attr">content</span>=<span class="string">&quot;IE=edge&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">&quot;viewport&quot;</span> <span class="attr">content</span>=<span class="string">&quot;width=device-width, initial-scale=1.0&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>React Webpack测试<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">&quot;app&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>webpack</code>读不懂<code>ES6</code>语法，也无法处理<code>html</code>文件。</p>
+<h4 id="babel："><a href="#babel：" class="headerlink" title="babel："></a>babel：</h4><p>把高版本代码编译成低版本代码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install @babel/core @babel/cli -g</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">babel test.js --presets=@babel/preset-env</span><br></pre></td></tr></table></figure>
+
+<p><code>--presets=@babel/preset-env</code>是配置参数，指定转换规则。<code>presets-env</code>可以把高版本代码转换为低版本。写在配置文件中：</p>
+<p><code>package.json</code>或者<code>.babelrc</code>文件(优先查询)</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;babel&quot;</span>: &#123;</span><br><span class="line">	<span class="string">&quot;presets&quot;</span>: [<span class="string">&quot;@babel/presets-env&quot;</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="在webpack中使用babel"><a href="#在webpack中使用babel" class="headerlink" title="在webpack中使用babel"></a>在<code>webpack</code>中使用<code>babel</code></h4><p><code>webpack.config.js</code>:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">module</span>.exports = &#123;</span><br><span class="line">    <span class="attr">module</span>: &#123;</span><br><span class="line">        <span class="attr">rules</span>: [</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="attr">test</span>: <span class="regexp">/\.jsx?/</span>,</span><br><span class="line">                exclude: <span class="regexp">/node_modules/</span>, <span class="comment">// 不对node_module进行编译</span></span><br><span class="line">            &#125;</span><br><span class="line">        ]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>安装loader和规则：解决代码转译问题：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm install babel-loader</span><br><span class="line">npm install @babel/preset-env @babel/preset-react</span><br></pre></td></tr></table></figure>
+
+<p>填写规则：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">options: &#123;</span><br><span class="line">    <span class="attr">babelrc</span>: <span class="literal">false</span>,</span><br><span class="line">    <span class="attr">presets</span>: [</span><br><span class="line">        <span class="built_in">require</span>.resolve(<span class="string">&#x27;@babel/preset-react&#x27;</span>),</span><br><span class="line">        <span class="comment">// 转义jsx</span></span><br><span class="line">        [<span class="built_in">require</span>.resolve(<span class="string">&#x27;@babel/preset-env&#x27;</span>, &#123;<span class="attr">modules</span>: <span class="literal">false</span>&#125;)]</span><br><span class="line">        <span class="comment">// 转义ES6，webpack可以识别import语法</span></span><br><span class="line">    ],</span><br><span class="line">    <span class="attr">cacheDirectory</span>: <span class="literal">true</span>, <span class="comment">// 是否对转译结果做缓存</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="html文件处理：plugin"><a href="#html文件处理：plugin" class="headerlink" title="html文件处理：plugin"></a><code>html</code>文件处理：<code>plugin</code></h4><p><code>plugin</code>实现节点层面的处理，以构造函数的形式存在</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install html-webpack-plugin -d</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">plugins: [</span><br><span class="line">        <span class="keyword">new</span> HtmlWebPackPlugin(&#123;</span><br><span class="line">            <span class="attr">template</span>: path.join(__dirname, <span class="string">&#x27;src/index.html&#x27;</span>),</span><br><span class="line">            <span class="comment">// 需要被处理的文件的路径</span></span><br><span class="line">            <span class="attr">filename</span>: <span class="string">&#x27;index.html&#x27;</span></span><br><span class="line">        &#125;)</span><br><span class="line">    ]</span><br></pre></td></tr></table></figure>
+
+<p>入口文件<code>index.jsx</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">import App from &#x27;./App&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>import省略文件后缀：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">resolve: &#123;</span><br><span class="line">       <span class="attr">extensions</span>: [<span class="string">&#x27;.wasm&#x27;</span>, <span class="string">&#x27;.mjs&#x27;</span>, <span class="string">&#x27;.js&#x27;</span>, <span class="string">&#x27;.jsx&#x27;</span>, <span class="string">&#x27;json&#x27;</span>]</span><br><span class="line">&#125;,</span><br><span class="line">    <span class="attr">entry</span>: path.resolve(__dirname, <span class="string">&#x27;src/index.jsx&#x27;</span>), <span class="comment">// 入口文件</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>ERROR in ./src/index.html 1:0<br>Module parse failed: Unexpected token (1:0)<br>You may need an appropriate loader to handle this file type, currently no loaders are configured to process this file. See <a target="_blank" rel="noopener" href="https://webpack.js.org/concepts#loaders">https://webpack.js.org/concepts#loaders</a></p>
+<blockquote>
+<!DOCTYPE html>
+<p>| <html lang="en"><br>| <head></p>
+</blockquote>
+<p>webpack 5.52.0 compiled with 1 error in 93 ms</p>
+</blockquote>
+<p>babel与babel-loader版本应该相匹配<a target="_blank" rel="noopener" href="https://www.npmjs.com/package/babel-loader">https://www.npmjs.com/package/babel-loader</a></p>
+<h4 id="打包"><a href="#打包" class="headerlink" title="打包"></a>打包</h4><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">webpack<span class="literal">-dev</span><span class="literal">-server</span> -<span class="literal">-config</span> // 指定读取的config文件,比如webpack.config.dev.js</span><br><span class="line">webpack<span class="literal">-dev</span><span class="literal">-server</span> -<span class="literal">-open</span> // 打开浏览器</span><br></pre></td></tr></table></figure>
+
+<p>自定义命令：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;scripts&quot;</span>: &#123;</span><br><span class="line">    <span class="string">&quot;test&quot;</span>: <span class="string">&quot;echo \&quot;Error: no test specified\&quot; &amp;&amp; exit 1&quot;</span>,</span><br><span class="line">    <span class="string">&quot;build&quot;</span>: <span class="string">&quot;webpack --mode production&quot;</span>, <span class="comment">// 打包</span></span><br><span class="line">    <span class="string">&quot;start&quot;</span>: <span class="string">&quot;webpack-dev-server --mode development --open&quot;</span> <span class="comment">// 预览</span></span><br><span class="line">  &#125;,</span><br></pre></td></tr></table></figure>
+
+<p><code>HMR</code>热更新（热替换）， 在不刷新页面的情况下更新修改部分：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">devServer: &#123;</span><br><span class="line">	<span class="attr">hot</span>: <span class="literal">true</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="attr">Plugins</span>: [</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">new</span> webpack.HotModuleReplacementPlugin()</span><br><span class="line">    ...</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<p><code>index.jsx</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="built_in">module</span>.hot) &#123;</span><br><span class="line">    <span class="built_in">module</span>.hot.accept(<span class="function"><span class="params">error</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">if</span>(error) &#123;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">&quot;热替换出错&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://hemengting.xyz/2021/09/10/webpack%E5%85%A5%E9%97%A8%E4%BA%94%E3%80%81webpack%E6%9E%84%E5%BB%BA%E5%B7%A5%E7%A8%8B/" data-id="ckuwtunhs0009l4ubd2d42fbw" data-title="webpack入门五、webpack构建工程" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/webpack/" rel="tag">webpack</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-webpack入门四、webpack核心特性" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/09/10/webpack%E5%85%A5%E9%97%A8%E5%9B%9B%E3%80%81webpack%E6%A0%B8%E5%BF%83%E7%89%B9%E6%80%A7/" class="article-date">
+  <time class="dt-published" datetime="2021-09-10T13:28:46.000Z" itemprop="datePublished">2021-09-10</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/09/10/webpack%E5%85%A5%E9%97%A8%E5%9B%9B%E3%80%81webpack%E6%A0%B8%E5%BF%83%E7%89%B9%E6%80%A7/">webpack入门四、webpack核心特性</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="webpack核心特性"><a href="#webpack核心特性" class="headerlink" title="webpack核心特性"></a>webpack核心特性</h1><h4 id="学习目标"><a href="#学习目标" class="headerlink" title="学习目标"></a>学习目标</h4><ul>
+<li>使用webpack构建简单工程</li>
+<li>了解webpack配置文件</li>
+<li>掌握“一切皆模块与loaders”的思想</li>
+<li>理解webpack中的“关键人物”—入口文件、出口文件、loaders、plugins</li>
+</ul>
+<p><code>index.html</code></p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">&quot;en&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">&quot;X-UA-Compatible&quot;</span> <span class="attr">content</span>=<span class="string">&quot;IE=edge&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">&quot;viewport&quot;</span> <span class="attr">content</span>=<span class="string">&quot;width=device-width, initial-scale=1.0&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>React Webpack测试<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">src</span>=<span class="string">&#x27;/dist/bunle.js&#x27;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>moduleLog.js</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="built_in">document</span>.write(<span class="string">&#x27;moduleLog is loaded&#x27;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>src/index.js</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> moduleLog <span class="keyword">from</span> <span class="string">&#x27;../moduleLog&#x27;</span></span><br><span class="line"><span class="built_in">document</span>.write(<span class="string">&#x27;入口js is loaded&#x27;</span>);</span><br><span class="line">moduleLog();</span><br></pre></td></tr></table></figure>
+
+<h4 id="安装webpack和webpack-cli"><a href="#安装webpack和webpack-cli" class="headerlink" title="安装webpack和webpack-cli:"></a>安装webpack和webpack-cli:</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm install webpack</span><br><span class="line">npm install webpack-cli -g</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>报错：无法将“WEBPACK”项识别为 CMDLET、函数、脚本文件或可运行程序的名称</p>
+</blockquote>
+<p>出现这个错误的原因是：windows10中，你的webpack是局部安装的，并没有加入到系统环境变量中，所以控制台找不到webpack命令，有以下方法可以解决：</p>
+<ul>
+<li>找到项目根目录下的<strong>package.json</strong>文件，配置<code>&#39;scripts&#39;</code>这个选项，配置加上<code>&quot;build&quot;：&quot;webpack&quot;</code>，然后运行<code>npm run build</code></li>
+<li>全局安装webpack</li>
+</ul>
+<p>默认入口文件：src/index.js </p>
+<p>出口：dist/main.js</p>
+<h4 id="自定义配置文件："><a href="#自定义配置文件：" class="headerlink" title="自定义配置文件："></a>自定义配置文件：</h4><p><code>webpack.config.js</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> path = <span class="built_in">require</span>(<span class="string">&#x27;path&#x27;</span>);</span><br><span class="line"><span class="built_in">module</span>.exports = &#123;</span><br><span class="line">    <span class="attr">entry</span>: <span class="string">&#x27;./app.js&#x27;</span>, <span class="comment">// 修改入口文件</span></span><br><span class="line">    <span class="attr">output</span>: &#123;</span><br><span class="line">        <span class="attr">path</span>: path.join(__dirname, <span class="string">&#x27;dist&#x27;</span>),</span><br><span class="line">        <span class="attr">filename</span>: <span class="string">&#x27;bundle.js&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>警告：WARNING in configuration<br>The ‘mode’ option has not been set, webpack will fallback to ‘production’<br>for this value.<br>Set ‘mode’ option to ‘development’ or ‘production’ to enable defaults for<br>each environment.</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mode: &#x27;development&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>但是每次修改都要保存、打包很麻烦，有没有自动的方法呢？</p>
+<h4 id="自动打包工具：webpack-dev-server"><a href="#自动打包工具：webpack-dev-server" class="headerlink" title="自动打包工具：webpack-dev-server"></a>自动打包工具：webpack-dev-server</h4><p>启动<code>webpack-dev-server</code>可以监听工程目录文件的改动，修改源文件并再次保存可以实现动态实时打包，自动刷新浏览器。</p>
+<p>不管cli还是webpack-dev-server都是可执行文件，一种方法是全局安装，或者进入node_module/.bin/server执行</p>
+<blockquote>
+<p>报错：.\webpack-dev-server : 无法加载文件 C:\Users\hh\github\learnwebpack\node_<br>modules.bin\webpack-dev-server.ps1，因为在此系统上禁止运行脚本。有关详细<br>信息，请参阅 https:/go.microsoft.com/fwlink/?LinkID=135170 中的 about_Exe<br>cution_Policies。</p>
+</blockquote>
+<ol>
+<li>以管理员身份运行powershell</li>
+<li>输入set-executionpolicy remotesigned，回车</li>
+<li>输入yes</li>
+</ol>
+<p>指定本地服务端口：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">devServer: &#123;</span><br><span class="line">	<span class="attr">port</span>: <span class="number">3000</span>, <span class="comment">// 服务端口</span></span><br><span class="line">	<span class="attr">publicPath</span>: <span class="string">&#x27;/dist&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>此时删除bundle.js依然可以运行，说明只在内存中生成了一个bundle.js，当浏览器发出请求时才会运行。</p>
+<p>所有资源（图片、css等）都是模块</p>
+<h4 id="文件编译：loader"><a href="#文件编译：loader" class="headerlink" title="文件编译：loader"></a>文件编译：loader</h4><p>安装css loader和style loader</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm install css<span class="literal">-loader</span> -<span class="literal">-save</span><span class="literal">-dev</span></span><br><span class="line">npm install style<span class="literal">-loader</span> -<span class="literal">-save</span><span class="literal">-dev</span></span><br></pre></td></tr></table></figure>
+
+<p>loader本质上是文件加载器</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">test</span>: <span class="regexp">/\.css$/</span>,</span><br><span class="line">        use: [</span><br><span class="line">            <span class="string">&#x27;style-loader&#x27;</span>, <span class="comment">// 加载样式</span></span><br><span class="line">            <span class="string">&#x27;css-loader&#x27;</span> <span class="comment">// 编译css文件，注意配置顺序与加载顺序相反</span></span><br><span class="line">        ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="plugins："><a href="#plugins：" class="headerlink" title="plugins："></a>plugins：</h4><p>监听事件，改变文件打包输出结果，比如压缩资源体积，去掉代码中的注释。</p>
+<p>举例：引入uglify之前的打包结果：<code>asset bundle.js 4.26 KiB [emitted] (name: main) </code></p>
+<p>安装：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install uglifyjs-webpack-plugin --save-dev</span><br></pre></td></tr></table></figure>
+
+<p>引入：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> UglifyJSPlugin = <span class="built_in">require</span>(<span class="string">&quot;uglifyjs-webpack-plugin&quot;</span>)</span><br><span class="line">...</span><br><span class="line"><span class="attr">Plugins</span>: [</span><br><span class="line">	<span class="keyword">new</span> UglifyJSPlugin()</span><br><span class="line">]</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p><code>asset bundle.js 1.82 KiB [emitted] (name: main)</code></p>
+<p>代码体积减小了。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://hemengting.xyz/2021/09/10/webpack%E5%85%A5%E9%97%A8%E5%9B%9B%E3%80%81webpack%E6%A0%B8%E5%BF%83%E7%89%B9%E6%80%A7/" data-id="ckuwtunhu000el4ub1asmh7io" data-title="webpack入门四、webpack核心特性" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/webpack/" rel="tag">webpack</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-webpack入门三、配置开发环境-npm与包管理器" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/09/10/webpack%E5%85%A5%E9%97%A8%E4%B8%89%E3%80%81%E9%85%8D%E7%BD%AE%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83-npm%E4%B8%8E%E5%8C%85%E7%AE%A1%E7%90%86%E5%99%A8/" class="article-date">
+  <time class="dt-published" datetime="2021-09-10T12:58:27.000Z" itemprop="datePublished">2021-09-10</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/09/10/webpack%E5%85%A5%E9%97%A8%E4%B8%89%E3%80%81%E9%85%8D%E7%BD%AE%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83-npm%E4%B8%8E%E5%8C%85%E7%AE%A1%E7%90%86%E5%99%A8/">webpack入门三、配置开发环境-npm与包管理器</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="配置开发环境——npm与包管理器"><a href="#配置开发环境——npm与包管理器" class="headerlink" title="配置开发环境——npm与包管理器"></a>配置开发环境——<code>npm</code>与包管理器</h1><h4 id="学习目标"><a href="#学习目标" class="headerlink" title="学习目标"></a>学习目标</h4><ul>
+<li>理解包管理器</li>
+<li>熟悉<code>npm</code>核心特性</li>
+<li>理解<code>npm</code>”仓库“与”依赖“的概念</li>
+<li>理解<code>npm</code>”语义化版本“</li>
+<li>掌握使用<code>npm</code>自定义工程脚本的方法</li>
+</ul>
+<h4 id="什么是包管理器？"><a href="#什么是包管理器？" class="headerlink" title="什么是包管理器？"></a>什么是包管理器？</h4><p>使开发者能够便捷的管理代码和分发代码的工具</p>
+<h6 id="npm依赖node环境，安装node会自动安装npm，查看node版本和npm版本："><a href="#npm依赖node环境，安装node会自动安装npm，查看node版本和npm版本：" class="headerlink" title="npm依赖node环境，安装node会自动安装npm，查看node版本和npm版本："></a><code>npm</code>依赖<code>node</code>环境，安装<code>node</code>会自动安装<code>npm</code>，查看<code>node</code>版本和<code>npm</code>版本：</h6><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">node -v // 查看node版本</span><br><span class="line">npm -v // 查看npm版本</span><br></pre></td></tr></table></figure>
+
+<h6 id="初始化工程："><a href="#初始化工程：" class="headerlink" title="初始化工程："></a>初始化工程：</h6><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm-init </span><br></pre></td></tr></table></figure>
+
+<h6 id="package-json："><a href="#package-json：" class="headerlink" title="package.json："></a><code>package.json</code>：</h6><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;name&quot;</span>: <span class="string">&quot;learn-webpack&quot;</span>, <span class="comment">// 包名称</span></span><br><span class="line">  <span class="attr">&quot;version&quot;</span>: <span class="string">&quot;1.0.0&quot;</span>, <span class="comment">// 版本号</span></span><br><span class="line">  <span class="attr">&quot;description&quot;</span>: <span class="string">&quot;&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;main&quot;</span>: <span class="string">&quot;index.js&quot;</span>, <span class="comment">// 执行入口</span></span><br><span class="line">  <span class="attr">&quot;scripts&quot;</span>: &#123;</span><br><span class="line">    <span class="attr">&quot;test&quot;</span>: <span class="string">&quot;echo \&quot;Error: no test specified\&quot; &amp;&amp; exit 1&quot;</span>,</span><br><span class="line">  &#125;, <span class="comment">// 自定义脚本，自动化执行命令</span></span><br><span class="line">  <span class="attr">&quot;author&quot;</span>: <span class="string">&quot;&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;license&quot;</span>: <span class="string">&quot;ISC&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h6 id="设置国内镜像："><a href="#设置国内镜像：" class="headerlink" title="设置国内镜像："></a>设置国内镜像：</h6><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm config <span class="built_in">set</span> registry https://registry.npm.taobao.org</span><br></pre></td></tr></table></figure>
+
+<h6 id="安装包："><a href="#安装包：" class="headerlink" title="安装包："></a>安装包：</h6><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install lodash --save</span><br></pre></td></tr></table></figure>
+
+<p><code>--save</code>或<code> -s</code>将下载的包写入<code>package.json</code>的<em>生产环境</em>下的依赖<code>dependencies</code>中，<code>npm</code>5.0版本之后默认<code>--save</code></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm install jquary -<span class="literal">-save</span><span class="literal">-dev</span></span><br><span class="line"><span class="literal">-d</span></span><br></pre></td></tr></table></figure>
+
+<p><code>--save-dev</code>或<code>-d</code>添加到<em>开发环境</em>下的依赖<code>devDepencies</code>，主要是构建工具，质量检测工具比如<code>eslint</code>等本地开发用到的包。</p>
+<p>项目迁移时，执行<code>npm install</code>即可安装`开发环境和生产环境下的包。</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install -<span class="literal">-only</span>=dev</span><br></pre></td></tr></table></figure>
+
+<p>只安装开发环境下的包</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install --only=prod</span><br></pre></td></tr></table></figure>
+
+<p>只安装生产环境中的包，由此可以实现环境区分。</p>
+<h6 id="删除并重装"><a href="#删除并重装" class="headerlink" title="删除并重装"></a>删除并重装</h6><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">rm</span> <span class="literal">-rf</span> node_modules &amp;&amp; npm install</span><br></pre></td></tr></table></figure>
+
+<h4 id="版本号，语义化版本"><a href="#版本号，语义化版本" class="headerlink" title="版本号，语义化版本"></a>版本号，语义化版本</h4><ul>
+<li><p>^version: 中版本和小版本</p>
+<p>^1.0.1 -&gt; 1.x.x</p>
+</li>
+<li><p>~version: 小版本</p>
+<p>~1.0.1 -&gt; 1.0.x</p>
+<p>方便推送小的新版本（fix bug等)</p>
+</li>
+<li><p>version：固定特定版本</p>
+</li>
+</ul>
+<h4 id="scripts自定义命令执行脚本"><a href="#scripts自定义命令执行脚本" class="headerlink" title="scripts自定义命令执行脚本"></a>scripts自定义命令执行脚本</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;    </span><br><span class="line">    <span class="attr">test</span>: <span class="string">&quot;echo \&quot;Error: no test specified\&quot; &amp;&amp; exit 1&quot;</span></span><br><span class="line">    <span class="attr">dev</span>: <span class="string">&quot;webpack-dev-sever&quot;</span><span class="comment">//启动ewbpack服务	</span></span><br><span class="line">    <span class="attr">build</span>: <span class="string">&#x27;eslint ./src &amp;&amp; webpack&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="npm-install的过程："><a href="#npm-install的过程：" class="headerlink" title="npm install的过程："></a><code>npm install</code>的过程：</h4><p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/5tmND0G_ZkYVR7Dmug0ugQ">https://mp.weixin.qq.com/s/5tmND0G_ZkYVR7Dmug0ugQ</a></p>
+<ul>
+<li>寻找包版本信息文件<code>package.json</code>，依照它来进行安装</li>
+<li>查<code>package.json</code>中的依赖，并检查项目中其他版本信息文件，如果不存在，则按照<code>package.json</code>的依赖进行安装，并生成版本信息文件</li>
+<li>如果发现了新包，就更新版本信息文件</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://hemengting.xyz/2021/09/10/webpack%E5%85%A5%E9%97%A8%E4%B8%89%E3%80%81%E9%85%8D%E7%BD%AE%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83-npm%E4%B8%8E%E5%8C%85%E7%AE%A1%E7%90%86%E5%99%A8/" data-id="ckuwtunhq0004l4ub3d8m9s4m" data-title="webpack入门三、配置开发环境-npm与包管理器" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/webpack/" rel="tag">webpack</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-for-of-与-for-in的区别" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/09/10/for-of-%E4%B8%8E-for-in%E7%9A%84%E5%8C%BA%E5%88%AB/" class="article-date">
+  <time class="dt-published" datetime="2021-09-10T08:44:47.000Z" itemprop="datePublished">2021-09-10</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/09/10/for-of-%E4%B8%8E-for-in%E7%9A%84%E5%8C%BA%E5%88%AB/">for...of 与 for...in的区别</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p><code>for...of</code>和<code>for...in</code>的作用都是迭代。它们之间的主要区别是迭代的内容。</p>
+<p><code>for...in</code>语句以任意顺序迭代<strong>对象</strong>的可枚举<strong>属性</strong>，包括实例属性和原型属性。</p>
+<p><code>for...of</code>语句迭代<strong>可迭代对象</strong>定义的要迭代的<strong>值</strong>。</p>
+<p>那么，可迭代对象有哪些呢？包括：<code>String</code>，<code>Array</code>，<code>array-like objects</code>，<code>TypedArray</code>，<code>Map</code>，<code>Set</code>。</p>
+<p>注意Object实例不是可迭代对象，所以不能用<code>for...of</code>迭代它的值，但可以用<code>for...in</code>枚举它的属性。</p>
+<p>下面的例子展示了<code>for...of</code>循环和<code>for...in</code>循环应用在数组上的区别：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Object</span>.prototype.objCustom = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;&#125;;</span><br><span class="line"><span class="built_in">Array</span>.prototype.arrCustom = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;&#125;;</span><br><span class="line"><span class="keyword">const</span> iterable = [<span class="number">3</span>, <span class="number">5</span>, <span class="number">7</span>];</span><br><span class="line">iterable.foo = <span class="string">&#x27;hello&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">const</span> i <span class="keyword">in</span> iterable) &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(i); <span class="comment">// logs &quot;0&quot;, &quot;1&quot;, &quot;2&quot;, &quot;foo&quot;， &quot;arrCustom&quot;, &quot;objCustom&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">const</span> i <span class="keyword">in</span> iterable) &#123;</span><br><span class="line">    <span class="keyword">if</span>(iterable.hasOwnProperty(i)) &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(i); <span class="comment">// logs &quot;0&quot;, &quot;1&quot;, &quot;2&quot;, &quot;foo&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">const</span> i <span class="keyword">of</span> iterable) &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(i); <span class="comment">// logs 3, 5, 7</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>让我们一步一步地看一下上面的代码。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Object</span>.prototype.objCustom = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;&#125;;</span><br><span class="line"><span class="built_in">Array</span>.prototype.arrCustom = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;&#125;;</span><br><span class="line"><span class="keyword">const</span> iterable = [<span class="number">3</span>, <span class="number">5</span>, <span class="number">7</span>];</span><br><span class="line">iterable.foo = <span class="string">&#x27;hello&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>每个对象实例都会继承<code>objectCustom</code>属性，并且每个Array对象的实例都会继承<code>arrCustom</code>属性，这是因为这些属性已分别添加到<code>Onject.prototype</code>和<code>Array.prototype</code>。由于继承和原型链，可迭代对象继承了属性<code>objCustom</code>和<code>arrCustom</code>。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">const</span> i <span class="keyword">in</span> iterable) &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(i); <span class="comment">// logs 0, 1, 2, &quot;foo&quot;, &quot;arrCustom&quot;, &quot;objCustom&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个循环只以任意顺序打印了可迭代对象的枚举属性。它不会打印数组<strong>元素</strong><code>3</code>，<code>5</code>，<code>7</code>或者<code>hello</code>，因为它们不是可枚举属性，<strong>实际上它们根本不是属性</strong>，它们是值。它所打印的数组的下标，还有<code>arrCustom</code>和<code>objCustom</code>才是属性。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">const</span> i <span class="keyword">in</span> iterable) &#123;</span><br><span class="line">  <span class="keyword">if</span> (iterable.hasOwnProperty(i)) &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(i); <span class="comment">// logs 0, 1, 2, &quot;foo&quot;</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个循环和上一个相似，但它使用<code>hasOwnProperty()</code>来检查可枚举属性是否是对象自身的，不是继承的。如果是，则打印该属性。属性<code>0</code>，<code>1</code>，<code>2</code>和<code>foo</code>被输出，因为他们是自有属性(不是继承的)。属性<code>arrCustom</code>和<code>objCustom</code>没有被输出，因为他们是继承的。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">const</span> i <span class="keyword">of</span> iterable) &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(i); <span class="comment">// logs 3, 5, 7</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个循环迭代并打印了可迭代的值，作为可迭代对象所定义的要迭代的值。对象的元素 3、5、7被打印，但没有打印对象的任何属性。</p>
+<p>补充：JavaScript规范定义的数据属性[[Enumerable]]表示属性是否可以通过<code>for...in</code>循环返回。默认情况下，所有直接定义在对象上的属性的这个特性都是true。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://hemengting.xyz/2021/09/10/for-of-%E4%B8%8E-for-in%E7%9A%84%E5%8C%BA%E5%88%AB/" data-id="ckuwtunho0002l4ubfp8qevie" data-title="for...of 与 for...in的区别" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JavaScript/" rel="tag">JavaScript</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-webpack入门一、前端模块化" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/09/07/webpack%E5%85%A5%E9%97%A8%E4%B8%80%E3%80%81%E5%89%8D%E7%AB%AF%E6%A8%A1%E5%9D%97%E5%8C%96/" class="article-date">
+  <time class="dt-published" datetime="2021-09-07T08:53:08.000Z" itemprop="datePublished">2021-09-07</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/09/07/webpack%E5%85%A5%E9%97%A8%E4%B8%80%E3%80%81%E5%89%8D%E7%AB%AF%E6%A8%A1%E5%9D%97%E5%8C%96/">webpack入门一、前端模块化</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="webpack是什么"><a href="#webpack是什么" class="headerlink" title="webpack是什么"></a>webpack是什么</h1><blockquote>
+<p>webpack 是一个用于现代 JavaScript 应用程序的 <em>静态模块打包工具</em>。当 webpack 处理应用程序时，它会在内部从一个或多个入口点构建一个 <a target="_blank" rel="noopener" href="https://webpack.docschina.org/concepts/dependency-graph/">依赖图(dependency graph)</a>，然后将你项目中所需的每一个模块组合成一个或多个 <em>bundles</em>，它们均为静态资源，用于展示你的内容。</p>
+</blockquote>
+<h4 id="1、首先，为什么需要打包？"><a href="#1、首先，为什么需要打包？" class="headerlink" title="1、首先，为什么需要打包？"></a>1、首先，为什么需要打包？</h4><p>逻辑多、文件多，项目复杂度提高了。</p>
+<h4 id="2、在打包之外，webpack还有哪些功能和特点？"><a href="#2、在打包之外，webpack还有哪些功能和特点？" class="headerlink" title="2、在打包之外，webpack还有哪些功能和特点？"></a>2、在打包之外，webpack还有哪些功能和特点？</h4><p><code>loader</code>：用于对模块的源代码进行转换。</p>
+<p><code>plugin</code>：打包优化，资源管理，注入环境变量。</p>
+<p><code>loader</code>和<code>plugin</code>的特点：可插拔 =&gt;webpack不仅强大，而且灵活</p>
+<h4 id="3、-课程重点："><a href="#3、-课程重点：" class="headerlink" title="3、 课程重点："></a>3、 课程重点：</h4><ul>
+<li>理解前端模块化</li>
+<li>理解wenpack打包的核心思路</li>
+<li>理解webpack中的“关键人物”—<code>loader</code>和<code>plugin</code></li>
+</ul>
+<h1 id="理解前端模块化"><a href="#理解前端模块化" class="headerlink" title="理解前端模块化"></a>理解前端模块化</h1><ul>
+<li>作用域</li>
+<li>命名空间</li>
+<li>模块化</li>
+</ul>
+<h4 id="1、作用域"><a href="#1、作用域" class="headerlink" title="1、作用域"></a>1、作用域</h4><p>作用域描述了代码<em>运行时</em>变量、函数、对象的<em>可访问性</em></p>
+<p>作用域决定了代码中变量和其他资源的可见性，JavaScript有全局作用域和局部作用域之分。全局作用域中的变量和资源都会挂载在全局对象，在浏览器中是window，在node中是global。以下是在全局作用域中声明变量和局部作用域的区别：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> a = <span class="number">1</span></span><br><span class="line"><span class="built_in">window</span>.a <span class="comment">// 1</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">test</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> b = <span class="number">2</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">b <span class="comment">// Uncaught ReferenceError</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="2、模块化的演化过程"><a href="#2、模块化的演化过程" class="headerlink" title="2、模块化的演化过程"></a>2、模块化的演化过程</h4><p>过去当一个页面想要组合多个功能时，使用引入多个JavaScript外链文件的方式：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;script src=<span class="string">&quot;./moduleA.js&quot;</span>&gt;&lt;/script&gt;</span><br><span class="line"><span class="xml"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">&quot;./moduleB.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line"><span class="xml"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">&quot;./moduleC.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>缺陷：moduleA、moduleB、moduleC共用一个全局作用域，在任何一个JavaScript文件中进行顶层的变量声明，都会暴露在全局中，使得其他脚本会获得它并不想要的变量。当应该规模和复杂度上升，这些脚本之间可能会发生<em>命名冲突</em>：</p>
+<p>解决方法：给不同文件不同的<em>命名空间</em></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ModuleA</span></span><br><span class="line"><span class="keyword">var</span> a = &#123;</span><br><span class="line">	<span class="attr">name</span>: <span class="string">&#x27;Susan&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ModuleB</span></span><br><span class="line"><span class="keyword">var</span> b = &#123;</span><br><span class="line">    name = <span class="string">&#x27;Jack&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ModuleC</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">&#x27;moduleA里的name: &#x27;</span>, a.name) <span class="comment">//moduleA里的name: Susan</span></span><br></pre></td></tr></table></figure>
+
+<p>新的缺陷：其他文件可以轻易修改命名空间中对象的属性。无法保护对象属性被随意访问和篡改：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ModuleA</span></span><br><span class="line"><span class="keyword">var</span> Susan = &#123;</span><br><span class="line">	<span class="attr">name</span>: <span class="string">&#x27;Susan&#x27;</span>,</span><br><span class="line">	<span class="attr">sex</span>: <span class="string">&#x27;女孩&#x27;</span>,</span><br><span class="line">	<span class="comment">// 自我介绍方法</span></span><br><span class="line">	<span class="attr">tell</span>: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">		<span class="built_in">console</span>.log(<span class="string">&#x27;我的名字是&#x27;</span>, <span class="built_in">this</span>.name)</span><br><span class="line">		<span class="built_in">console</span>.log(<span class="string">&#x27;我的性别是&#x27;</span>, <span class="built_in">this</span>.sex)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ModuleB</span></span><br><span class="line"><span class="keyword">var</span> Jack = &#123;</span><br><span class="line">	<span class="attr">name</span>: <span class="string">&#x27;Jack&#x27;</span>,</span><br><span class="line">	<span class="attr">sex</span>: <span class="string">&#x27;男孩&#x27;</span>,</span><br><span class="line">	<span class="comment">// 自我介绍方法</span></span><br><span class="line">	<span class="attr">tell</span>: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">		<span class="built_in">console</span>.log(<span class="string">&#x27;我的名字是&#x27;</span>, <span class="built_in">this</span>.name)</span><br><span class="line">		<span class="built_in">console</span>.log(<span class="string">&#x27;我的性别是&#x27;</span>, <span class="built_in">this</span>.sex)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Susan.name = <span class="string">&#x27;Jack&#x27;</span></span><br><span class="line">Susan.name <span class="comment">// Jack</span></span><br></pre></td></tr></table></figure>
+
+<p>举个例子，在自动登录功能中，对于用户账号密码这样的敏感信息，不希望被其他模块获取、修改：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ModuleA</span></span><br><span class="line">autoLogin=&#123;</span><br><span class="line">	userName=<span class="string">&quot;小明&quot;</span>,</span><br><span class="line">    <span class="attr">password</span>: <span class="string">&quot;123456&quot;</span>,</span><br><span class="line">    <span class="attr">login</span>: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="comment">// 利用useName和password登录</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ModuleB</span></span><br><span class="line">autoLogin.password = <span class="string">&quot;32&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>解决方法：利用函数作用域保护模块中的变量，形成模块作用域，隐藏该隐藏的，暴露该暴露的。实现一个立即执行函数，并返回<em>闭包函数</em>：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> Susanodule = (<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> name = <span class="string">&#x27;Susan&#x27;</span></span><br><span class="line">    <span class="keyword">var</span> sex = <span class="string">&#x27;女孩&#x27;</span></span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        <span class="attr">tell</span>: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">&#x27;我的名字是：&#x27;</span>, name)</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">&#x27;我的性别是：&#x27;</span>, sex)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)()</span><br><span class="line"></span><br><span class="line">SusanModule.tell <span class="comment">// 我的名字是我的性别是</span></span><br><span class="line">SusanModule.name <span class="comment">// undefined</span></span><br><span class="line">SusanModule.sex <span class="comment">// undefined</span></span><br></pre></td></tr></table></figure>
+
+<p>这样暴露了一个tell方法，但是其他模块无法直接访问修改name和sex的值。</p>
+<p>改进：在满足重用的基础上，将赋值过程写在立即执行函数内部</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="keyword">function</span>(<span class="params"><span class="built_in">window</span></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> name = <span class="string">&#x27;Susan&#x27;</span></span><br><span class="line">    <span class="keyword">var</span> sex = <span class="string">&#x27;女孩&#x27;</span></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">tell</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">&#x27;我的名字是：&#x27;</span>, name)</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">&#x27;我的性别是：&#x27;</span>, sex)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">window</span>.SusanModule = &#123;tell&#125;</span><br><span class="line">&#125;)(<span class="built_in">window</span>)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SusanModule <span class="comment">// &#123;tell: f&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>总结一下，模块化的优点：</p>
+<ul>
+<li>作用域封装 - 用模块把代码封装起来，保证模块内部的实现不会暴露在全局作用域中，只需要将模块的功能通过接口的方式暴露出去给其他模块调用，避免污染全局命名空间</li>
+<li>重用性</li>
+<li>接触耦合 - 模块间接口不变，模块内部的变化对其他模块没有影响</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://hemengting.xyz/2021/09/07/webpack%E5%85%A5%E9%97%A8%E4%B8%80%E3%80%81%E5%89%8D%E7%AB%AF%E6%A8%A1%E5%9D%97%E5%8C%96/" data-id="ckuwtunhn0001l4ub2o49damx" data-title="webpack入门一、前端模块化" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/webpack/" rel="tag">webpack</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+
+
+  <nav id="page-nav">
+    
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+  </nav>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/JavaScript/" rel="tag">JavaScript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/html-%E7%BF%BB%E8%AF%91/" rel="tag">html,翻译</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/react-babel/" rel="tag">react babel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/webpack/" rel="tag">webpack</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/JavaScript/" style="font-size: 15px;">JavaScript</a> <a href="/tags/html-%E7%BF%BB%E8%AF%91/" style="font-size: 10px;">html,翻译</a> <a href="/tags/react-babel/" style="font-size: 10px;">react babel</a> <a href="/tags/webpack/" style="font-size: 20px;">webpack</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2021/10/17/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAReact/">从0开始实现一个React</a>
+          </li>
+        
+          <li>
+            <a href="/2021/10/12/test/">test</a>
+          </li>
+        
+          <li>
+            <a href="/2021/09/23/%E7%BF%BB%E8%AF%91-viewports%E7%9A%84%E6%95%85%E4%BA%8B-part-one/">翻译:viewports的故事-第一部分</a>
+          </li>
+        
+          <li>
+            <a href="/2021/09/19/this%E6%98%AF%E4%BB%80%E4%B9%88/">this是什么</a>
+          </li>
+        
+          <li>
+            <a href="/2021/09/10/webpack%E5%85%A5%E9%97%A8%E5%85%AD%E3%80%81%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/">webpack入门六、性能调优</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2021 He Mengting<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

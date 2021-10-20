@@ -15,7 +15,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="c:/Users/luna6/AppData/Roaming/Typora/typora-user-images/image-20211018223652632.png">
 <meta property="article:published_time" content="2021-10-17T04:18:53.000Z">
-<meta property="article:modified_time" content="2021-10-18T15:37:29.853Z">
+<meta property="article:modified_time" content="2021-10-20T15:01:14.544Z">
 <meta property="article:author" content="He Mengting">
 <meta property="article:tag" content="react babel">
 <meta name="twitter:card" content="summary">
@@ -111,7 +111,7 @@
 <li>函数组件</li>
 <li>Hooks</li>
 </ol>
-<h2 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h2><p>首先，<code>JSX</code>语法是通过Babel转换成JavaScript的，因此我们需要在项目中配置Babel。</p>
+<h2 id="1：准备"><a href="#1：准备" class="headerlink" title="-1：准备"></a>-1：准备</h2><p>首先，<code>JSX</code>语法是通过Babel转换成JavaScript的，因此我们需要在项目中配置Babel。</p>
 <p>安装：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install --save-dev @babel/core @babel/cli @babel/preset-env @babel/preset-react</span><br></pre></td></tr></table></figure>
 
@@ -237,11 +237,6 @@
 <p>​      ),</p>
 <p>​    },</p>
 <p>手残多写了个大括号，一直报错！</p>
-<p>requestIdleCallback</p>
-<p>**<code>window.requestIdleCallback()</code>**方法插入一个函数，这个函数将在浏览器空闲时期被调用。这使开发者能够在主事件循环上执行后台和低优先级工作，而不会影响延迟关键事件，如动画和输入响应。函数一般会按先进先调用的顺序执行，然而，如果回调函数指定了执行超时时间<code>timeout</code>，则有可能为了在超时前执行函数而打乱执行顺序。</p>
-<p>遍历一颗fiber tree：</p>
-<p>一个节点有多个孩子也只有一个child指针</p>
-<p>child -&gt; sibling -&gt; uncle</p>
 
       
     </div>
@@ -257,6 +252,15 @@
   
     
 <nav id="article-nav">
+  
+    <a href="/2021/10/20/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAReact%E4%B8%8B/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          从0开始实现一个React下
+        
+      </div>
+    </a>
   
   
     <a href="/2021/10/12/test/" id="article-nav-older" class="article-nav-link-wrap">
@@ -281,7 +285,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/JavaScript/" rel="tag">JavaScript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/html-%E7%BF%BB%E8%AF%91/" rel="tag">html,翻译</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/react-babel/" rel="tag">react babel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/webpack/" rel="tag">webpack</a></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/JavaScript/" rel="tag">JavaScript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/html-%E7%BF%BB%E8%AF%91/" rel="tag">html,翻译</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/react/" rel="tag">react</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/react-babel/" rel="tag">react babel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/webpack/" rel="tag">webpack</a></li></ul>
     </div>
   </div>
 
@@ -291,7 +295,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/JavaScript/" style="font-size: 15px;">JavaScript</a> <a href="/tags/html-%E7%BF%BB%E8%AF%91/" style="font-size: 10px;">html,翻译</a> <a href="/tags/react-babel/" style="font-size: 10px;">react babel</a> <a href="/tags/webpack/" style="font-size: 20px;">webpack</a>
+      <a href="/tags/JavaScript/" style="font-size: 15px;">JavaScript</a> <a href="/tags/html-%E7%BF%BB%E8%AF%91/" style="font-size: 10px;">html,翻译</a> <a href="/tags/react/" style="font-size: 10px;">react</a> <a href="/tags/react-babel/" style="font-size: 10px;">react babel</a> <a href="/tags/webpack/" style="font-size: 20px;">webpack</a>
     </div>
   </div>
 
@@ -313,6 +317,10 @@
       <ul>
         
           <li>
+            <a href="/2021/10/20/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAReact%E4%B8%8B/">从0开始实现一个React下</a>
+          </li>
+        
+          <li>
             <a href="/2021/10/17/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAReact/">从0开始实现一个React</a>
           </li>
         
@@ -326,10 +334,6 @@
         
           <li>
             <a href="/2021/09/19/this%E6%98%AF%E4%BB%80%E4%B9%88/">this是什么</a>
-          </li>
-        
-          <li>
-            <a href="/2021/09/10/webpack%E5%85%A5%E9%97%A8%E5%85%AD%E3%80%81%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/">webpack入门六、性能调优</a>
           </li>
         
       </ul>

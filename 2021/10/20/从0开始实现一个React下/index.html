@@ -13,11 +13,13 @@
 <meta property="og:site_name" content="hmt的博客">
 <meta property="og:description" content="书接上回，我们已经实现了createElement函数、render函数和Fibers，接下来就要开始处理组件更新的部分了~ 5.Render和Commit阶段但在这之前！不知道你有没有注意到一个问题：在performUnitOfWork中每次我们处理一个元素时都会在DOM 中添加一个新的节点。而且，浏览器还会在完成整棵树的渲染之前打断我们的工作。这样，用户将会看到一个不完整的UI，这是我们不希望">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="c:/Users/luna6/AppData/Roaming/Typora/typora-user-images/image-20211028180235291.png">
 <meta property="article:published_time" content="2021-10-20T15:00:10.000Z">
-<meta property="article:modified_time" content="2021-10-27T11:13:12.046Z">
+<meta property="article:modified_time" content="2021-10-28T17:18:01.761Z">
 <meta property="article:author" content="He Mengting">
 <meta property="article:tag" content="react">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="c:/Users/luna6/AppData/Roaming/Typora/typora-user-images/image-20211028180235291.png">
   
     <link rel="alternate" href="/atom.xml" title="hmt的博客" type="application/atom+xml">
   
@@ -167,7 +169,6 @@
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Add event listeners</span></span><br><span class="line"> <span class="built_in">Object</span>.keys(nextProps)</span><br><span class="line">   .filter(isEvent)</span><br><span class="line">   .filter(isNew(prevProps, nextProps))</span><br><span class="line">   .forEach(<span class="function"><span class="params">name</span> =&gt;</span> &#123;</span><br><span class="line">     <span class="keyword">const</span> eventType = name</span><br><span class="line">       .toLowerCase()</span><br><span class="line">       .substring(<span class="number">2</span>)</span><br><span class="line">     dom.addEventListener(</span><br><span class="line">       eventType,</span><br><span class="line">       nextProps[name]</span><br><span class="line">     )</span><br><span class="line">   &#125;)</span><br></pre></td></tr></table></figure>
 
 <p>（其实就是初次渲染的时候要从头（根）到尾（叶）生成一棵fiber树，之后有更新只需要调整部分节点，保留不变的节点）</p>
-<p>（关于添加事件这里还有点问题）</p>
 <h2 id="7-函数组件"><a href="#7-函数组件" class="headerlink" title="7.函数组件"></a>7.函数组件</h2><p>接下来我们要做的是支持函数式组件。首先让我们把原来的例子修改成函数式组件，它返回一个<code>h1</code>元素：</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** <span class="doctag">@jsx </span>Didact.createElement */</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">App</span>(<span class="params">props</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="xml"><span class="tag">&lt;<span class="name">h1</span>&gt;</span>Hi &#123;props.name&#125;<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> element = <span class="xml"><span class="tag">&lt;<span class="name">App</span> <span class="attr">name</span>=<span class="string">&quot;foo&quot;</span> /&gt;</span></span></span><br><span class="line"><span class="keyword">const</span> container = <span class="built_in">document</span>.getElementById(<span class="string">&quot;root&quot;</span>)</span><br><span class="line">Didact.render(element, container)</span><br></pre></td></tr></table></figure>
 
@@ -224,6 +225,29 @@
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> actions = oldHook ? oldHook.queue : []</span><br><span class="line">actions.forEach(<span class="function"><span class="params">action</span> =&gt;</span> &#123;</span><br><span class="line">    hook.state = action(hook.state)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
 
 <p>大功告成！我们写了一个自己的React😀</p>
+<p>下面我们来复习一下整个过程8：</p>
+<p>render:</p>
+<p><img src="C:\Users\luna6\AppData\Roaming\Typora\typora-user-images\image-20211028180235291.png" alt="image-20211028180235291"></p>
+<p>hookindex是干嘛的？</p>
+<p>每次触发一个更新，调用setState函数，都会更新nextUnitOfWork，开始新一轮的重新渲染</p>
+<p>此时fiber一定是函数组件，index在更新函数中初始化为0</p>
+<p>生成children的就是执行函数的过程</p>
+<p>会挨个执行useState函数</p>
+<p>初始化的时候不执行setState的回调</p>
+<p>但是在之后的更新中，需要拿到上一个fiber状态中保存的对应useState,setState回调队列，因为不是每一个setState都执行</p>
+<p>可能再一次事件中调用了多个setState</p>
+<p>在执行setState的过程中，并不会直接改变状态的值</p>
+<p>而是把回调函数推到hook队列中，同时更新nextUnitOfWork，浏览器一旦有空闲就会重新渲染</p>
+<p>比如调用了5个useState，在第三个useState的时候浏览器重新渲染</p>
+<p>前两个useState是没有被打断的，那么hookIndex递增到了2</p>
+<p>第三个的时候，又有五个useState要执行，就要从0开始了</p>
+<p>则意味着hookIndex置为0，而且又要重新执行5个useState</p>
+<p>由于idle的存在，可能队列中有多个action</p>
+<p>当执行perform的时候，index初始化为0，又开始执行useState</p>
+<p>这时wipFiber.alternate.hooks不为空，而且hookindex也有值</p>
+<p>主要是setState和useState执行顺序的问题</p>
+<p>栈</p>
+<p>为了让新的hook能够和旧的hook联系起来</p>
 
       
     </div>
@@ -239,6 +263,15 @@
   
     
 <nav id="article-nav">
+  
+    <a href="/2021/10/29/%E4%B8%BA%E4%BB%80%E4%B9%88%E5%8F%AA%E8%83%BD%E5%9C%A8React%E5%87%BD%E6%95%B0%E7%9A%84%E6%9C%80%E9%A1%B6%E5%B1%82%E8%B0%83%E7%94%A8Hook/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          为什么只能在React函数的最顶层调用Hook?
+        
+      </div>
+    </a>
   
   
     <a href="/2021/10/17/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAReact/" id="article-nav-older" class="article-nav-link-wrap">
@@ -273,7 +306,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/JavaScript/" style="font-size: 15px;">JavaScript</a> <a href="/tags/html-%E7%BF%BB%E8%AF%91/" style="font-size: 10px;">html,翻译</a> <a href="/tags/react/" style="font-size: 10px;">react</a> <a href="/tags/react-babel/" style="font-size: 10px;">react babel</a> <a href="/tags/webpack/" style="font-size: 20px;">webpack</a>
+      <a href="/tags/JavaScript/" style="font-size: 15px;">JavaScript</a> <a href="/tags/html-%E7%BF%BB%E8%AF%91/" style="font-size: 10px;">html,翻译</a> <a href="/tags/react/" style="font-size: 15px;">react</a> <a href="/tags/react-babel/" style="font-size: 10px;">react babel</a> <a href="/tags/webpack/" style="font-size: 20px;">webpack</a>
     </div>
   </div>
 
@@ -295,6 +328,10 @@
       <ul>
         
           <li>
+            <a href="/2021/10/29/%E4%B8%BA%E4%BB%80%E4%B9%88%E5%8F%AA%E8%83%BD%E5%9C%A8React%E5%87%BD%E6%95%B0%E7%9A%84%E6%9C%80%E9%A1%B6%E5%B1%82%E8%B0%83%E7%94%A8Hook/">为什么只能在React函数的最顶层调用Hook?</a>
+          </li>
+        
+          <li>
             <a href="/2021/10/20/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAReact%E4%B8%8B/">从0开始实现一个React下</a>
           </li>
         
@@ -308,10 +345,6 @@
         
           <li>
             <a href="/2021/09/23/%E7%BF%BB%E8%AF%91-viewports%E7%9A%84%E6%95%85%E4%BA%8B-part-one/">翻译:viewports的故事-第一部分</a>
-          </li>
-        
-          <li>
-            <a href="/2021/09/19/this%E6%98%AF%E4%BB%80%E4%B9%88/">this是什么</a>
           </li>
         
       </ul>

@@ -71,6 +71,68 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-for-of-与-for-in的区别" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/09/10/for-of-%E4%B8%8E-for-in%E7%9A%84%E5%8C%BA%E5%88%AB/" class="article-date">
+  <time class="dt-published" datetime="2021-09-10T08:44:47.000Z" itemprop="datePublished">2021-09-10</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/09/10/for-of-%E4%B8%8E-for-in%E7%9A%84%E5%8C%BA%E5%88%AB/">for...of 与 for...in的区别</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p><code>for...of</code>和<code>for...in</code>的作用都是迭代。它们之间的主要区别是迭代的内容。</p>
+<p><code>for...in</code>语句以任意顺序迭代<strong>对象</strong>的可枚举<strong>属性</strong>，包括实例属性和原型属性。</p>
+<p><code>for...of</code>语句迭代<strong>可迭代对象</strong>定义的要迭代的<strong>值</strong>。</p>
+<p>那么，可迭代对象有哪些呢？包括：<code>String</code>，<code>Array</code>，<code>array-like objects</code>，<code>TypedArray</code>，<code>Map</code>，<code>Set</code>。</p>
+<p>注意Object实例不是可迭代对象，所以不能用<code>for...of</code>迭代它的值，但可以用<code>for...in</code>枚举它的属性。</p>
+<p>下面的例子展示了<code>for...of</code>循环和<code>for...in</code>循环应用在数组上的区别：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Object</span>.prototype.objCustom = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;&#125;;</span><br><span class="line"><span class="built_in">Array</span>.prototype.arrCustom = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;&#125;;</span><br><span class="line"><span class="keyword">const</span> iterable = [<span class="number">3</span>, <span class="number">5</span>, <span class="number">7</span>];</span><br><span class="line">iterable.foo = <span class="string">&#x27;hello&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">const</span> i <span class="keyword">in</span> iterable) &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(i); <span class="comment">// logs &quot;0&quot;, &quot;1&quot;, &quot;2&quot;, &quot;foo&quot;， &quot;arrCustom&quot;, &quot;objCustom&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">const</span> i <span class="keyword">in</span> iterable) &#123;</span><br><span class="line">    <span class="keyword">if</span>(iterable.hasOwnProperty(i)) &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(i); <span class="comment">// logs &quot;0&quot;, &quot;1&quot;, &quot;2&quot;, &quot;foo&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">const</span> i <span class="keyword">of</span> iterable) &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(i); <span class="comment">// logs 3, 5, 7</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>让我们一步一步地看一下上面的代码。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Object</span>.prototype.objCustom = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;&#125;;</span><br><span class="line"><span class="built_in">Array</span>.prototype.arrCustom = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;&#125;;</span><br><span class="line"><span class="keyword">const</span> iterable = [<span class="number">3</span>, <span class="number">5</span>, <span class="number">7</span>];</span><br><span class="line">iterable.foo = <span class="string">&#x27;hello&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>每个对象实例都会继承<code>objectCustom</code>属性，并且每个Array对象的实例都会继承<code>arrCustom</code>属性，这是因为这些属性已分别添加到<code>Onject.prototype</code>和<code>Array.prototype</code>。由于继承和原型链，可迭代对象继承了属性<code>objCustom</code>和<code>arrCustom</code>。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">const</span> i <span class="keyword">in</span> iterable) &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(i); <span class="comment">// logs 0, 1, 2, &quot;foo&quot;, &quot;arrCustom&quot;, &quot;objCustom&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个循环只以任意顺序打印了可迭代对象的枚举属性。它不会打印数组<strong>元素</strong><code>3</code>，<code>5</code>，<code>7</code>或者<code>hello</code>，因为它们不是可枚举属性，<strong>实际上它们根本不是属性</strong>，它们是值。它所打印的数组的下标，还有<code>arrCustom</code>和<code>objCustom</code>才是属性。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">const</span> i <span class="keyword">in</span> iterable) &#123;</span><br><span class="line">  <span class="keyword">if</span> (iterable.hasOwnProperty(i)) &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(i); <span class="comment">// logs 0, 1, 2, &quot;foo&quot;</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个循环和上一个相似，但它使用<code>hasOwnProperty()</code>来检查可枚举属性是否是对象自身的，不是继承的。如果是，则打印该属性。属性<code>0</code>，<code>1</code>，<code>2</code>和<code>foo</code>被输出，因为他们是自有属性(不是继承的)。属性<code>arrCustom</code>和<code>objCustom</code>没有被输出，因为他们是继承的。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">const</span> i <span class="keyword">of</span> iterable) &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(i); <span class="comment">// logs 3, 5, 7</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个循环迭代并打印了可迭代的值，作为可迭代对象所定义的要迭代的值。对象的元素 3、5、7被打印，但没有打印对象的任何属性。</p>
+<p>补充：JavaScript规范定义的数据属性[[Enumerable]]表示属性是否可以通过<code>for...in</code>循环返回。默认情况下，所有直接定义在对象上的属性的这个特性都是true。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://hemengting.xyz/2021/09/10/for-of-%E4%B8%8E-for-in%E7%9A%84%E5%8C%BA%E5%88%AB/" data-id="ckuwtunho0002l4ubfp8qevie" data-title="for...of 与 for...in的区别" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JavaScript/" rel="tag">JavaScript</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-webpack入门一、前端模块化" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2021/09/07/webpack%E5%85%A5%E9%97%A8%E4%B8%80%E3%80%81%E5%89%8D%E7%AB%AF%E6%A8%A1%E5%9D%97%E5%8C%96/" class="article-date">
@@ -272,7 +334,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/JavaScript/" style="font-size: 15px;">JavaScript</a> <a href="/tags/html-%E7%BF%BB%E8%AF%91/" style="font-size: 10px;">html,翻译</a> <a href="/tags/react/" style="font-size: 10px;">react</a> <a href="/tags/react-babel/" style="font-size: 10px;">react babel</a> <a href="/tags/webpack/" style="font-size: 20px;">webpack</a>
+      <a href="/tags/JavaScript/" style="font-size: 15px;">JavaScript</a> <a href="/tags/html-%E7%BF%BB%E8%AF%91/" style="font-size: 10px;">html,翻译</a> <a href="/tags/react/" style="font-size: 15px;">react</a> <a href="/tags/react-babel/" style="font-size: 10px;">react babel</a> <a href="/tags/webpack/" style="font-size: 20px;">webpack</a>
     </div>
   </div>
 
@@ -294,6 +356,10 @@
       <ul>
         
           <li>
+            <a href="/2021/10/29/%E4%B8%BA%E4%BB%80%E4%B9%88%E5%8F%AA%E8%83%BD%E5%9C%A8React%E5%87%BD%E6%95%B0%E7%9A%84%E6%9C%80%E9%A1%B6%E5%B1%82%E8%B0%83%E7%94%A8Hook/">为什么只能在React函数的最顶层调用Hook?</a>
+          </li>
+        
+          <li>
             <a href="/2021/10/20/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAReact%E4%B8%8B/">从0开始实现一个React下</a>
           </li>
         
@@ -307,10 +373,6 @@
         
           <li>
             <a href="/2021/09/23/%E7%BF%BB%E8%AF%91-viewports%E7%9A%84%E6%95%85%E4%BA%8B-part-one/">翻译:viewports的故事-第一部分</a>
-          </li>
-        
-          <li>
-            <a href="/2021/09/19/this%E6%98%AF%E4%BB%80%E4%B9%88/">this是什么</a>
           </li>
         
       </ul>

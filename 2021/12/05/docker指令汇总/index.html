@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>docker指令汇总 | hmt的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="构建镜像 DockerFile 1234567# syntax&#x3D;docker&#x2F;dockerfile:1FROM node:12-alpineRUN apk add --no-cache python3 g++ makeWORKDIR &#x2F;appCOPY . .RUN yarn install --productionCMD [&quot;node&quot;, &quot;src&#x2F;index.js&amp;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="docker指令汇总">
+<meta property="og:url" content="http://hemengting.xyz/2021/12/05/docker%E6%8C%87%E4%BB%A4%E6%B1%87%E6%80%BB/index.html">
+<meta property="og:site_name" content="hmt的博客">
+<meta property="og:description" content="构建镜像 DockerFile 1234567# syntax&#x3D;docker&#x2F;dockerfile:1FROM node:12-alpineRUN apk add --no-cache python3 g++ makeWORKDIR &#x2F;appCOPY . .RUN yarn install --productionCMD [&quot;node&quot;, &quot;src&#x2F;index.js&amp;">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-12-04T16:35:46.000Z">
+<meta property="article:modified_time" content="2021-12-04T16:36:23.434Z">
+<meta property="article:author" content="He Mengting">
+<meta property="article:tag" content="docker">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="hmt的博客" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">hmt的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://hemengting.xyz"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-docker指令汇总" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/12/05/docker%E6%8C%87%E4%BB%A4%E6%B1%87%E6%80%BB/" class="article-date">
+  <time class="dt-published" datetime="2021-12-04T16:35:46.000Z" itemprop="datePublished">2021-12-05</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      docker指令汇总
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>构建镜像</p>
+<p>DockerFile</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># syntax=docker/dockerfile:1</span><br><span class="line">FROM node:12-alpine</span><br><span class="line">RUN apk add --no-cache python3 g++ make</span><br><span class="line">WORKDIR /app</span><br><span class="line">COPY . .</span><br><span class="line">RUN yarn install --production</span><br><span class="line">CMD [&quot;node&quot;, &quot;src/index.js&quot;]</span><br></pre></td></tr></table></figure>
+
+<p>构建镜像</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build -t getting-started .</span><br></pre></td></tr></table></figure>
+
+<p>启动容器</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -dp 3000:3000 getting-started</span><br></pre></td></tr></table></figure>
+
+<p>更新应用程序</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build -t getting-started .</span><br></pre></td></tr></table></figure>
+
+<p>删除旧的容器</p>
+<p>获取ID</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker ps</span><br></pre></td></tr></table></figure>
+
+<p>停止旧容器</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Swap out &lt;the-container-id&gt; with the ID from docker ps</span><br><span class="line">$ docker stop &lt;the-container-id&gt;</span><br></pre></td></tr></table></figure>
+
+<p>移除旧容器</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker rm &lt;the-container-id&gt;</span><br></pre></td></tr></table></figure>
+
+<p>合并</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker rm -f &lt;container-id&gt;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>应用程序共享</p>
+<p>登录</p>
+<p><code>docker login -u YOUR-USER-NAME</code>.</p>
+<p>重命名镜像</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker tag getting-started YOUR-USER-NAME/getting-started</span><br></pre></td></tr></table></figure>
+
+<p>推送</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker push YOUR-USER-NAME/getting-started</span><br></pre></td></tr></table></figure>
+
+
+
+<p>新建文件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d ubuntu bash -c &quot;shuf -i 1-10000 -n 1 -o /data.txt &amp;&amp; tail -f /dev/null&quot;</span><br></pre></td></tr></table></figure>
+
+<p>dockers cli查看文件内容</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /data.txt</span><br></pre></td></tr></table></figure>
+
+<p>使用dockers exec命令行查看文件内容：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker exec &lt;container-id&gt; cat /data.txt</span><br></pre></td></tr></table></figure>
+
+<p>数据持久化</p>
+<p>创建卷</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker volume create todo-db</span><br></pre></td></tr></table></figure>
+
+<p>创建应用程序容器，指定卷挂载：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -dp 3000:3000 -v todo-db:/etc/todos getting-started</span><br></pre></td></tr></table></figure>
+
+<p>查看数据存储信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker volume inspect todo-db</span><br></pre></td></tr></table></figure>
+
+
+
+<p>使用绑定安装</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -dp 3000:3000 `</span><br><span class="line">     -w /app -v &quot;$(pwd):/app&quot; `</span><br><span class="line">     node:12-alpine `</span><br><span class="line">     sh -c &quot;yarn install &amp;&amp; yarn run dev&quot;</span><br></pre></td></tr></table></figure>
+
+<p>查看日志</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker logs -f 8f660e5ddb02</span><br></pre></td></tr></table></figure>
+
+<p>part 7混合容器应用程序</p>
+<p>创建网络应用</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network create todo-app</span><br></pre></td></tr></table></figure>
+
+<p>创建mySQL容器并将它连接到网络</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">docker run -d `</span><br><span class="line">     --network todo-app --network-alias mysql `</span><br><span class="line">     -v todo-mysql-data:/var/lib/mysql `</span><br><span class="line">     -e MYSQL_ROOT_PASSWORD=secret `</span><br><span class="line">     -e MYSQL_DATABASE=todos `</span><br><span class="line">     mysql:5.7</span><br></pre></td></tr></table></figure>
+
+<p>连接数据库</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it &lt;mysql-container-id&gt; mysql -u root -p</span><br></pre></td></tr></table></figure>
+
+<p>输入密码后，显示数据库：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SHOW DATABASES;</span><br></pre></td></tr></table></figure>
+
+<p>连接mySQL</p>
+<p>使用nicklaka/netshoot镜像创建一个新的容器：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it --network todo-app nicolaka/netshoot</span><br></pre></td></tr></table></figure>
+
+<p>查找mySQL主机的IP地址</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dig mysql</span><br></pre></td></tr></table></figure>
+
+<p><strong>用MySQL运行应用程序</strong></p>
+<p>修改数据库权限</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; ALTER USER &#x27;root&#x27; IDENTIFIED WITH mysql_native_password BY &#x27;secret&#x27;;</span><br><span class="line">mysql&gt; flush privileges;</span><br></pre></td></tr></table></figure>
+
+<p>指定环境变量，并将容器连接到应用程序网络。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">docker run -dp 3000:3000 `</span><br><span class="line">   -w /app -v &quot;$(pwd):/app&quot; `</span><br><span class="line">   --network todo-app `</span><br><span class="line">   -e MYSQL_HOST=mysql `</span><br><span class="line">   -e MYSQL_USER=root `</span><br><span class="line">   -e MYSQL_PASSWORD=secret `</span><br><span class="line">   -e MYSQL_DB=todos `</span><br><span class="line">   node:12-alpine `</span><br><span class="line">   sh -c &quot;yarn install &amp;&amp; yarn run dev&quot;</span><br></pre></td></tr></table></figure>
+
+<p>查看日志</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker logs &lt;container-id&gt;</span><br></pre></td></tr></table></figure>
+
+<p>连接mysql数据库</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://hemengting.xyz/2021/12/05/docker%E6%8C%87%E4%BB%A4%E6%B1%87%E6%80%BB/" data-id="ckws1gnav0000w4ub2hic8g20" data-title="docker指令汇总" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/docker/" rel="tag">docker</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2021/10/31/wiproot%20setState%20=%20nextUnitOfwork/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title"></div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/JavaScript/" rel="tag">JavaScript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/" rel="tag">docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/html-%E7%BF%BB%E8%AF%91/" rel="tag">html,翻译</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/react/" rel="tag">react</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/react-babel/" rel="tag">react babel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/webpack/" rel="tag">webpack</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/JavaScript/" style="font-size: 15px;">JavaScript</a> <a href="/tags/docker/" style="font-size: 10px;">docker</a> <a href="/tags/html-%E7%BF%BB%E8%AF%91/" style="font-size: 10px;">html,翻译</a> <a href="/tags/react/" style="font-size: 15px;">react</a> <a href="/tags/react-babel/" style="font-size: 10px;">react babel</a> <a href="/tags/webpack/" style="font-size: 20px;">webpack</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">December 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2021/12/05/docker%E6%8C%87%E4%BB%A4%E6%B1%87%E6%80%BB/">docker指令汇总</a>
+          </li>
+        
+          <li>
+            <a href="/2021/10/31/wiproot%20setState%20=%20nextUnitOfwork/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2021/10/29/%E4%B8%BA%E4%BB%80%E4%B9%88%E5%8F%AA%E8%83%BD%E5%9C%A8React%E5%87%BD%E6%95%B0%E7%9A%84%E6%9C%80%E9%A1%B6%E5%B1%82%E8%B0%83%E7%94%A8Hook/">为什么只能在React函数的最顶层调用Hook?</a>
+          </li>
+        
+          <li>
+            <a href="/2021/10/20/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAReact%E4%B8%8B/">从0开始实现一个React下</a>
+          </li>
+        
+          <li>
+            <a href="/2021/10/17/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAReact/">从0开始实现一个React</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2021 He Mengting<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

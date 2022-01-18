@@ -71,6 +71,223 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-前端与HTML" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/01/18/%E5%89%8D%E7%AB%AF%E4%B8%8EHTML/" class="article-date">
+  <time class="dt-published" datetime="2022-01-18T09:37:28.000Z" itemprop="datePublished">2022-01-18</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2022/01/18/%E5%89%8D%E7%AB%AF%E4%B8%8EHTML/">青训营笔记一 前端与HTML</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>本节课老师梳理了HTML的相关概念，同时学了一些不常用的标签和属性。</p>
+<h2 id="一、前端概述"><a href="#一、前端概述" class="headerlink" title="一、前端概述"></a>一、前端概述</h2><h3 id="1-技术栈"><a href="#1-技术栈" class="headerlink" title="1. 技术栈"></a>1. 技术栈</h3><ul>
+<li><p>js</p>
+</li>
+<li><p>css</p>
+</li>
+<li><p>html</p>
+</li>
+</ul>
+<h3 id="2-前端应该关注哪些方面？"><a href="#2-前端应该关注哪些方面？" class="headerlink" title="2. 前端应该关注哪些方面？"></a>2. 前端应该关注哪些方面？</h3><p>图形界面下的人机交互</p>
+<p>功能 美观 无障碍 安全 性能 兼容性 体验</p>
+<h3 id="3-前端的边界"><a href="#3-前端的边界" class="headerlink" title="3. 前端的边界"></a>3. 前端的边界</h3><ul>
+<li><p><code>node</code> - 服务器端应用</p>
+</li>
+<li><p><code>Electron</code>/<code>React Native</code> - 跨平台桌面应用</p>
+</li>
+<li><p><code>WebRTC</code>（Web Real-Time Communication） - P2P在线传输，多人会议</p>
+</li>
+<li><p>WebGL（Web Graphics Library） - 3D游戏</p>
+</li>
+<li><p>WebAssembly - 可以使用非 JavaScript 编程语言编写代码并且能在浏览器上运行</p>
+</li>
+</ul>
+<h3 id="4-开发环境"><a href="#4-开发环境" class="headerlink" title="4.开发环境"></a>4.开发环境</h3><p>浏览器+编辑器</p>
+<h2 id="二、HTML概述"><a href="#二、HTML概述" class="headerlink" title="二、HTML概述"></a>二、HTML概述</h2><h3 id="1-HTML是什么？"><a href="#1-HTML是什么？" class="headerlink" title="1. HTML是什么？"></a>1. HTML是什么？</h3><ul>
+<li><p>HyperText（图片、链接、表格等） </p>
+</li>
+<li><p>Markup（ 标记语言，<code>&lt;img src=&quot;photo.jpg&quot; /&gt;</code>，<code>src</code>是属性名，等号右边是属性值）</p>
+</li>
+<li><p>Language</p>
+</li>
+</ul>
+<p>一个完整的例子：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>页面标题<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">h1</span>&gt;</span>一级标题<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span>&gt;</span>段落内容<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>&lt;!DOCTYPE html&gt;</code>：对 HTML文件来说，浏览器使用文件开头的 DOCTYPE 来决定用<strong>怪异模式</strong>处理或<strong>标准模式</strong>处理。</p>
+<p><code>html</code>：文档根标签，所有其他元素必须是此元素的后代。</p>
+<p><code>head</code>：页面元数据，不需要直接呈现给用户</p>
+<p><code>body</code>：需要呈现给用户的内容</p>
+<h3 id="2-DOM树"><a href="#2-DOM树" class="headerlink" title="2. DOM树"></a>2. DOM树</h3><p>浏览器对html文件进行解析，得到DOM树，DOM节点</p>
+<h2 id="三、HTML语法"><a href="#三、HTML语法" class="headerlink" title="三、HTML语法"></a>三、HTML语法</h2><ul>
+<li>标签和属性不区分大小写，推荐<strong>小写</strong></li>
+<li>空标签可以不闭合，比如input、meta</li>
+<li>属性值推荐用双引号包裹</li>
+<li>某些属性值可以省略，比如 required、readonly</li>
+</ul>
+<h3 id="1-标题h1-h6"><a href="#1-标题h1-h6" class="headerlink" title="1.标题h1~h6"></a>1.标题h1~h6</h3><h3 id="2-列表"><a href="#2-列表" class="headerlink" title="2.列表"></a>2.列表</h3><ul>
+<li>有序列表<code>&lt;ol&gt;</code>：ordered list</li>
+<li>无序列表<code>&lt;ul&gt;</code>：unordered list</li>
+<li>key-value列表<code>&lt;dl&gt;</code>：defination list<ul>
+<li><code>&lt;dt&gt;</code>title</li>
+<li><code>&lt;dd&gt;</code>description</li>
+<li>多对多的关系</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-链接anchor"><a href="#3-链接anchor" class="headerlink" title="3.链接anchor"></a>3.链接anchor</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;a href=&quot;www.aboutmt.top&quot;&gt;&lt;/a&gt;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>target</code>：该属性指定在何处显示链接的资源。 取值为标签（tab），窗口（window），或框架（iframe）等浏览上下文的名称或其他关键词。</li>
+</ul>
+<h3 id="4-多媒体：图片和音视频"><a href="#4-多媒体：图片和音视频" class="headerlink" title="4. 多媒体：图片和音视频"></a>4. 多媒体：图片和音视频</h3><p><code>&lt;img/&gt;</code></p>
+<ul>
+<li><code>alt</code>：定义了图像的备用文本描述。</li>
+</ul>
+<p><code>&lt;audio /&gt;</code></p>
+<p><code>&lt;video /&gt;</code></p>
+<ul>
+<li><code>controls</code>：默认播放控件</li>
+</ul>
+<h3 id="5-输入"><a href="#5-输入" class="headerlink" title="5.输入"></a>5.输入</h3><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">placeholder</span>=<span class="string">&quot;range&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;range&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;number&quot;</span> <span class="attr">min</span>=<span class="string">&quot;1&quot;</span> <span class="attr">max</span>=<span class="string">&quot;10&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;date&quot;</span> <span class="attr">min</span>=<span class="string">&quot;2018-02-10&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">textarea</span>&gt;</span>Hey<span class="tag">&lt;/<span class="name">textarea</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="6-选择"><a href="#6-选择" class="headerlink" title="6.选择"></a>6.选择</h3><p>多选：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"> <span class="tag">&lt;<span class="name">p</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">label</span>&gt;</span><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;checkbox&quot;</span> /&gt;</span>🍎<span class="tag">&lt;/<span class="name">label</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">label</span>&gt;</span><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;checkbox&quot;</span> /&gt;</span>🍌<span class="tag">&lt;/<span class="name">label</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>单选：通过name达到互斥关系</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">label</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;radio&quot;</span> <span class="attr">name</span>=<span class="string">&quot;fruit&quot;</span> /&gt;</span>🍎</span><br><span class="line">    <span class="tag">&lt;/<span class="name">label</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">label</span>&gt;</span><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;radio&quot;</span> <span class="attr">name</span>=<span class="string">&quot;fruit&quot;</span> /&gt;</span>🍌		<span class="tag">&lt;/<span class="name">label</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>下拉菜单：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">select</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">option</span>&gt;</span>🍎<span class="tag">&lt;/<span class="name">option</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">option</span>&gt;</span>🍌<span class="tag">&lt;/<span class="name">option</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">option</span>&gt;</span>🍈<span class="tag">&lt;/<span class="name">option</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">select</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>自由输入的同时有提示：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">list</span>=<span class="string">&quot;fruits&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">datalist</span> <span class="attr">id</span>=<span class="string">&quot;fruits&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">option</span>&gt;</span>🍎<span class="tag">&lt;/<span class="name">option</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">option</span>&gt;</span>🍌<span class="tag">&lt;/<span class="name">option</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">option</span>&gt;</span>🍈<span class="tag">&lt;/<span class="name">option</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">datalist</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="7-文本类标签"><a href="#7-文本类标签" class="headerlink" title="7.文本类标签"></a>7.文本类标签</h3><h4 id="文字引用"><a href="#文字引用" class="headerlink" title="文字引用"></a>文字引用</h4><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">blockquote</span> <span class="attr">cite</span>=<span class="string">&quot;http://aboutmt.top&quot;</span>&gt;</span></span><br><span class="line">    长引用，直接引用别人的一段文字，可以换行</span><br><span class="line"><span class="tag">&lt;/<span class="name">blockquote</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span></span><br><span class="line">    短引用，我最喜欢的一本书是<span class="tag">&lt;<span class="name">cite</span>&gt;</span>小王子<span class="tag">&lt;/<span class="name">cite</span>&gt;</span></span><br><span class="line">    引用内容不要包含换行</span><br><span class="line"><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span></span><br><span class="line">    在<span class="tag">&lt;<span class="name">cite</span>&gt;</span>第一章<span class="tag">&lt;/<span class="name">cite</span>&gt;</span>，我们讲过<span class="tag">&lt;<span class="name">q</span>&gt;</span>字符串是</span><br><span class="line">    不可变量。<span class="tag">&lt;/<span class="name">q</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>q</code>和<code>cite</code>区别：</p>
+<ul>
+<li><p><code>cite</code>表示一个作品的引用，且必须包含作品的标题；</p>
+</li>
+<li><p><code>q</code>表示一个封闭的并且是短的行内引用的文本。</p>
+</li>
+</ul>
+<h4 id="代码引用："><a href="#代码引用：" class="headerlink" title="代码引用："></a>代码引用：</h4><p>使用等宽字体（编程字体）展示</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">code</span>&gt;</span>const<span class="tag">&lt;/<span class="name">code</span>&gt;</span>声明创建一个只读的常量。</span><br><span class="line"><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">pre</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">code</span>&gt;</span></span><br><span class="line">    	const add = (a, b) =&gt; a + b;</span><br><span class="line">        const multiply = (a, b) =&gt; a * b;</span><br><span class="line">    <span class="tag">&lt;/<span class="name">code</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">pre</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="强调标签"><a href="#强调标签" class="headerlink" title="强调标签"></a>强调标签</h4><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span></span><br><span class="line">    在投资之前，<span class="tag">&lt;<span class="name">strong</span>&gt;</span>一定要做风险评估<span class="tag">&lt;/<span class="name">strong</span>&gt;</span>。</span><br><span class="line"><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span>Cats <span class="tag">&lt;<span class="name">em</span>&gt;</span>are<span class="tag">&lt;/<span class="name">em</span>&gt;</span> cute animals.<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>strong</code>强调内容重要</li>
+<li><code>em</code>强调语气</li>
+</ul>
+<h3 id="8-内容划分"><a href="#8-内容划分" class="headerlink" title="8. 内容划分"></a>8. 内容划分</h3><p><code>header</code></p>
+<p><code>nav</code></p>
+<p><code>main</code></p>
+<p><code>article</code></p>
+<p><code>aside</code> 广告 热点推荐</p>
+<p><code>footer</code> 版权信息 备案</p>
+<h2 id="四、语义化是什么"><a href="#四、语义化是什么" class="headerlink" title="四、语义化是什么"></a>四、语义化是什么</h2><ul>
+<li><p>HTML中的元素、属性及属性值都拥有某些含义</p>
+</li>
+<li><p>开发者应该遵循语义来编写HTML</p>
+<ul>
+<li><p>有序列表用ol；无序列表用ul</p>
+</li>
+<li><p>lang属性表示内容所使用的语言</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>有助于chrome自动翻译</p>
+<h3 id="1-谁在使用我们写的HTML"><a href="#1-谁在使用我们写的HTML" class="headerlink" title="1. 谁在使用我们写的HTML"></a>1. 谁在使用我们写的HTML</h3><ul>
+<li>开发者-修改、维护页面</li>
+<li>浏览器-展示页面，比如语言</li>
+<li>搜索引擎-提取关键词、排序</li>
+<li>屏幕阅读器-给盲人或者不方便的人页面内容 无障碍性</li>
+</ul>
+<h3 id="2-语义化的好处"><a href="#2-语义化的好处" class="headerlink" title="2. 语义化的好处"></a>2. 语义化的好处</h3><ul>
+<li>代码可读性</li>
+<li>可维护性</li>
+<li>搜索引擎优化</li>
+<li>提升无障碍性</li>
+</ul>
+<h3 id="3-传达内容，而不是样式"><a href="#3-传达内容，而不是样式" class="headerlink" title="3. 传达内容，而不是样式"></a>3. 传达内容，而不是样式</h3><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">p</span> <span class="attr">style</span>=<span class="string">&quot;font-size: 32px;&quot;</span>&gt;</span></span><br><span class="line">	前端工程师的自我修养（这是一个不好的例子）</span><br><span class="line"><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">h1</span>&gt;</span>前端工程师的自我修养（推荐这样写）<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-如何做到语义化？"><a href="#4-如何做到语义化？" class="headerlink" title="4. 如何做到语义化？"></a>4. 如何做到语义化？</h3><ul>
+<li>了解每个标签和属性的含义</li>
+<li>思考什么标签最适合描述这个内容</li>
+<li>不使用可视化工具生成代码</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://hemengting.xyz/2022/01/18/%E5%89%8D%E7%AB%AF%E4%B8%8EHTML/" data-id="ckyjxbgim000ss4ub70cz8m85" data-title="青训营笔记一 前端与HTML" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/html/" rel="tag">html</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-wiproot setState = nextUnitOfwork" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/01/18/wiproot%20setState%20=%20nextUnitOfwork/" class="article-date">
+  <time class="dt-published" datetime="2022-01-18T09:31:37.892Z" itemprop="datePublished">2022-01-18</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>wiproot setState =&gt; nextUnitOfwork</p>
+<p>currrentroot commitRoot =&gt; wiproot</p>
+<p>wipfiber useState =&gt; update</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://hemengting.xyz/2022/01/18/wiproot%20setState%20=%20nextUnitOfwork/" data-id="ckyjxbgii000is4ub6phdalud" data-title="" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-使用navicat连接云服务器的docker中的mysql数据库过程" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2021/12/10/%E4%BD%BF%E7%94%A8navicat%E8%BF%9E%E6%8E%A5%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84docker%E4%B8%AD%E7%9A%84mysql%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%87%E7%A8%8B/" class="article-date">
@@ -147,7 +364,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hemengting.xyz/2021/12/10/%E4%BD%BF%E7%94%A8navicat%E8%BF%9E%E6%8E%A5%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84docker%E4%B8%AD%E7%9A%84mysql%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%87%E7%A8%8B/" data-id="ckx0kcbip0000q0ubgadv7pip" data-title="使用navicat连接云服务器的docker中的mysql数据库过程" class="article-share-link">Share</a>
+      <a data-url="http://hemengting.xyz/2021/12/10/%E4%BD%BF%E7%94%A8navicat%E8%BF%9E%E6%8E%A5%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84docker%E4%B8%AD%E7%9A%84mysql%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%87%E7%A8%8B/" data-id="ckyjxbgim000qs4ubadp3722z" data-title="使用navicat连接云服务器的docker中的mysql数据库过程" class="article-share-link">Share</a>
       
       
       
@@ -384,43 +601,12 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hemengting.xyz/2021/12/05/docker%E6%8C%87%E4%BB%A4%E6%B1%87%E6%80%BB/" data-id="ckws1gnav0000w4ub2hic8g20" data-title="docker指令汇总" class="article-share-link">Share</a>
+      <a data-url="http://hemengting.xyz/2021/12/05/docker%E6%8C%87%E4%BB%A4%E6%B1%87%E6%80%BB/" data-id="ckyjxbgi30000s4ub52zdcy8p" data-title="docker指令汇总" class="article-share-link">Share</a>
       
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/docker/" rel="tag">docker</a></li></ul>
 
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-wiproot setState = nextUnitOfwork" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2021/10/31/wiproot%20setState%20=%20nextUnitOfwork/" class="article-date">
-  <time class="dt-published" datetime="2021-10-30T18:17:45.102Z" itemprop="datePublished">2021-10-31</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <p>wiproot setState =&gt; nextUnitOfwork</p>
-<p>currrentroot commitRoot =&gt; wiproot</p>
-<p>wipfiber useState =&gt; update</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://hemengting.xyz/2021/10/31/wiproot%20setState%20=%20nextUnitOfwork/" data-id="ckws1gnaz0001w4ub8q9vhlee" data-title="" class="article-share-link">Share</a>
-      
-      
-      
     </footer>
   </div>
   
@@ -475,7 +661,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hemengting.xyz/2021/10/29/%E4%B8%BA%E4%BB%80%E4%B9%88%E5%8F%AA%E8%83%BD%E5%9C%A8React%E5%87%BD%E6%95%B0%E7%9A%84%E6%9C%80%E9%A1%B6%E5%B1%82%E8%B0%83%E7%94%A8Hook/" data-id="ckvc60w7a0000cwub15gm66ky" data-title="为什么只能在React函数的最顶层调用Hook?" class="article-share-link">Share</a>
+      <a data-url="http://hemengting.xyz/2021/10/29/%E4%B8%BA%E4%BB%80%E4%B9%88%E5%8F%AA%E8%83%BD%E5%9C%A8React%E5%87%BD%E6%95%B0%E7%9A%84%E6%9C%80%E9%A1%B6%E5%B1%82%E8%B0%83%E7%94%A8Hook/" data-id="ckyjxbgik000ls4ub1k9e28h5" data-title="为什么只能在React函数的最顶层调用Hook?" class="article-share-link">Share</a>
       
       
       
@@ -665,7 +851,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hemengting.xyz/2021/10/20/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAReact%E4%B8%8B/" data-id="ckuzpu8ls0000joub6lha8n3o" data-title="从0开始实现一个React下" class="article-share-link">Share</a>
+      <a data-url="http://hemengting.xyz/2021/10/20/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAReact%E4%B8%8B/" data-id="ckyjxbgis0012s4ubhc1zgwxu" data-title="从0开始实现一个React下" class="article-share-link">Share</a>
       
       
       
@@ -842,7 +1028,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hemengting.xyz/2021/10/17/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAReact/" data-id="ckuwtunhv000gl4ubeeu61v0o" data-title="从0开始实现一个React" class="article-share-link">Share</a>
+      <a data-url="http://hemengting.xyz/2021/10/17/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAReact/" data-id="ckyjxbgil000ns4ubhg8mc8et" data-title="从0开始实现一个React" class="article-share-link">Share</a>
       
       
       
@@ -883,7 +1069,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hemengting.xyz/2021/10/12/test/" data-id="ckuwtunhj0000l4ube2wqhw3z" data-title="test" class="article-share-link">Share</a>
+      <a data-url="http://hemengting.xyz/2021/10/12/test/" data-id="ckyjxbgia0004s4ub1b2aak2w" data-title="test" class="article-share-link">Share</a>
       
       
       
@@ -1019,7 +1205,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hemengting.xyz/2021/09/23/%E7%BF%BB%E8%AF%91-viewports%E7%9A%84%E6%95%85%E4%BA%8B-part-one/" data-id="ckuwtunhw000jl4ubfjfk5297" data-title="翻译:viewports的故事-第一部分" class="article-share-link">Share</a>
+      <a data-url="http://hemengting.xyz/2021/09/23/%E7%BF%BB%E8%AF%91-viewports%E7%9A%84%E6%95%85%E4%BA%8B-part-one/" data-id="ckyjxbgir0011s4ub9g7e5bln" data-title="翻译:viewports的故事-第一部分" class="article-share-link">Share</a>
       
       
       
@@ -1087,112 +1273,11 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hemengting.xyz/2021/09/19/this%E6%98%AF%E4%BB%80%E4%B9%88/" data-id="ckuwtunhr0006l4ubg5ne202b" data-title="this是什么" class="article-share-link">Share</a>
+      <a data-url="http://hemengting.xyz/2021/09/19/this%E6%98%AF%E4%BB%80%E4%B9%88/" data-id="ckyjxbgic0009s4ub2qdt0m09" data-title="this是什么" class="article-share-link">Share</a>
       
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JavaScript/" rel="tag">JavaScript</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-webpack入门六、性能调优" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2021/09/10/webpack%E5%85%A5%E9%97%A8%E5%85%AD%E3%80%81%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/" class="article-date">
-  <time class="dt-published" datetime="2021-09-10T14:40:22.000Z" itemprop="datePublished">2021-09-10</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2021/09/10/webpack%E5%85%A5%E9%97%A8%E5%85%AD%E3%80%81%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/">webpack入门六、性能调优</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <h1 id="webpack性能调优"><a href="#webpack性能调优" class="headerlink" title="webpack性能调优"></a><code>webpack</code>性能调优</h1><h4 id="学习目标"><a href="#学习目标" class="headerlink" title="学习目标"></a>学习目标</h4><ul>
-<li>打包结果优化</li>
-<li>构建过程优化</li>
-<li>tree-shaking</li>
-</ul>
-<p><code>webpack</code>在生产环境下会自动压缩代码</p>
-<h4 id="预制terser-plugin：实现插件定制"><a href="#预制terser-plugin：实现插件定制" class="headerlink" title="预制terser plugin：实现插件定制"></a>预制<code>terser plugin</code>：实现插件定制</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> TerserPlugin = <span class="built_in">require</span>(<span class="string">&#x27;terser-webpack-plugin&#x27;</span>)</span><br></pre></td></tr></table></figure>
-
-<p>配置：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">optimization: &#123;</span><br><span class="line">       <span class="attr">minimizer</span>: [<span class="keyword">new</span> TerserPlugin(&#123;</span><br><span class="line">           <span class="comment">// 使用缓存，加快构建速度</span></span><br><span class="line">           <span class="attr">cache</span>: <span class="literal">true</span>,</span><br><span class="line">           <span class="attr">parallel</span>: <span class="literal">true</span>,</span><br><span class="line">           <span class="comment">// 打包多线程</span></span><br><span class="line">           <span class="attr">TerserOptions</span>: &#123;</span><br><span class="line">               <span class="attr">compress</span>: &#123;</span><br><span class="line">                   <span class="comment">// 移除无用代码,debugger、console等</span></span><br><span class="line">                   <span class="attr">unused</span>: <span class="literal">true</span>,</span><br><span class="line">                   <span class="attr">drop_debugger</span>: <span class="literal">true</span>,</span><br><span class="line">                   <span class="attr">drop_console</span>: <span class="literal">true</span>,</span><br><span class="line">                   <span class="attr">dead_code</span>: <span class="literal">true</span></span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;)]</span><br><span class="line">   &#125;,</span><br></pre></td></tr></table></figure>
-
-<p>打包结果可视化分析：<code>webpack.bundle-analyzer</code>，可以看到哪一部分占的体积更大</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install webpack-bundle-analyzer</span><br></pre></td></tr></table></figure>
-
-<p>配置：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> BundleAnalyzerPlugin()</span><br></pre></td></tr></table></figure>
-
-<p>报错</p>
-<blockquote>
-<p>[webpack-cli] TypeError: BundleAnalyzerPlugin is not a constructor</p>
-</blockquote>
-<p>解决：解构赋值引用</p>
-<h4 id="其他调优方式："><a href="#其他调优方式：" class="headerlink" title="其他调优方式："></a>其他调优方式：</h4><ul>
-<li>减少解析：配置不解析的文件：</li>
-</ul>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">noParse: /node_modules\/(jquery\.js)/,</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>减少查找：include只打包某些文件</li>
-</ul>
-<ul>
-<li>利用多线程提高构建速度，并发执行子进程：</li>
-</ul>
-<ol>
-<li><code>thread-loader</code>把loader放在worker线程池里，必须放在所有<code>loader</code>之前</li>
-<li><code>HappyPack</code>：多进程</li>
-</ol>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 根据cpu数量创建线程池</span></span><br><span class="line"><span class="keyword">const</span> happyThreadPool = HappyPack.ThreadPool(&#123;<span class="attr">size</span>: os.cpus().length&#125;)</span><br><span class="line"><span class="comment">// url-loader file-loader不支持happypack</span></span><br></pre></td></tr></table></figure>
-
-<ul>
-<li><p>预编译：</p>
-</li>
-<li><p>缓存：fast-sass-loader并行处理sass文件</p>
-</li>
-</ul>
-<ul>
-<li>source-map</li>
-</ul>
-<h4 id="tree-shaking"><a href="#tree-shaking" class="headerlink" title="tree-shaking"></a>tree-shaking</h4><p>消除无用JavaScript代码<code>DCE</code>， 例如：引用未执行的模块</p>
-<p>development：去掉无用引用</p>
-<p>run build：直接去掉</p>
-<p>总结：<code>webpack</code>是什么</p>
-<ul>
-<li><p>前端发展的产物</p>
-</li>
-<li><p>模块化打包方案</p>
-</li>
-<li><p>工程化方案 ，例如<code>create-react-app</code>也是基于<code>webpack</code></p>
-</li>
-</ul>
-<p>补充：了解进程与线程的概念，<code>webpack</code>优化是体现工作能力的地方</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://hemengting.xyz/2021/09/10/webpack%E5%85%A5%E9%97%A8%E5%85%AD%E3%80%81%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/" data-id="ckuwtunhs000bl4ubea160ny7" data-title="webpack入门六、性能调优" class="article-share-link">Share</a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/webpack/" rel="tag">webpack</a></li></ul>
 
     </footer>
   </div>
@@ -1220,7 +1305,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/JavaScript/" rel="tag">JavaScript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/" rel="tag">docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker-mysql-navicat/" rel="tag">docker mysql navicat</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/html-%E7%BF%BB%E8%AF%91/" rel="tag">html,翻译</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/react/" rel="tag">react</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/react-babel/" rel="tag">react babel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/webpack/" rel="tag">webpack</a></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/JavaScript/" rel="tag">JavaScript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/" rel="tag">docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker-mysql-navicat/" rel="tag">docker mysql navicat</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/html/" rel="tag">html</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/html-%E7%BF%BB%E8%AF%91/" rel="tag">html,翻译</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/react/" rel="tag">react</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/react-babel/" rel="tag">react babel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/webpack/" rel="tag">webpack</a></li></ul>
     </div>
   </div>
 
@@ -1230,7 +1315,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/JavaScript/" style="font-size: 15px;">JavaScript</a> <a href="/tags/docker/" style="font-size: 10px;">docker</a> <a href="/tags/docker-mysql-navicat/" style="font-size: 10px;">docker mysql navicat</a> <a href="/tags/html-%E7%BF%BB%E8%AF%91/" style="font-size: 10px;">html,翻译</a> <a href="/tags/react/" style="font-size: 15px;">react</a> <a href="/tags/react-babel/" style="font-size: 10px;">react babel</a> <a href="/tags/webpack/" style="font-size: 20px;">webpack</a>
+      <a href="/tags/JavaScript/" style="font-size: 15px;">JavaScript</a> <a href="/tags/docker/" style="font-size: 10px;">docker</a> <a href="/tags/docker-mysql-navicat/" style="font-size: 10px;">docker mysql navicat</a> <a href="/tags/html/" style="font-size: 10px;">html</a> <a href="/tags/html-%E7%BF%BB%E8%AF%91/" style="font-size: 10px;">html,翻译</a> <a href="/tags/react/" style="font-size: 15px;">react</a> <a href="/tags/react-babel/" style="font-size: 10px;">react babel</a> <a href="/tags/webpack/" style="font-size: 20px;">webpack</a>
     </div>
   </div>
 
@@ -1239,7 +1324,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">December 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">January 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">December 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li></ul>
     </div>
   </div>
 
@@ -1252,6 +1337,14 @@
       <ul>
         
           <li>
+            <a href="/2022/01/18/%E5%89%8D%E7%AB%AF%E4%B8%8EHTML/">青训营笔记一 前端与HTML</a>
+          </li>
+        
+          <li>
+            <a href="/2022/01/18/wiproot%20setState%20=%20nextUnitOfwork/">(no title)</a>
+          </li>
+        
+          <li>
             <a href="/2021/12/10/%E4%BD%BF%E7%94%A8navicat%E8%BF%9E%E6%8E%A5%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84docker%E4%B8%AD%E7%9A%84mysql%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%87%E7%A8%8B/">使用navicat连接云服务器的docker中的mysql数据库过程</a>
           </li>
         
@@ -1260,15 +1353,7 @@
           </li>
         
           <li>
-            <a href="/2021/10/31/wiproot%20setState%20=%20nextUnitOfwork/">(no title)</a>
-          </li>
-        
-          <li>
             <a href="/2021/10/29/%E4%B8%BA%E4%BB%80%E4%B9%88%E5%8F%AA%E8%83%BD%E5%9C%A8React%E5%87%BD%E6%95%B0%E7%9A%84%E6%9C%80%E9%A1%B6%E5%B1%82%E8%B0%83%E7%94%A8Hook/">为什么只能在React函数的最顶层调用Hook?</a>
-          </li>
-        
-          <li>
-            <a href="/2021/10/20/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAReact%E4%B8%8B/">从0开始实现一个React下</a>
           </li>
         
       </ul>
@@ -1284,7 +1369,7 @@
   <div class="outer">
     <div id="footer-info" class="inner">
       
-      &copy; 2021 He Mengting<br>
+      &copy; 2022 He Mengting<br>
       Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
     </div>
   </div>

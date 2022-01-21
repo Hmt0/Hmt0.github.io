@@ -1,37 +1,826 @@
-{% extends '_layout.swig' %}
-{% import '_macro/post.swig' as post_template %}
-{% import '_macro/sidebar.swig' as sidebar_template %}
+<!DOCTYPE html>
 
 
-{% block title %}{{ page.title }} | {{ config.title }}{% endblock %}
 
-{% block page_class %}page-post-detail{% endblock %}
+  
 
 
-{% block content %}
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="react," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="书接上回，我们已经实现了createElement函数、render函数和Fibers，接下来就要开始处理组件更新的部分了~ 5.Render和Commit阶段但在这之前！不知道你有没有注意到一个问题：在performUnitOfWork中每次我们处理一个元素时都会在DOM 中添加一个新的节点。而且，浏览器还会在完成整棵树的渲染之前打断我们的工作。这样，用户将会看到一个不完整的UI，这是我们不希望">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从0开始实现一个React下">
+<meta property="og:url" content="http://hemengting.xyz/2021/10/20/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAReact%E4%B8%8B/index.html">
+<meta property="og:site_name" content="hmt的博客">
+<meta property="og:description" content="书接上回，我们已经实现了createElement函数、render函数和Fibers，接下来就要开始处理组件更新的部分了~ 5.Render和Commit阶段但在这之前！不知道你有没有注意到一个问题：在performUnitOfWork中每次我们处理一个元素时都会在DOM 中添加一个新的节点。而且，浏览器还会在完成整棵树的渲染之前打断我们的工作。这样，用户将会看到一个不完整的UI，这是我们不希望">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="c:/Users/luna6/AppData/Roaming/Typora/typora-user-images/image-20211028180235291.png">
+<meta property="article:published_time" content="2021-10-20T15:00:10.000Z">
+<meta property="article:modified_time" content="2022-01-18T09:31:37.893Z">
+<meta property="article:author" content="He Mengting">
+<meta property="article:tag" content="react">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="c:/Users/luna6/AppData/Roaming/Typora/typora-user-images/image-20211028180235291.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://hemengting.xyz/2021/10/20/从0开始实现一个React下/"/>
+
+
+
+
+
+  <title>从0开始实现一个React下 | hmt的博客</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">hmt的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
 
   <div id="posts" class="posts-expand">
-    {{ post_template.render(page) }}
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hemengting.xyz/2021/10/20/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAReact%E4%B8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="hmt的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">从0开始实现一个React下</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2021-10-20T23:00:10+08:00">
+                2021-10-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>书接上回，我们已经实现了<code>createElement</code>函数、<code>render</code>函数和Fibers，接下来就要开始处理组件更新的部分了~</p>
+<h2 id="5-Render和Commit阶段"><a href="#5-Render和Commit阶段" class="headerlink" title="5.Render和Commit阶段"></a>5.<code>Render</code>和<code>Commit</code>阶段</h2><p>但在这之前！不知道你有没有注意到一个问题：在<code>performUnitOfWork</code>中每次我们处理一个元素时都会在DOM 中添加一个新的节点。而且，浏览器还会在完成整棵树的渲染之前打断我们的工作。这样，用户将会看到一个不完整的<code>UI</code>，这是我们不希望的。</p>
+<p>所以我们把修改DOM的这部分代码移除：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">performUnitOfWork</span>(<span class="params">fiber</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">&quot;performUnitOfWork&quot;</span>, fiber)</span><br><span class="line">    <span class="comment">// TODO add dom node</span></span><br><span class="line">    <span class="keyword">if</span>(!fiber.dom) &#123;</span><br><span class="line">        fiber.dom = createDom(fiber)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// TODO create new fibers</span></span><br><span class="line">    <span class="keyword">const</span> elements = fiber.props.children</span><br><span class="line">    <span class="keyword">let</span> index = <span class="number">0</span></span><br><span class="line">    <span class="keyword">let</span> prevSibling = <span class="literal">null</span></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>并且在render函数中去跟踪fiber树的根节点，我们叫它“正在进行的工作”root或者<code>wipRoot</code>。</p>
+<p>当我们完成了所有任务（也就是任务中没有下一个单元的时候），我们就把整个fiber树提交到DOM中：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">commitRoot</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="comment">// TODO add nodes to dom</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">render</span>(<span class="params">element, container</span>) </span>&#123;</span><br><span class="line">  wipRoot = &#123;</span><br><span class="line">    <span class="attr">dom</span>: container,</span><br><span class="line">    <span class="attr">props</span>: &#123;</span><br><span class="line">      <span class="attr">children</span>: [element],</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;</span><br><span class="line">  nextUnitOfWork = wipRoot</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> nextUnitOfWork = <span class="literal">null</span></span><br><span class="line"><span class="keyword">let</span> wipRoot = <span class="literal">null</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">workLoop</span>(<span class="params">deadline</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">let</span> shouldYield = <span class="literal">false</span></span><br><span class="line">  <span class="keyword">while</span> (nextUnitOfWork &amp;&amp; !shouldYield) &#123;</span><br><span class="line">    nextUnitOfWork = performUnitOfWork(</span><br><span class="line">      nextUnitOfWork</span><br><span class="line">    )</span><br><span class="line">    shouldYield = deadline.timeRemaining() &lt; <span class="number">1</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (!nextUnitOfWork &amp;&amp; wipRoot) &#123;</span><br><span class="line">    commitRoot()</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  requestIdleCallback(workLoop)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们在<code>commitRoot</code>函数中完成提交。这里我们递归地将所有节点添加到DOM中：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">commitRoot</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  commitWork(wipRoot.child)</span><br><span class="line">  wipRoot = <span class="literal">null</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">commitWork</span>(<span class="params">fiber</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (!fiber) &#123;</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">const</span> domParent = fiber.parent.dom</span><br><span class="line">  domParent.appendChild(fiber.dom)</span><br><span class="line">  commitWork(fiber.child)</span><br><span class="line">  commitWork(fiber.sibling)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>（也就是不断执行<code>requestIdleCallback(workLoop)</code>生成fiber树，修改DOM的操作集中在commit阶段）</p>
+<h2 id="6-协调"><a href="#6-协调" class="headerlink" title="6.协调"></a>6.协调</h2><p>带目前为止我们只是在DOM中添加东西，怎么去更新或者删除节点呢？</p>
+<p>这就是所谓的协调（reconciliation）了，我们需要将在<code>render</code>函数上接收到的元素与提交给DOM的最后一个fiber树进行比较。</p>
+<p>所以完成提交后，我们需要保存“上一个提交到DOM的fiber树”的引用。我们称它为<code>currentRoot</code>。</p>
+<p>我们还要为每一个fiber添加一个<code>alternate</code>属性。这个属性是到到旧fiber的链接，也就是我们在上一次提交阶段中提交到DOM中的fiber。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">commitRoot</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">	...</span><br><span class="line">	currentRoot = wipRoot</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">funciton <span class="function"><span class="title">render</span>(<span class="params">element, container</span>)</span> &#123;</span><br><span class="line">	wipRoot = &#123;</span><br><span class="line">		...</span><br><span class="line">		<span class="attr">alternate</span>: currentRoot</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> currentRoot = <span class="literal">null</span></span><br></pre></td></tr></table></figure>
+
+<p>现在让我们把创建新fibers的代码从<code>performUnitOfWork</code>中提取出来，放在一个新的<code>reconcileChildren</code>函数中。在这里我们把旧fibers和新元素调和起来：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">performUnitOfWork</span>(<span class="params">fiber</span>) </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">const</span> elements = fiber.props.children</span><br><span class="line">    reconcileChildren(fiber, element)</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">reconcileChildren</span>(<span class="params">wipFiber, elements</span>) </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们同时迭代旧fiber的孩子（<code>wipFiber.alternate</code>）和我们想调和的元素数组。</p>
+<p>如果忽略同时遍历一个数组和链表的模板代码，在while循环中只剩下最重要的部分：<code>oldFiber</code>和<code>element</code>。**<code>element</code>是我们想渲染在DOM中的东西，<code>oldFiber</code>则是我们上次的渲染的内容。**</p>
+<p>我们需要比较它们，来看看是不是有需要应用在DOM中的更改：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> index = <span class="number">0</span></span><br><span class="line">  <span class="keyword">let</span> oldFiber =</span><br><span class="line">    wipFiber.alternate &amp;&amp; wipFiber.alternate.child</span><br><span class="line">  <span class="keyword">let</span> prevSibling = <span class="literal">null</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span> (</span><br><span class="line">    index &lt; elements.length ||</span><br><span class="line">    oldFiber != <span class="literal">null</span></span><br><span class="line">  ) &#123;</span><br><span class="line">    <span class="keyword">const</span> element = elements[index]</span><br><span class="line">    <span class="keyword">let</span> newFiber = <span class="literal">null</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// TODO compare oldFiber to element</span></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们使用类型来比较它们：</p>
+<ul>
+<li>如果旧fiber和新元素类型一样，我们可以保留DOM节点并且只更新的属性</li>
+<li>如果类型不同，并且存在新元素，意味着我们需要创建一个新的DOM节点</li>
+<li>如果类型不同，并且存在旧fiber，我们需要移除旧节点</li>
+</ul>
+<p>在这里React还用了keys，来实现更高效的调和。比如，它检测子元素在元素数组中的位置何时改变。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> sameType =</span><br><span class="line">    oldFiber &amp;&amp;</span><br><span class="line">    element &amp;&amp;</span><br><span class="line">    element.type == oldFiber.type</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (sameType) &#123;</span><br><span class="line">    <span class="comment">// TODO update the node</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (element &amp;&amp; !sameType) &#123;</span><br><span class="line">    <span class="comment">// TODO add this node</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (oldFiber &amp;&amp; !sameType) &#123;</span><br><span class="line">    <span class="comment">// TODO delete the oldFiber&#x27;s node</span></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<p>当旧fiber和元素有相同的类型时，我们创建一个新fiber，使DOM节点和旧fiber保持一致，属性和元素保持一致。</p>
+<p>我们还给fiber添加了一个新的属性：<code>effectTag</code>。接下来，我们将在提交阶段使用这个属性：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> sameType =</span><br><span class="line">      oldFiber &amp;&amp;</span><br><span class="line">      element &amp;&amp;</span><br><span class="line">      element.type == oldFiber.type</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (sameType) &#123;</span><br><span class="line">      newFiber = &#123;</span><br><span class="line">        <span class="attr">type</span>: oldFiber.type,</span><br><span class="line">        <span class="attr">props</span>: element.props,</span><br><span class="line">        <span class="attr">dom</span>: oldFiber.dom,</span><br><span class="line">        <span class="attr">parent</span>: wipFiber,</span><br><span class="line">        <span class="attr">alternate</span>: oldFiber,</span><br><span class="line">        <span class="attr">effectTag</span>: <span class="string">&quot;UPDATE&quot;</span>,</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>对于需要一个新的DOM节点的元素，我们用<code>PLACEMENT</code>来标记新fiber：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (element &amp;&amp; !sameType) &#123;</span><br><span class="line">      newFiber = &#123;</span><br><span class="line">        <span class="attr">type</span>: element.type,</span><br><span class="line">        <span class="attr">props</span>: element.props,</span><br><span class="line">        <span class="attr">dom</span>: <span class="literal">null</span>,</span><br><span class="line">        <span class="attr">parent</span>: wipFiber,</span><br><span class="line">        <span class="attr">alternate</span>: <span class="literal">null</span>,</span><br><span class="line">        <span class="attr">effectTag</span>: <span class="string">&quot;PLACEMENT&quot;</span>,</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>对于需要删除节点的情况，我们不需要新fiber，只要在旧fiber上添加effect tag就好了：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (oldFiber &amp;&amp; !sameType) &#123;</span><br><span class="line">     oldFiber.effectTag = <span class="string">&quot;DELETION&quot;</span></span><br><span class="line">     deletions.push(oldFiber)</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<p>但是，当我们把fiber树提交到DOM时，我们从“正在工作中的”根执行，它并没有旧fibers呀。</p>
+<p>因此我们需要一个数组deletions来跟踪想要移除的节点。接着，当我们向DOM提交更改时，我们仍然使用deletions数组中的fibers：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">commitRoot</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  deletions.forEach(commitWork)</span><br><span class="line">  commitWork(wipRoot.child)</span><br><span class="line">  currentRoot = wipRoot</span><br><span class="line">  wipRoot = <span class="literal">null</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>现在，让我们修改<code>commitWork</code>函数来处理新的<code>effectTags</code>。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">commitWork</span>(<span class="params">fiber</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (!fiber) &#123;</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">const</span> domParent = fiber.parent.dom</span><br><span class="line">  domParent.appendChild(fiber.dom)</span><br><span class="line">  commitWork(fiber.child)</span><br><span class="line">  commitWork(fiber.sibling)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果fiber的effect tag值是<code>PLACEMENT</code>，我们和之前做的一样，把DOM节点追加到父fiber的节点上；</p>
+<p>如果是<code>DELETION</code>,则相反，我们要删除子节点；</p>
+<p>如果是<code>UPDATE</code>，我们需要用更改后的属性更新现存的DOM节点：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">commitWork</span>(<span class="params">fiber</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (!fiber) &#123;</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">const</span> domParent = fiber.parent.dom</span><br><span class="line">   <span class="keyword">if</span> (</span><br><span class="line">    fiber.effectTag === <span class="string">&quot;PLACEMENT&quot;</span> &amp;&amp;</span><br><span class="line">    fiber.dom != <span class="literal">null</span></span><br><span class="line">   ) &#123;</span><br><span class="line">       domParent.appendChild(fiber.dom)</span><br><span class="line">   &#125; <span class="keyword">else</span> <span class="keyword">if</span> (</span><br><span class="line">    fiber.effectTag === <span class="string">&quot;UPDATE&quot;</span> &amp;&amp;</span><br><span class="line">    fiber.dom != <span class="literal">null</span></span><br><span class="line">   ) &#123;</span><br><span class="line">       updateDom(</span><br><span class="line">           fiber.dom,</span><br><span class="line">           fiber.alternate.props,</span><br><span class="line">           fiber.props</span><br><span class="line">       ) </span><br><span class="line">   &#125; <span class="keyword">else</span> <span class="keyword">if</span> (fiber.effectTag === <span class="string">&quot;DELETION&quot;</span>) &#123;</span><br><span class="line">     domParent.removeChild(fiber.dom)</span><br><span class="line">   &#125; </span><br><span class="line">  commitWork(fiber.child)</span><br><span class="line">  commitWork(fiber.sibling)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们把更新的操作写在<code>updateDom</code>函数中：我们对比新旧fibers的属性，移除无用属性，设置新的或改变的属性：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> isProperty = <span class="function"><span class="params">key</span> =&gt;</span> key !== <span class="string">&quot;children&quot;</span></span><br><span class="line"><span class="keyword">const</span> isNew = <span class="function">(<span class="params">prev, next</span>) =&gt;</span> <span class="function"><span class="params">key</span> =&gt;</span></span><br><span class="line">  prev[key] !== next[key]</span><br><span class="line"><span class="keyword">const</span> isGone = <span class="function">(<span class="params">prev, next</span>) =&gt;</span> <span class="function"><span class="params">key</span> =&gt;</span> !(key <span class="keyword">in</span> next)</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">updateDom</span>(<span class="params">dom, prevProps, nextProps</span>) </span>&#123;</span><br><span class="line">  <span class="comment">// Remove old properties</span></span><br><span class="line">  <span class="built_in">Object</span>.keys(prevProps)</span><br><span class="line">    .filter(isProperty)</span><br><span class="line">    .filter(isGone(prevProps, nextProps))</span><br><span class="line">    .forEach(<span class="function"><span class="params">name</span> =&gt;</span> &#123;</span><br><span class="line">      dom[name] = <span class="string">&quot;&quot;</span></span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Set new or changed properties</span></span><br><span class="line">  <span class="built_in">Object</span>.keys(nextProps)</span><br><span class="line">    .filter(isProperty)</span><br><span class="line">    .filter(isNew(prevProps, nextProps))</span><br><span class="line">    .forEach(<span class="function"><span class="params">name</span> =&gt;</span> &#123;</span><br><span class="line">      dom[name] = nextProps[name]</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对于事件监听属性我们需要做特殊处理，也就是属性名以“on”前缀开头的属性：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> isEvent = <span class="function"><span class="params">key</span> =&gt;</span> key.startsWith(<span class="string">&quot;on&quot;</span>)</span><br><span class="line"><span class="keyword">const</span> isProperty = <span class="function"><span class="params">key</span> =&gt;</span></span><br><span class="line">  key !== <span class="string">&quot;children&quot;</span> &amp;&amp; !isEvent(key)</span><br></pre></td></tr></table></figure>
+
+<p>如果事件处理程序发生了改变，我们把它从节点中移除：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Remove old or changed event listeners</span></span><br><span class="line"><span class="built_in">Object</span>.keys(prevProps)</span><br><span class="line">  .filter(isEvent)</span><br><span class="line">  .filter(</span><br><span class="line">    <span class="function"><span class="params">key</span> =&gt;</span></span><br><span class="line">      !(key <span class="keyword">in</span> nextProps) ||</span><br><span class="line">      isNew(prevProps, nextProps)(key)</span><br><span class="line">  )</span><br><span class="line">  .forEach(<span class="function"><span class="params">name</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> eventType = name</span><br><span class="line">      .toLowerCase()</span><br><span class="line">      .substring(<span class="number">2</span>)</span><br><span class="line">    dom.removeEventListener(</span><br><span class="line">      eventType,</span><br><span class="line">      prevProps[name]</span><br><span class="line">    )</span><br><span class="line">  &#125;)</span><br></pre></td></tr></table></figure>
+
+<p>然后添加一个新的处理程序：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Add event listeners</span></span><br><span class="line"> <span class="built_in">Object</span>.keys(nextProps)</span><br><span class="line">   .filter(isEvent)</span><br><span class="line">   .filter(isNew(prevProps, nextProps))</span><br><span class="line">   .forEach(<span class="function"><span class="params">name</span> =&gt;</span> &#123;</span><br><span class="line">     <span class="keyword">const</span> eventType = name</span><br><span class="line">       .toLowerCase()</span><br><span class="line">       .substring(<span class="number">2</span>)</span><br><span class="line">     dom.addEventListener(</span><br><span class="line">       eventType,</span><br><span class="line">       nextProps[name]</span><br><span class="line">     )</span><br><span class="line">   &#125;)</span><br></pre></td></tr></table></figure>
+
+<p>（其实就是初次渲染的时候要从头（根）到尾（叶）生成一棵fiber树，之后有更新只需要调整部分节点，保留不变的节点）</p>
+<h2 id="7-函数组件"><a href="#7-函数组件" class="headerlink" title="7.函数组件"></a>7.函数组件</h2><p>接下来我们要做的是支持函数式组件。首先让我们把原来的例子修改成函数式组件，它返回一个<code>h1</code>元素：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** <span class="doctag">@jsx </span>Didact.createElement */</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">App</span>(<span class="params">props</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="xml"><span class="tag">&lt;<span class="name">h1</span>&gt;</span>Hi &#123;props.name&#125;<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> element = <span class="xml"><span class="tag">&lt;<span class="name">App</span> <span class="attr">name</span>=<span class="string">&quot;foo&quot;</span> /&gt;</span></span></span><br><span class="line"><span class="keyword">const</span> container = <span class="built_in">document</span>.getElementById(<span class="string">&quot;root&quot;</span>)</span><br><span class="line">Didact.render(element, container)</span><br></pre></td></tr></table></figure>
+
+<p>如果把JSX语法转换成JS呢，应该是下面这样的:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">App</span>(<span class="params">props</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> Didact.createElement(</span><br><span class="line">    <span class="string">&quot;h1&quot;</span>,</span><br><span class="line">    <span class="literal">null</span>,</span><br><span class="line">    <span class="string">&quot;Hi &quot;</span>,</span><br><span class="line">    props.name</span><br><span class="line">  )</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> element = Didact.createElement(App, &#123;</span><br><span class="line">  <span class="attr">name</span>: <span class="string">&quot;foo&quot;</span>,</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>函数式组件有两个不同点：</p>
+<ul>
+<li>函数式组件的fiber（本身）没有DOM节点（本身是由其他由DOM节点的fiber组成的嘛）</li>
+<li>而且组件的孩子来自于函数的执行而不是直接来自于<code>props</code></li>
+</ul>
+<p>我们检查fiber type是不是一个函数，然后据此切换到一个不同的更新函数。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> isFunctionComponent =</span><br><span class="line">    fiber.type <span class="keyword">instanceof</span> <span class="built_in">Function</span></span><br><span class="line">  <span class="keyword">if</span> (isFunctionComponent) &#123;</span><br><span class="line">    updateFunctionComponent(fiber)</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    updateHostComponent(fiber)</span><br></pre></td></tr></table></figure>
+
+<p>在<code>updateHostComponent</code>中我们做的事和之前一样：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">function <span class="title">updateFunctionComponent</span><span class="params">(fiber)</span> </span>&#123;</span><br><span class="line">  <span class="comment">// TODO</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">function <span class="title">updateHostComponent</span><span class="params">(fiber)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (!fiber.dom) &#123;</span><br><span class="line">    fiber.dom = createDom(fiber)</span><br><span class="line">  &#125;</span><br><span class="line">  reconcileChildren(fiber, fiber.props.children)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>而在<code>updateFunctionComponent</code>中我们运行函数来获得children。</p>
+<p>在我们的例子中，这里的<code>fiber.type</code>是<code>App</code>函数，当我们运行它时会返回一个<code>h1</code>元素。</p>
+<p>接着，一旦我们得到了children，调和函数也会以同样的方式执行，我们不需要对它做任何修改</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">updateFunctionComponent</span>(<span class="params">fiber</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> children = [fiber.type(fiber.props)]</span><br><span class="line">  reconcileChildren(fiber, children)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们需要修改的是<code>commitWork</code>函数，现在我们的到了一些没有DOM节点的fibers，我们要修改两件事。</p>
+<p>首先，为了找到DOM节点的父亲，我们需要在fiber tree中向上查找，直到找到了拥有DOM节点的fiber：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> domParentFiber = fiber.parent</span><br><span class="line"> <span class="keyword">while</span> (!domParentFiber.dom) &#123;</span><br><span class="line">   domParentFiber = domParentFiber.parent</span><br><span class="line"> &#125;</span><br><span class="line"> <span class="keyword">const</span> domParent = domParentFiber.dom</span><br><span class="line"></span><br><span class="line"> <span class="keyword">if</span> (</span><br><span class="line">   fiber.effectTag === <span class="string">&quot;PLACEMENT&quot;</span> &amp;&amp;</span><br><span class="line">   fiber.dom != <span class="literal">null</span></span><br><span class="line"> ) &#123;</span><br><span class="line">   domParent.appendChild(fiber.dom)</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>接着当删除节点时，我们也需要继续查找，直到找到一个具有DOM节点的子元素：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">commitDeletion</span>(<span class="params">fiber, domParent</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (fiber.dom) &#123;</span><br><span class="line">    domParent.removeChild(fiber.dom)</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    commitDeletion(fiber.child, domParent)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="8-Hooks"><a href="#8-Hooks" class="headerlink" title="8.Hooks"></a>8.<code>Hooks</code></h2><p>最后一步了！现在我们实现了函数式组件，现在让我们加入状态。</p>
+<p>让我们写一个经典的计数器例子。每次我们点击它，它的state就加一。注意我们用的是<code>Diadact.useState</code>来获取和更新counter值：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Counter</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> [state, setState] = Didact.useState(<span class="number">1</span>)</span><br><span class="line">  <span class="keyword">return</span> (</span><br><span class="line">    <span class="xml"><span class="tag">&lt;<span class="name">h1</span> <span class="attr">onClick</span>=<span class="string">&#123;()</span> =&gt;</span> setState(c =&gt; c + 1)&#125;&gt;</span></span><br><span class="line"><span class="xml">      Count: &#123;state&#125;</span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span></span><br><span class="line">  )</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> element = <span class="xml"><span class="tag">&lt;<span class="name">Counter</span> /&gt;</span></span></span><br></pre></td></tr></table></figure>
+
+<p><code>updateFunctionComponent</code>是我们调用示例中<code>Counter</code>函数的地方，在<strong>函数内部</strong>我们还调用了<code>useState</code>：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">updateFunctionComponent</span>(<span class="params">fiber</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> children = [fiber.type(fiber.props)]</span><br><span class="line">  reconcileChildren(fiber, children)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">useState</span>(<span class="params">initial</span>) </span>&#123;</span><br><span class="line">  <span class="comment">// TODO</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在调用函数组件之前，我们需要初始化一些全局变量，供我们在<code>useState</code>函数中使用。</p>
+<p>首先，我们定义“正在工作的”fiber。</p>
+<p>我们还在fiber中添加了<code>hooks</code>数组，来实现在一个组件中多次调用<code>useState</code>。同时我们跟踪当前的hook下标：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> wipFiber = <span class="literal">null</span></span><br><span class="line"><span class="keyword">let</span> hookIndex = <span class="literal">null</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">updateFunctionComponent</span>(<span class="params">fiber</span>) </span>&#123;</span><br><span class="line">  wipFiber = fiber</span><br><span class="line">  hookIndex = <span class="number">0</span></span><br><span class="line">  wipFiber.hooks = []</span><br><span class="line">  <span class="keyword">const</span> children = [fiber.type(fiber.props)]</span><br><span class="line">  reconcileChildren(fiber, children)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当函数式组件调用<code>useState</code>时，我们检查是否有一个旧hook。我们用hook下标在fiber的<code>alternate</code>属性中检查。</p>
+<p>如果我们有一个旧hook，就把旧hook中的state复制到新hook中，没有的话呢就初始化state。</p>
+<p>接着我们把新hook添加到fiber，把hook下标加一，并且返回state：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">useState</span>(<span class="params">initial</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> oldHook =</span><br><span class="line">    wipFiber.alternate &amp;&amp;</span><br><span class="line">    wipFiber.alternate.hooks &amp;&amp;</span><br><span class="line">    wipFiber.alternate.hooks[hookIndex]</span><br><span class="line">  <span class="keyword">const</span> hook = &#123;</span><br><span class="line">    <span class="attr">state</span>: oldHook ? oldHook.state : initial,</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  wipFiber.hooks.push(hook)</span><br><span class="line">  hookIndex++</span><br><span class="line">  <span class="keyword">return</span> [hook.state]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>useState</code>还应该返回一个更新state的函数，所以我们定义一个<code>setState</code>函数来接收一个动作（在<code>Counter</code>例子中这个动作是把state加一的函数）。</p>
+<p>我们把这个动作推入一个队列，这个队列是添加在hook上的。</p>
+<p>接下来我们要做的事和之前在<code>render</code>函数中的类似，设置一个新的“工作中的”root作为任务的下一个单元，使workLoop能开启一个新的渲染阶段：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> hook = &#123;</span><br><span class="line">    <span class="attr">state</span>: oldHook ? oldHook.state : initial,</span><br><span class="line">    <span class="attr">queue</span>: [],</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> setState = <span class="function"><span class="params">action</span> =&gt;</span> &#123;</span><br><span class="line">    hook.queue.push(action)</span><br><span class="line">    wipRoot = &#123;</span><br><span class="line">      <span class="attr">dom</span>: currentRoot.dom,</span><br><span class="line">      <span class="attr">props</span>: currentRoot.props,</span><br><span class="line">      <span class="attr">alternate</span>: currentRoot,</span><br><span class="line">    &#125;</span><br><span class="line">    nextUnitOfWork = wipRoot</span><br><span class="line">    deletions = []</span><br><span class="line">  &#125;</span><br><span class="line">​</span><br><span class="line">  wipFiber.hooks.push(hook)</span><br><span class="line">  hookIndex++</span><br><span class="line">  <span class="keyword">return</span> [hook.state, setState]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们还没执行动作呢！</p>
+<p>我们在<strong>下次渲染组件的时候</strong>再执行，我们从旧hook队列中拿到所有动作，再把他们一个个应用在新hook state上，所以当我们返回state的时候它已经更新过了：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> actions = oldHook ? oldHook.queue : []</span><br><span class="line">actions.forEach(<span class="function"><span class="params">action</span> =&gt;</span> &#123;</span><br><span class="line">    hook.state = action(hook.state)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>大功告成！我们写了一个自己的React😀</p>
+<p>下面我们来复习一下整个过程8：</p>
+<p>render:</p>
+<p><img src="C:\Users\luna6\AppData\Roaming\Typora\typora-user-images\image-20211028180235291.png" alt="image-20211028180235291"></p>
+<p>hookindex是干嘛的？</p>
+<p>每次触发一个更新，调用setState函数，都会更新nextUnitOfWork，开始新一轮的重新渲染</p>
+<p>此时fiber一定是函数组件，index在更新函数中初始化为0</p>
+<p>生成children的就是执行函数的过程</p>
+<p>会挨个执行useState函数</p>
+<p>初始化的时候不执行setState的回调</p>
+<p>但是在之后的更新中，需要拿到上一个fiber状态中保存的对应useState,setState回调队列，因为不是每一个setState都执行</p>
+<p>可能再一次事件中调用了多个setState</p>
+<p>在执行setState的过程中，并不会直接改变状态的值</p>
+<p>而是把回调函数推到hook队列中，同时更新nextUnitOfWork，浏览器一旦有空闲就会重新渲染</p>
+<p>比如调用了5个useState，在第三个useState的时候浏览器重新渲染</p>
+<p>前两个useState是没有被打断的，那么hookIndex递增到了2</p>
+<p>第三个的时候，又有五个useState要执行，就要从0开始了</p>
+<p>则意味着hookIndex置为0，而且又要重新执行5个useState</p>
+<p>由于idle的存在，可能队列中有多个action</p>
+<p>当执行perform的时候，index初始化为0，又开始执行useState</p>
+<p>这时wipFiber.alternate.hooks不为空，而且hookindex也有值</p>
+<p>主要是setState和useState执行顺序的问题</p>
+<p>栈</p>
+<p>为了让新的hook能够和旧的hook联系起来</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/react/" rel="tag"># react</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/10/17/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAReact/" rel="next" title="从0开始实现一个React">
+                <i class="fa fa-chevron-left"></i> 从0开始实现一个React
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/10/29/%E4%B8%BA%E4%BB%80%E4%B9%88%E5%8F%AA%E8%83%BD%E5%9C%A8React%E5%87%BD%E6%95%B0%E7%9A%84%E6%9C%80%E9%A1%B6%E5%B1%82%E8%B0%83%E7%94%A8Hook/" rel="prev" title="为什么只能在React函数的最顶层调用Hook?">
+                为什么只能在React函数的最顶层调用Hook? <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
 
     <div class="post-spread">
-      {% if theme.jiathis %}
-        {% include '_partials/share/jiathis.swig' %}
-      {% elseif theme.baidushare %}
-        {% include '_partials/share/baidushare.swig' %}
-      {% elseif theme.add_this_id %}
-        {% include '_partials/share/add-this.swig' %}
-      {% elseif theme.duoshuo_shortname and theme.duoshuo_share %}
-        {% include '_partials/share/duoshuo_share.swig' %}
-      {% endif %}
+      
     </div>
   </div>
 
-{% endblock %}
 
-{% block sidebar %}
-  {{ sidebar_template.render(true) }}
-{% endblock %}
+          </div>
+          
 
-{% block script_extra %}
-  {% include '_scripts/pages/post-details.swig' %}
-{% endblock %}
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%20%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#5-Render%E5%92%8CCommit%E9%98%B6%E6%AE%B5"><span class="nav-number">1.</span> <span class="nav-text">5.Render和Commit阶段</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-%E5%8D%8F%E8%B0%83"><span class="nav-number">2.</span> <span class="nav-text">6.协调</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-%E5%87%BD%E6%95%B0%E7%BB%84%E4%BB%B6"><span class="nav-number">3.</span> <span class="nav-text">7.函数组件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-Hooks"><span class="nav-number">4.</span> <span class="nav-text">8.Hooks</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">He Mengting</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,37 +1,672 @@
-{% extends '_layout.swig' %}
-{% import '_macro/post.swig' as post_template %}
-{% import '_macro/sidebar.swig' as sidebar_template %}
+<!DOCTYPE html>
 
 
-{% block title %}{{ page.title }} | {{ config.title }}{% endblock %}
 
-{% block page_class %}page-post-detail{% endblock %}
+  
 
 
-{% block content %}
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="react," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Hook是React函数组件的机制，以Counter组件为例，我们先看一下函数组件和普通组件有什么区别？ 123456789101112function Counter() &amp;#123;    const [state0, setState0] &#x3D; Didact.useState(0)    const [satte1, setState1] &#x3D; Didact.useState(1)    con">
+<meta property="og:type" content="article">
+<meta property="og:title" content="为什么只能在React函数的最顶层调用Hook?">
+<meta property="og:url" content="http://hemengting.xyz/2021/10/29/%E4%B8%BA%E4%BB%80%E4%B9%88%E5%8F%AA%E8%83%BD%E5%9C%A8React%E5%87%BD%E6%95%B0%E7%9A%84%E6%9C%80%E9%A1%B6%E5%B1%82%E8%B0%83%E7%94%A8Hook/index.html">
+<meta property="og:site_name" content="hmt的博客">
+<meta property="og:description" content="Hook是React函数组件的机制，以Counter组件为例，我们先看一下函数组件和普通组件有什么区别？ 123456789101112function Counter() &amp;#123;    const [state0, setState0] &#x3D; Didact.useState(0)    const [satte1, setState1] &#x3D; Didact.useState(1)    con">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="c:/Users/luna6/AppData/Roaming/Typora/typora-user-images/image-20211029145820062.png">
+<meta property="og:image" content="c:/Users/luna6/AppData/Roaming/Typora/typora-user-images/image-20211031180819358.png">
+<meta property="article:published_time" content="2021-10-29T09:19:55.000Z">
+<meta property="article:modified_time" content="2022-01-18T09:31:37.892Z">
+<meta property="article:author" content="He Mengting">
+<meta property="article:tag" content="react">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="c:/Users/luna6/AppData/Roaming/Typora/typora-user-images/image-20211029145820062.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://hemengting.xyz/2021/10/29/为什么只能在React函数的最顶层调用Hook/"/>
+
+
+
+
+
+  <title>为什么只能在React函数的最顶层调用Hook? | hmt的博客</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">hmt的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
 
   <div id="posts" class="posts-expand">
-    {{ post_template.render(page) }}
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hemengting.xyz/2021/10/29/%E4%B8%BA%E4%BB%80%E4%B9%88%E5%8F%AA%E8%83%BD%E5%9C%A8React%E5%87%BD%E6%95%B0%E7%9A%84%E6%9C%80%E9%A1%B6%E5%B1%82%E8%B0%83%E7%94%A8Hook/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="hmt的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">为什么只能在React函数的最顶层调用Hook?</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2021-10-29T17:19:55+08:00">
+                2021-10-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Hook是React函数组件的机制，以Counter组件为例，我们先看一下函数组件和普通组件有什么区别？</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Counter</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> [state0, setState0] = Didact.useState(<span class="number">0</span>)</span><br><span class="line">    <span class="keyword">const</span> [satte1, setState1] = Didact.useState(<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">const</span> [satte2, setState2] = Didact.useState(<span class="number">2</span>)</span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">        <span class="xml"><span class="tag">&lt;<span class="name">h1</span> <span class="attr">onClick</span>=<span class="string">&#123;()</span> =&gt;</span> &#123;</span></span><br><span class="line"><span class="xml">            setState0(c =&gt; c+1)</span></span><br><span class="line"><span class="xml">            setCount1(c =&gt; c+1)&#125;&#125;&gt; </span></span><br><span class="line"><span class="xml">            Count: &#123;state0&#125;</span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span></span><br><span class="line">    )</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>首先它是通过函数定义的，实际要渲染的内容写在返回值中</li>
+<li>在函数中可以写各种各样的Hook（<code>useState</code>）</li>
+</ol>
+<p>那么为什么这种函数叫Hook呢？我们来看一下<code>useState</code>的内部原理：</p>
+<p>在我们调用<code>useState</code>时，就会创建一个hook对象，里面包含state的值和一个actions队列。</p>
+<p>在Counter第一次挂载的时候会把通过<code>useState</code>创建好的hook一个个添加到<code>wipFiber</code>的hooks队列中，此时<code>wipFiber.hook</code>中有三个hook:</p>
+<p><img src="C:\Users\luna6\AppData\Roaming\Typora\typora-user-images\image-20211029145820062.png" alt="image-20211029145820062"></p>
+<p>因此，在我们执行<code>[state, setState] = useState(0)</code>的时候实际上<code>useState</code>函数返回的就是<code>hook.state</code>和一个闭包函数<code>setState</code>。</p>
+<p>这个时候actions队列中还是空空如也的，当我们点击了Counter，就会根据<code>onClick</code>的回调函数调用相应的<code>setState</code>函数，这里做的主要工作是向对应hook（<code>setState</code>是闭包函数，保存着相应<code>useState</code>函数中定义的hook）的actions queue中加入action，也就是我们传给<code>setState</code>的回调函数，同时更新<code>wipRoot</code>。</p>
+<p>这个时候就有可能调用到函数组件的更新了，因为我们是通过调用<code>requestIdleCallback</code>去执行组件的更新任务的，所以不能保证更新的时机，有可能执行了几个<code>setState</code>之后合并起来一起更新。</p>
+<p>更新函数式组件时，会再次依次执行<code>useState</code>函数，与初次渲染不同的是，这次会<strong>根据<code>hookIndex</code>获取上一个Fiber</strong>的hooks队列中保存的对应的<code>hook</code>，这就是为什么这个保存着状态和动作的对象叫hook的原因：总是要在重新渲染时把上次的状态和动作给“钩”过来，才能实现状态的更新，也是Hook函数这么叫的原因。</p>
+<p>使用<code>hookIndex</code>就是我们把新的<code>useState</code>中的hook和上一次联系起来的手段，所以要确保函数组件每一次执行的时候，<code>useState</code>调用的顺序都是一致的！</p>
+<p>关于倒计时：</p>
+<p>在<code>setInterval</code>中调用<code>setState</code>，会发现倒计时只改变了一次数字就不再变化了，把<code>useState</code>的执行过程打印出来可以看到：</p>
+<p><img src="C:\Users\luna6\AppData\Roaming\Typora\typora-user-images\image-20211031180819358.png" alt="image-20211031180819358"></p>
+<p>只有在<code>useState</code>第二次（第一次是初次渲染）被调用的时候才在hook中添加了action，而且<code>setState</code>执行了五次，添加了五次。这是因为<code>setState</code>实在<code>setInterval</code>中调用的，而<code>setInterval</code>是在第一次更新的时候的useState中被调用的。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/react/" rel="tag"># react</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/10/20/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAReact%E4%B8%8B/" rel="next" title="从0开始实现一个React下">
+                <i class="fa fa-chevron-left"></i> 从0开始实现一个React下
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/12/05/docker%E6%8C%87%E4%BB%A4%E6%B1%87%E6%80%BB/" rel="prev" title="docker指令汇总">
+                docker指令汇总 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
 
     <div class="post-spread">
-      {% if theme.jiathis %}
-        {% include '_partials/share/jiathis.swig' %}
-      {% elseif theme.baidushare %}
-        {% include '_partials/share/baidushare.swig' %}
-      {% elseif theme.add_this_id %}
-        {% include '_partials/share/add-this.swig' %}
-      {% elseif theme.duoshuo_shortname and theme.duoshuo_share %}
-        {% include '_partials/share/duoshuo_share.swig' %}
-      {% endif %}
+      
     </div>
   </div>
 
-{% endblock %}
 
-{% block sidebar %}
-  {{ sidebar_template.render(true) }}
-{% endblock %}
+          </div>
+          
 
-{% block script_extra %}
-  {% include '_scripts/pages/post-details.swig' %}
-{% endblock %}
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%20%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">He Mengting</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

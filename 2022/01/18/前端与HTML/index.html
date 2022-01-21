@@ -1,37 +1,820 @@
-{% extends '_layout.swig' %}
-{% import '_macro/post.swig' as post_template %}
-{% import '_macro/sidebar.swig' as sidebar_template %}
+<!DOCTYPE html>
 
 
-{% block title %}{{ page.title }} | {{ config.title }}{% endblock %}
 
-{% block page_class %}page-post-detail{% endblock %}
+  
 
 
-{% block content %}
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="html," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="本节课老师梳理了HTML的相关概念，同时学了一些不常用的标签和属性。 一、前端概述1. 技术栈 js  css  html   2. 前端应该关注哪些方面？图形界面下的人机交互 功能 美观 无障碍 安全 性能 兼容性 体验 3. 前端的边界 node - 服务器端应用  Electron&#x2F;React Native - 跨平台桌面应用  WebRTC（Web Real-Time Communicat">
+<meta property="og:type" content="article">
+<meta property="og:title" content="青训营笔记一 前端与HTML">
+<meta property="og:url" content="http://hemengting.xyz/2022/01/18/%E5%89%8D%E7%AB%AF%E4%B8%8EHTML/index.html">
+<meta property="og:site_name" content="hmt的博客">
+<meta property="og:description" content="本节课老师梳理了HTML的相关概念，同时学了一些不常用的标签和属性。 一、前端概述1. 技术栈 js  css  html   2. 前端应该关注哪些方面？图形界面下的人机交互 功能 美观 无障碍 安全 性能 兼容性 体验 3. 前端的边界 node - 服务器端应用  Electron&#x2F;React Native - 跨平台桌面应用  WebRTC（Web Real-Time Communicat">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-01-18T09:37:28.000Z">
+<meta property="article:modified_time" content="2022-01-18T09:38:08.470Z">
+<meta property="article:author" content="He Mengting">
+<meta property="article:tag" content="html">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://hemengting.xyz/2022/01/18/前端与HTML/"/>
+
+
+
+
+
+  <title>青训营笔记一 前端与HTML | hmt的博客</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">hmt的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
 
   <div id="posts" class="posts-expand">
-    {{ post_template.render(page) }}
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hemengting.xyz/2022/01/18/%E5%89%8D%E7%AB%AF%E4%B8%8EHTML/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="hmt的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">青训营笔记一 前端与HTML</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2022-01-18T17:37:28+08:00">
+                2022-01-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本节课老师梳理了HTML的相关概念，同时学了一些不常用的标签和属性。</p>
+<h2 id="一、前端概述"><a href="#一、前端概述" class="headerlink" title="一、前端概述"></a>一、前端概述</h2><h3 id="1-技术栈"><a href="#1-技术栈" class="headerlink" title="1. 技术栈"></a>1. 技术栈</h3><ul>
+<li><p>js</p>
+</li>
+<li><p>css</p>
+</li>
+<li><p>html</p>
+</li>
+</ul>
+<h3 id="2-前端应该关注哪些方面？"><a href="#2-前端应该关注哪些方面？" class="headerlink" title="2. 前端应该关注哪些方面？"></a>2. 前端应该关注哪些方面？</h3><p>图形界面下的人机交互</p>
+<p>功能 美观 无障碍 安全 性能 兼容性 体验</p>
+<h3 id="3-前端的边界"><a href="#3-前端的边界" class="headerlink" title="3. 前端的边界"></a>3. 前端的边界</h3><ul>
+<li><p><code>node</code> - 服务器端应用</p>
+</li>
+<li><p><code>Electron</code>/<code>React Native</code> - 跨平台桌面应用</p>
+</li>
+<li><p><code>WebRTC</code>（Web Real-Time Communication） - P2P在线传输，多人会议</p>
+</li>
+<li><p>WebGL（Web Graphics Library） - 3D游戏</p>
+</li>
+<li><p>WebAssembly - 可以使用非 JavaScript 编程语言编写代码并且能在浏览器上运行</p>
+</li>
+</ul>
+<h3 id="4-开发环境"><a href="#4-开发环境" class="headerlink" title="4.开发环境"></a>4.开发环境</h3><p>浏览器+编辑器</p>
+<h2 id="二、HTML概述"><a href="#二、HTML概述" class="headerlink" title="二、HTML概述"></a>二、HTML概述</h2><h3 id="1-HTML是什么？"><a href="#1-HTML是什么？" class="headerlink" title="1. HTML是什么？"></a>1. HTML是什么？</h3><ul>
+<li><p>HyperText（图片、链接、表格等） </p>
+</li>
+<li><p>Markup（ 标记语言，<code>&lt;img src=&quot;photo.jpg&quot; /&gt;</code>，<code>src</code>是属性名，等号右边是属性值）</p>
+</li>
+<li><p>Language</p>
+</li>
+</ul>
+<p>一个完整的例子：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>页面标题<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">h1</span>&gt;</span>一级标题<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span>&gt;</span>段落内容<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>&lt;!DOCTYPE html&gt;</code>：对 HTML文件来说，浏览器使用文件开头的 DOCTYPE 来决定用<strong>怪异模式</strong>处理或<strong>标准模式</strong>处理。</p>
+<p><code>html</code>：文档根标签，所有其他元素必须是此元素的后代。</p>
+<p><code>head</code>：页面元数据，不需要直接呈现给用户</p>
+<p><code>body</code>：需要呈现给用户的内容</p>
+<h3 id="2-DOM树"><a href="#2-DOM树" class="headerlink" title="2. DOM树"></a>2. DOM树</h3><p>浏览器对html文件进行解析，得到DOM树，DOM节点</p>
+<h2 id="三、HTML语法"><a href="#三、HTML语法" class="headerlink" title="三、HTML语法"></a>三、HTML语法</h2><ul>
+<li>标签和属性不区分大小写，推荐<strong>小写</strong></li>
+<li>空标签可以不闭合，比如input、meta</li>
+<li>属性值推荐用双引号包裹</li>
+<li>某些属性值可以省略，比如 required、readonly</li>
+</ul>
+<h3 id="1-标题h1-h6"><a href="#1-标题h1-h6" class="headerlink" title="1.标题h1~h6"></a>1.标题h1~h6</h3><h3 id="2-列表"><a href="#2-列表" class="headerlink" title="2.列表"></a>2.列表</h3><ul>
+<li>有序列表<code>&lt;ol&gt;</code>：ordered list</li>
+<li>无序列表<code>&lt;ul&gt;</code>：unordered list</li>
+<li>key-value列表<code>&lt;dl&gt;</code>：defination list<ul>
+<li><code>&lt;dt&gt;</code>title</li>
+<li><code>&lt;dd&gt;</code>description</li>
+<li>多对多的关系</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-链接anchor"><a href="#3-链接anchor" class="headerlink" title="3.链接anchor"></a>3.链接anchor</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;a href=&quot;www.aboutmt.top&quot;&gt;&lt;/a&gt;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>target</code>：该属性指定在何处显示链接的资源。 取值为标签（tab），窗口（window），或框架（iframe）等浏览上下文的名称或其他关键词。</li>
+</ul>
+<h3 id="4-多媒体：图片和音视频"><a href="#4-多媒体：图片和音视频" class="headerlink" title="4. 多媒体：图片和音视频"></a>4. 多媒体：图片和音视频</h3><p><code>&lt;img/&gt;</code></p>
+<ul>
+<li><code>alt</code>：定义了图像的备用文本描述。</li>
+</ul>
+<p><code>&lt;audio /&gt;</code></p>
+<p><code>&lt;video /&gt;</code></p>
+<ul>
+<li><code>controls</code>：默认播放控件</li>
+</ul>
+<h3 id="5-输入"><a href="#5-输入" class="headerlink" title="5.输入"></a>5.输入</h3><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">placeholder</span>=<span class="string">&quot;range&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;range&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;number&quot;</span> <span class="attr">min</span>=<span class="string">&quot;1&quot;</span> <span class="attr">max</span>=<span class="string">&quot;10&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;date&quot;</span> <span class="attr">min</span>=<span class="string">&quot;2018-02-10&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">textarea</span>&gt;</span>Hey<span class="tag">&lt;/<span class="name">textarea</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="6-选择"><a href="#6-选择" class="headerlink" title="6.选择"></a>6.选择</h3><p>多选：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"> <span class="tag">&lt;<span class="name">p</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">label</span>&gt;</span><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;checkbox&quot;</span> /&gt;</span>🍎<span class="tag">&lt;/<span class="name">label</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">label</span>&gt;</span><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;checkbox&quot;</span> /&gt;</span>🍌<span class="tag">&lt;/<span class="name">label</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>单选：通过name达到互斥关系</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">label</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;radio&quot;</span> <span class="attr">name</span>=<span class="string">&quot;fruit&quot;</span> /&gt;</span>🍎</span><br><span class="line">    <span class="tag">&lt;/<span class="name">label</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">label</span>&gt;</span><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;radio&quot;</span> <span class="attr">name</span>=<span class="string">&quot;fruit&quot;</span> /&gt;</span>🍌		<span class="tag">&lt;/<span class="name">label</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>下拉菜单：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">select</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">option</span>&gt;</span>🍎<span class="tag">&lt;/<span class="name">option</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">option</span>&gt;</span>🍌<span class="tag">&lt;/<span class="name">option</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">option</span>&gt;</span>🍈<span class="tag">&lt;/<span class="name">option</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">select</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>自由输入的同时有提示：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">list</span>=<span class="string">&quot;fruits&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">datalist</span> <span class="attr">id</span>=<span class="string">&quot;fruits&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">option</span>&gt;</span>🍎<span class="tag">&lt;/<span class="name">option</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">option</span>&gt;</span>🍌<span class="tag">&lt;/<span class="name">option</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">option</span>&gt;</span>🍈<span class="tag">&lt;/<span class="name">option</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">datalist</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="7-文本类标签"><a href="#7-文本类标签" class="headerlink" title="7.文本类标签"></a>7.文本类标签</h3><h4 id="文字引用"><a href="#文字引用" class="headerlink" title="文字引用"></a>文字引用</h4><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">blockquote</span> <span class="attr">cite</span>=<span class="string">&quot;http://aboutmt.top&quot;</span>&gt;</span></span><br><span class="line">    长引用，直接引用别人的一段文字，可以换行</span><br><span class="line"><span class="tag">&lt;/<span class="name">blockquote</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span></span><br><span class="line">    短引用，我最喜欢的一本书是<span class="tag">&lt;<span class="name">cite</span>&gt;</span>小王子<span class="tag">&lt;/<span class="name">cite</span>&gt;</span></span><br><span class="line">    引用内容不要包含换行</span><br><span class="line"><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span></span><br><span class="line">    在<span class="tag">&lt;<span class="name">cite</span>&gt;</span>第一章<span class="tag">&lt;/<span class="name">cite</span>&gt;</span>，我们讲过<span class="tag">&lt;<span class="name">q</span>&gt;</span>字符串是</span><br><span class="line">    不可变量。<span class="tag">&lt;/<span class="name">q</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>q</code>和<code>cite</code>区别：</p>
+<ul>
+<li><p><code>cite</code>表示一个作品的引用，且必须包含作品的标题；</p>
+</li>
+<li><p><code>q</code>表示一个封闭的并且是短的行内引用的文本。</p>
+</li>
+</ul>
+<h4 id="代码引用："><a href="#代码引用：" class="headerlink" title="代码引用："></a>代码引用：</h4><p>使用等宽字体（编程字体）展示</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">code</span>&gt;</span>const<span class="tag">&lt;/<span class="name">code</span>&gt;</span>声明创建一个只读的常量。</span><br><span class="line"><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">pre</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">code</span>&gt;</span></span><br><span class="line">    	const add = (a, b) =&gt; a + b;</span><br><span class="line">        const multiply = (a, b) =&gt; a * b;</span><br><span class="line">    <span class="tag">&lt;/<span class="name">code</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">pre</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="强调标签"><a href="#强调标签" class="headerlink" title="强调标签"></a>强调标签</h4><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span></span><br><span class="line">    在投资之前，<span class="tag">&lt;<span class="name">strong</span>&gt;</span>一定要做风险评估<span class="tag">&lt;/<span class="name">strong</span>&gt;</span>。</span><br><span class="line"><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span>Cats <span class="tag">&lt;<span class="name">em</span>&gt;</span>are<span class="tag">&lt;/<span class="name">em</span>&gt;</span> cute animals.<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>strong</code>强调内容重要</li>
+<li><code>em</code>强调语气</li>
+</ul>
+<h3 id="8-内容划分"><a href="#8-内容划分" class="headerlink" title="8. 内容划分"></a>8. 内容划分</h3><p><code>header</code></p>
+<p><code>nav</code></p>
+<p><code>main</code></p>
+<p><code>article</code></p>
+<p><code>aside</code> 广告 热点推荐</p>
+<p><code>footer</code> 版权信息 备案</p>
+<h2 id="四、语义化是什么"><a href="#四、语义化是什么" class="headerlink" title="四、语义化是什么"></a>四、语义化是什么</h2><ul>
+<li><p>HTML中的元素、属性及属性值都拥有某些含义</p>
+</li>
+<li><p>开发者应该遵循语义来编写HTML</p>
+<ul>
+<li><p>有序列表用ol；无序列表用ul</p>
+</li>
+<li><p>lang属性表示内容所使用的语言</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>有助于chrome自动翻译</p>
+<h3 id="1-谁在使用我们写的HTML"><a href="#1-谁在使用我们写的HTML" class="headerlink" title="1. 谁在使用我们写的HTML"></a>1. 谁在使用我们写的HTML</h3><ul>
+<li>开发者-修改、维护页面</li>
+<li>浏览器-展示页面，比如语言</li>
+<li>搜索引擎-提取关键词、排序</li>
+<li>屏幕阅读器-给盲人或者不方便的人页面内容 无障碍性</li>
+</ul>
+<h3 id="2-语义化的好处"><a href="#2-语义化的好处" class="headerlink" title="2. 语义化的好处"></a>2. 语义化的好处</h3><ul>
+<li>代码可读性</li>
+<li>可维护性</li>
+<li>搜索引擎优化</li>
+<li>提升无障碍性</li>
+</ul>
+<h3 id="3-传达内容，而不是样式"><a href="#3-传达内容，而不是样式" class="headerlink" title="3. 传达内容，而不是样式"></a>3. 传达内容，而不是样式</h3><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">p</span> <span class="attr">style</span>=<span class="string">&quot;font-size: 32px;&quot;</span>&gt;</span></span><br><span class="line">	前端工程师的自我修养（这是一个不好的例子）</span><br><span class="line"><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">h1</span>&gt;</span>前端工程师的自我修养（推荐这样写）<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-如何做到语义化？"><a href="#4-如何做到语义化？" class="headerlink" title="4. 如何做到语义化？"></a>4. 如何做到语义化？</h3><ul>
+<li>了解每个标签和属性的含义</li>
+<li>思考什么标签最适合描述这个内容</li>
+<li>不使用可视化工具生成代码</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/html/" rel="tag"># html</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/01/18/wiproot%20setState%20=%20nextUnitOfwork/" rel="next" title="">
+                <i class="fa fa-chevron-left"></i> 
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2022/01/21/d3-js%E5%85%A5%E9%97%A8%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="prev" title="d3.js入门学习笔记">
+                d3.js入门学习笔记 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
 
     <div class="post-spread">
-      {% if theme.jiathis %}
-        {% include '_partials/share/jiathis.swig' %}
-      {% elseif theme.baidushare %}
-        {% include '_partials/share/baidushare.swig' %}
-      {% elseif theme.add_this_id %}
-        {% include '_partials/share/add-this.swig' %}
-      {% elseif theme.duoshuo_shortname and theme.duoshuo_share %}
-        {% include '_partials/share/duoshuo_share.swig' %}
-      {% endif %}
+      
     </div>
   </div>
 
-{% endblock %}
 
-{% block sidebar %}
-  {{ sidebar_template.render(true) }}
-{% endblock %}
+          </div>
+          
 
-{% block script_extra %}
-  {% include '_scripts/pages/post-details.swig' %}
-{% endblock %}
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%20%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%89%8D%E7%AB%AF%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">一、前端概述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%8A%80%E6%9C%AF%E6%A0%88"><span class="nav-number">1.1.</span> <span class="nav-text">1. 技术栈</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%89%8D%E7%AB%AF%E5%BA%94%E8%AF%A5%E5%85%B3%E6%B3%A8%E5%93%AA%E4%BA%9B%E6%96%B9%E9%9D%A2%EF%BC%9F"><span class="nav-number">1.2.</span> <span class="nav-text">2. 前端应该关注哪些方面？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%89%8D%E7%AB%AF%E7%9A%84%E8%BE%B9%E7%95%8C"><span class="nav-number">1.3.</span> <span class="nav-text">3. 前端的边界</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83"><span class="nav-number">1.4.</span> <span class="nav-text">4.开发环境</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81HTML%E6%A6%82%E8%BF%B0"><span class="nav-number">2.</span> <span class="nav-text">二、HTML概述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-HTML%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-number">2.1.</span> <span class="nav-text">1. HTML是什么？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-DOM%E6%A0%91"><span class="nav-number">2.2.</span> <span class="nav-text">2. DOM树</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81HTML%E8%AF%AD%E6%B3%95"><span class="nav-number">3.</span> <span class="nav-text">三、HTML语法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%A0%87%E9%A2%98h1-h6"><span class="nav-number">3.1.</span> <span class="nav-text">1.标题h1~h6</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%88%97%E8%A1%A8"><span class="nav-number">3.2.</span> <span class="nav-text">2.列表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E9%93%BE%E6%8E%A5anchor"><span class="nav-number">3.3.</span> <span class="nav-text">3.链接anchor</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E5%A4%9A%E5%AA%92%E4%BD%93%EF%BC%9A%E5%9B%BE%E7%89%87%E5%92%8C%E9%9F%B3%E8%A7%86%E9%A2%91"><span class="nav-number">3.4.</span> <span class="nav-text">4. 多媒体：图片和音视频</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E8%BE%93%E5%85%A5"><span class="nav-number">3.5.</span> <span class="nav-text">5.输入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-%E9%80%89%E6%8B%A9"><span class="nav-number">3.6.</span> <span class="nav-text">6.选择</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-%E6%96%87%E6%9C%AC%E7%B1%BB%E6%A0%87%E7%AD%BE"><span class="nav-number">3.7.</span> <span class="nav-text">7.文本类标签</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%96%87%E5%AD%97%E5%BC%95%E7%94%A8"><span class="nav-number">3.7.1.</span> <span class="nav-text">文字引用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E5%BC%95%E7%94%A8%EF%BC%9A"><span class="nav-number">3.7.2.</span> <span class="nav-text">代码引用：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%BA%E8%B0%83%E6%A0%87%E7%AD%BE"><span class="nav-number">3.7.3.</span> <span class="nav-text">强调标签</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-%E5%86%85%E5%AE%B9%E5%88%92%E5%88%86"><span class="nav-number">3.8.</span> <span class="nav-text">8. 内容划分</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E8%AF%AD%E4%B9%89%E5%8C%96%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">4.</span> <span class="nav-text">四、语义化是什么</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E8%B0%81%E5%9C%A8%E4%BD%BF%E7%94%A8%E6%88%91%E4%BB%AC%E5%86%99%E7%9A%84HTML"><span class="nav-number">4.1.</span> <span class="nav-text">1. 谁在使用我们写的HTML</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E8%AF%AD%E4%B9%89%E5%8C%96%E7%9A%84%E5%A5%BD%E5%A4%84"><span class="nav-number">4.2.</span> <span class="nav-text">2. 语义化的好处</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E4%BC%A0%E8%BE%BE%E5%86%85%E5%AE%B9%EF%BC%8C%E8%80%8C%E4%B8%8D%E6%98%AF%E6%A0%B7%E5%BC%8F"><span class="nav-number">4.3.</span> <span class="nav-text">3. 传达内容，而不是样式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E5%A6%82%E4%BD%95%E5%81%9A%E5%88%B0%E8%AF%AD%E4%B9%89%E5%8C%96%EF%BC%9F"><span class="nav-number">4.4.</span> <span class="nav-text">4. 如何做到语义化？</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">He Mengting</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,269 +1,37 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  
-  
-  <title>为什么只能在React函数的最顶层调用Hook? | hmt的博客</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="Hook是React函数组件的机制，以Counter组件为例，我们先看一下函数组件和普通组件有什么区别？ 123456789101112function Counter() &amp;#123;    const [state0, setState0] &#x3D; Didact.useState(0)    const [satte1, setState1] &#x3D; Didact.useState(1)    con">
-<meta property="og:type" content="article">
-<meta property="og:title" content="为什么只能在React函数的最顶层调用Hook?">
-<meta property="og:url" content="http://hemengting.xyz/2021/10/29/%E4%B8%BA%E4%BB%80%E4%B9%88%E5%8F%AA%E8%83%BD%E5%9C%A8React%E5%87%BD%E6%95%B0%E7%9A%84%E6%9C%80%E9%A1%B6%E5%B1%82%E8%B0%83%E7%94%A8Hook/index.html">
-<meta property="og:site_name" content="hmt的博客">
-<meta property="og:description" content="Hook是React函数组件的机制，以Counter组件为例，我们先看一下函数组件和普通组件有什么区别？ 123456789101112function Counter() &amp;#123;    const [state0, setState0] &#x3D; Didact.useState(0)    const [satte1, setState1] &#x3D; Didact.useState(1)    con">
-<meta property="og:locale" content="en_US">
-<meta property="og:image" content="c:/Users/luna6/AppData/Roaming/Typora/typora-user-images/image-20211029145820062.png">
-<meta property="og:image" content="c:/Users/luna6/AppData/Roaming/Typora/typora-user-images/image-20211031180819358.png">
-<meta property="article:published_time" content="2021-10-29T09:19:55.000Z">
-<meta property="article:modified_time" content="2022-01-18T09:31:37.892Z">
-<meta property="article:author" content="He Mengting">
-<meta property="article:tag" content="react">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="c:/Users/luna6/AppData/Roaming/Typora/typora-user-images/image-20211029145820062.png">
-  
-    <link rel="alternate" href="/atom.xml" title="hmt的博客" type="application/atom+xml">
-  
-  
-    <link rel="shortcut icon" href="/favicon.png">
-  
-  
-    
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
-
-  
-  
-<link rel="stylesheet" href="/css/style.css">
-
-  
-    
-<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
-
-  
-<meta name="generator" content="Hexo 5.4.0"></head>
-
-<body>
-  <div id="container">
-    <div id="wrap">
-      <header id="header">
-  <div id="banner"></div>
-  <div id="header-outer" class="outer">
-    <div id="header-title" class="inner">
-      <h1 id="logo-wrap">
-        <a href="/" id="logo">hmt的博客</a>
-      </h1>
-      
-    </div>
-    <div id="header-inner" class="inner">
-      <nav id="main-nav">
-        <a id="main-nav-toggle" class="nav-icon"></a>
-        
-          <a class="main-nav-link" href="/">Home</a>
-        
-          <a class="main-nav-link" href="/archives">Archives</a>
-        
-      </nav>
-      <nav id="sub-nav">
-        
-          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
-        
-        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
-      </nav>
-      <div id="search-form-wrap">
-        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://hemengting.xyz"></form>
-      </div>
-    </div>
-  </div>
-</header>
-
-      <div class="outer">
-        <section id="main"><article id="post-为什么只能在React函数的最顶层调用Hook" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2021/10/29/%E4%B8%BA%E4%BB%80%E4%B9%88%E5%8F%AA%E8%83%BD%E5%9C%A8React%E5%87%BD%E6%95%B0%E7%9A%84%E6%9C%80%E9%A1%B6%E5%B1%82%E8%B0%83%E7%94%A8Hook/" class="article-date">
-  <time class="dt-published" datetime="2021-10-29T09:19:55.000Z" itemprop="datePublished">2021-10-29</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 class="p-name article-title" itemprop="headline name">
-      为什么只能在React函数的最顶层调用Hook?
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <p>Hook是React函数组件的机制，以Counter组件为例，我们先看一下函数组件和普通组件有什么区别？</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Counter</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> [state0, setState0] = Didact.useState(<span class="number">0</span>)</span><br><span class="line">    <span class="keyword">const</span> [satte1, setState1] = Didact.useState(<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">const</span> [satte2, setState2] = Didact.useState(<span class="number">2</span>)</span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">        <span class="xml"><span class="tag">&lt;<span class="name">h1</span> <span class="attr">onClick</span>=<span class="string">&#123;()</span> =&gt;</span> &#123;</span></span><br><span class="line"><span class="xml">            setState0(c =&gt; c+1)</span></span><br><span class="line"><span class="xml">            setCount1(c =&gt; c+1)&#125;&#125;&gt; </span></span><br><span class="line"><span class="xml">            Count: &#123;state0&#125;</span></span><br><span class="line"><span class="xml">        <span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span></span><br><span class="line">    )</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ol>
-<li>首先它是通过函数定义的，实际要渲染的内容写在返回值中</li>
-<li>在函数中可以写各种各样的Hook（<code>useState</code>）</li>
-</ol>
-<p>那么为什么这种函数叫Hook呢？我们来看一下<code>useState</code>的内部原理：</p>
-<p>在我们调用<code>useState</code>时，就会创建一个hook对象，里面包含state的值和一个actions队列。</p>
-<p>在Counter第一次挂载的时候会把通过<code>useState</code>创建好的hook一个个添加到<code>wipFiber</code>的hooks队列中，此时<code>wipFiber.hook</code>中有三个hook:</p>
-<p><img src="C:\Users\luna6\AppData\Roaming\Typora\typora-user-images\image-20211029145820062.png" alt="image-20211029145820062"></p>
-<p>因此，在我们执行<code>[state, setState] = useState(0)</code>的时候实际上<code>useState</code>函数返回的就是<code>hook.state</code>和一个闭包函数<code>setState</code>。</p>
-<p>这个时候actions队列中还是空空如也的，当我们点击了Counter，就会根据<code>onClick</code>的回调函数调用相应的<code>setState</code>函数，这里做的主要工作是向对应hook（<code>setState</code>是闭包函数，保存着相应<code>useState</code>函数中定义的hook）的actions queue中加入action，也就是我们传给<code>setState</code>的回调函数，同时更新<code>wipRoot</code>。</p>
-<p>这个时候就有可能调用到函数组件的更新了，因为我们是通过调用<code>requestIdleCallback</code>去执行组件的更新任务的，所以不能保证更新的时机，有可能执行了几个<code>setState</code>之后合并起来一起更新。</p>
-<p>更新函数式组件时，会再次依次执行<code>useState</code>函数，与初次渲染不同的是，这次会<strong>根据<code>hookIndex</code>获取上一个Fiber</strong>的hooks队列中保存的对应的<code>hook</code>，这就是为什么这个保存着状态和动作的对象叫hook的原因：总是要在重新渲染时把上次的状态和动作给“钩”过来，才能实现状态的更新，也是Hook函数这么叫的原因。</p>
-<p>使用<code>hookIndex</code>就是我们把新的<code>useState</code>中的hook和上一次联系起来的手段，所以要确保函数组件每一次执行的时候，<code>useState</code>调用的顺序都是一致的！</p>
-<p>关于倒计时：</p>
-<p>在<code>setInterval</code>中调用<code>setState</code>，会发现倒计时只改变了一次数字就不再变化了，把<code>useState</code>的执行过程打印出来可以看到：</p>
-<p><img src="C:\Users\luna6\AppData\Roaming\Typora\typora-user-images\image-20211031180819358.png" alt="image-20211031180819358"></p>
-<p>只有在<code>useState</code>第二次（第一次是初次渲染）被调用的时候才在hook中添加了action，而且<code>setState</code>执行了五次，添加了五次。这是因为<code>setState</code>实在<code>setInterval</code>中调用的，而<code>setInterval</code>是在第一次更新的时候的useState中被调用的。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://hemengting.xyz/2021/10/29/%E4%B8%BA%E4%BB%80%E4%B9%88%E5%8F%AA%E8%83%BD%E5%9C%A8React%E5%87%BD%E6%95%B0%E7%9A%84%E6%9C%80%E9%A1%B6%E5%B1%82%E8%B0%83%E7%94%A8Hook/" data-id="ckyjxbgik000ls4ub1k9e28h5" data-title="为什么只能在React函数的最顶层调用Hook?" class="article-share-link">Share</a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/react/" rel="tag">react</a></li></ul>
-
-    </footer>
-  </div>
-  
-    
-<nav id="article-nav">
-  
-    <a href="/2021/12/05/docker%E6%8C%87%E4%BB%A4%E6%B1%87%E6%80%BB/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          docker指令汇总
-        
-      </div>
-    </a>
-  
-  
-    <a href="/2021/10/20/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAReact%E4%B8%8B/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">从0开始实现一个React下</div>
-    </a>
-  
-</nav>
-
-  
-</article>
+{% extends '_layout.swig' %}
+{% import '_macro/post.swig' as post_template %}
+{% import '_macro/sidebar.swig' as sidebar_template %}
 
 
-</section>
-        
-          <aside id="sidebar">
-  
-    
+{% block title %}{{ page.title }} | {{ config.title }}{% endblock %}
 
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">Tags</h3>
-    <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/JavaScript/" rel="tag">JavaScript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/d3/" rel="tag">d3</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/" rel="tag">docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker-mysql-navicat/" rel="tag">docker mysql navicat</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/html/" rel="tag">html</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/html-%E7%BF%BB%E8%AF%91/" rel="tag">html,翻译</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/react/" rel="tag">react</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/react-babel/" rel="tag">react babel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/webpack/" rel="tag">webpack</a></li></ul>
+{% block page_class %}page-post-detail{% endblock %}
+
+
+{% block content %}
+
+  <div id="posts" class="posts-expand">
+    {{ post_template.render(page) }}
+
+    <div class="post-spread">
+      {% if theme.jiathis %}
+        {% include '_partials/share/jiathis.swig' %}
+      {% elseif theme.baidushare %}
+        {% include '_partials/share/baidushare.swig' %}
+      {% elseif theme.add_this_id %}
+        {% include '_partials/share/add-this.swig' %}
+      {% elseif theme.duoshuo_shortname and theme.duoshuo_share %}
+        {% include '_partials/share/duoshuo_share.swig' %}
+      {% endif %}
     </div>
   </div>
 
+{% endblock %}
 
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">Tag Cloud</h3>
-    <div class="widget tagcloud">
-      <a href="/tags/JavaScript/" style="font-size: 15px;">JavaScript</a> <a href="/tags/d3/" style="font-size: 10px;">d3</a> <a href="/tags/docker/" style="font-size: 10px;">docker</a> <a href="/tags/docker-mysql-navicat/" style="font-size: 10px;">docker mysql navicat</a> <a href="/tags/html/" style="font-size: 10px;">html</a> <a href="/tags/html-%E7%BF%BB%E8%AF%91/" style="font-size: 10px;">html,翻译</a> <a href="/tags/react/" style="font-size: 15px;">react</a> <a href="/tags/react-babel/" style="font-size: 10px;">react babel</a> <a href="/tags/webpack/" style="font-size: 20px;">webpack</a>
-    </div>
-  </div>
+{% block sidebar %}
+  {{ sidebar_template.render(true) }}
+{% endblock %}
 
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">Archives</h3>
-    <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">January 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">December 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">October 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li></ul>
-    </div>
-  </div>
-
-
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">Recent Posts</h3>
-    <div class="widget">
-      <ul>
-        
-          <li>
-            <a href="/2022/01/21/d3-js%E5%85%A5%E9%97%A8%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">d3.js入门学习笔记</a>
-          </li>
-        
-          <li>
-            <a href="/2022/01/18/%E5%89%8D%E7%AB%AF%E4%B8%8EHTML/">青训营笔记一 前端与HTML</a>
-          </li>
-        
-          <li>
-            <a href="/2022/01/18/wiproot%20setState%20=%20nextUnitOfwork/">(no title)</a>
-          </li>
-        
-          <li>
-            <a href="/2021/12/10/%E4%BD%BF%E7%94%A8navicat%E8%BF%9E%E6%8E%A5%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84docker%E4%B8%AD%E7%9A%84mysql%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%87%E7%A8%8B/">使用navicat连接云服务器的docker中的mysql数据库过程</a>
-          </li>
-        
-          <li>
-            <a href="/2021/12/05/docker%E6%8C%87%E4%BB%A4%E6%B1%87%E6%80%BB/">docker指令汇总</a>
-          </li>
-        
-      </ul>
-    </div>
-  </div>
-
-  
-</aside>
-        
-      </div>
-      <footer id="footer">
-  
-  <div class="outer">
-    <div id="footer-info" class="inner">
-      
-      &copy; 2022 He Mengting<br>
-      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
-    </div>
-  </div>
-</footer>
-
-    </div>
-    <nav id="mobile-nav">
-  
-    <a href="/" class="mobile-nav-link">Home</a>
-  
-    <a href="/archives" class="mobile-nav-link">Archives</a>
-  
-</nav>
-    
-
-
-<script src="/js/jquery-3.4.1.min.js"></script>
-
-
-
-  
-<script src="/fancybox/jquery.fancybox.min.js"></script>
-
-
-
-
-<script src="/js/script.js"></script>
-
-
-
-
-
-  </div>
-</body>
-</html>
+{% block script_extra %}
+  {% include '_scripts/pages/post-details.swig' %}
+{% endblock %}

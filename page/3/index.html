@@ -20,33 +20,28 @@
     var CONFIG = {"hostname":"hmt0.github.io","root":"/project/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="模块化方案进化史 AMD（Asynchronous Module Definition）异步模块定义 123456&#x2F;&#x2F; 求和模块的定义define(&amp;#x27;getSum&amp;#x27;, [&amp;#x27;math&amp;#x27;], function(math))&amp;#123;    return function(a, b) &amp;#123;    	console.log(&quot;sum: &amp;quot">
-<meta property="og:type" content="article">
-<meta property="og:title" content="webpack入门二、模块化方案进化史">
-<meta property="og:url" content="https://hmt0.github.io/project/2021/09/07/webpack%E5%85%A5%E9%97%A8%E4%BA%8C%E3%80%81%E6%A8%A1%E5%9D%97%E5%8C%96%E6%96%B9%E6%A1%88%E8%BF%9B%E5%8C%96%E5%8F%B2/index.html">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="hmt的博客">
+<meta property="og:url" content="https://hmt0.github.io/project/page/3/index.html">
 <meta property="og:site_name" content="hmt的博客">
-<meta property="og:description" content="模块化方案进化史 AMD（Asynchronous Module Definition）异步模块定义 123456&#x2F;&#x2F; 求和模块的定义define(&amp;#x27;getSum&amp;#x27;, [&amp;#x27;math&amp;#x27;], function(math))&amp;#123;    return function(a, b) &amp;#123;    	console.log(&quot;sum: &amp;quot">
 <meta property="og:locale" content="en_US">
-<meta property="article:published_time" content="2021-09-07T08:53:08.000Z">
-<meta property="article:modified_time" content="2022-01-18T09:31:37.890Z">
 <meta property="article:author" content="He Mengting">
-<meta property="article:tag" content="webpack">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://hmt0.github.io/project/2021/09/07/webpack%E5%85%A5%E9%97%A8%E4%BA%8C%E3%80%81%E6%A8%A1%E5%9D%97%E5%8C%96%E6%96%B9%E6%A1%88%E8%BF%9B%E5%8C%96%E5%8F%B2/">
+<link rel="canonical" href="https://hmt0.github.io/project/page/3/">
 
 
 <script id="page-configurations">
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome : false,
-    isPost : true,
+    isHome : true,
+    isPost : false,
     lang   : 'en'
   };
 </script>
 
-  <title>webpack入门二、模块化方案进化史 | hmt的博客</title>
+  <title>hmt的博客</title>
   
 
 
@@ -144,10 +139,9 @@
         <div class="content-wrap">
           
 
-          <div class="content post posts-expand">
+          <div class="content index posts-expand">
             
-
-    
+      
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
@@ -163,9 +157,10 @@
       <meta itemprop="name" content="hmt的博客">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          webpack入门二、模块化方案进化史
-        </h1>
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/project/2021/09/07/webpack%E5%85%A5%E9%97%A8%E4%BA%8C%E3%80%81%E6%A8%A1%E5%9D%97%E5%8C%96%E6%96%B9%E6%A1%88%E8%BF%9B%E5%8C%96%E5%8F%B2/" class="post-title-link" itemprop="url">webpack入门二、模块化方案进化史</a>
+        </h2>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -195,7 +190,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="模块化方案进化史"><a href="#模块化方案进化史" class="headerlink" title="模块化方案进化史"></a>模块化方案进化史</h1><p> <code>AMD</code>（Asynchronous Module Definition）异步模块定义</p>
+          <h1 id="模块化方案进化史"><a href="#模块化方案进化史" class="headerlink" title="模块化方案进化史"></a>模块化方案进化史</h1><p> <code>AMD</code>（Asynchronous Module Definition）异步模块定义</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 求和模块的定义</span></span><br><span class="line"><span class="function"><span class="title">define</span>(<span class="params"><span class="string">&#x27;getSum&#x27;</span>, [<span class="string">&#x27;math&#x27;</span>], <span class="keyword">function</span>(math)</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params">a, b</span>) </span>&#123;</span><br><span class="line">    	<span class="built_in">console</span>.log(<span class="string">&quot;sum: &quot;</span> + math.sum(a, b));</span><br><span class="line">	&#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
 
 <p><code>COMMONJS</code></p>
@@ -236,34 +231,25 @@
 <li>把执行入口文件的逻辑放在一个函数表达式中，并立即执行这个函数</li>
 </ul>
 
+      
     </div>
 
     
     
     
-
       <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/project/tags/webpack/" rel="tag"># webpack</a>
-          </div>
-
-        
-
-
-        
-    <div class="post-nav">
-      <div class="post-nav-item"></div>
-      <div class="post-nav-item">
-    <a href="/project/2021/09/07/webpack%E5%85%A5%E9%97%A8%E4%B8%80%E3%80%81%E5%89%8D%E7%AB%AF%E6%A8%A1%E5%9D%97%E5%8C%96/" rel="next" title="webpack入门一、前端模块化">
-      webpack入门一、前端模块化 <i class="fa fa-chevron-right"></i>
-    </a></div>
-    </div>
+        <div class="post-eof"></div>
       </footer>
-    
   </article>
   
   
   
+
+
+  
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/project/page/2/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/project/">1</a><a class="page-number" href="/project/page/2/">2</a><span class="page-number current">3</span>
+  </nav>
 
 
 
@@ -315,7 +301,6 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97%E5%8C%96%E6%96%B9%E6%A1%88%E8%BF%9B%E5%8C%96%E5%8F%B2"><span class="nav-number">1.</span> <span class="nav-text">模块化方案进化史</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#webpack%E7%9A%84%E6%89%93%E5%8C%85%E6%9C%BA%E5%88%B6"><span class="nav-number">2.</span> <span class="nav-text">webpack的打包机制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AD%A6%E4%B9%A0%E7%9B%AE%E6%A0%87"><span class="nav-number">2.0.0.1.</span> <span class="nav-text">学习目标</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E6%96%87%E4%BB%B6%E5%86%85%E5%AE%B9"><span class="nav-number">2.0.0.2.</span> <span class="nav-text">项目文件内容</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%94%A4%E8%B5%B7webpack"><span class="nav-number">2.0.0.3.</span> <span class="nav-text">唤起webpack</span></a></li></ol></li></ol></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 

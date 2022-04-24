@@ -145,6 +145,123 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://hmt0.github.io/project/2021/09/07/webpack%E5%85%A5%E9%97%A8%E4%B8%80%E3%80%81%E5%89%8D%E7%AB%AF%E6%A8%A1%E5%9D%97%E5%8C%96/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/project/images/avatar.gif">
+      <meta itemprop="name" content="He Mengting">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="hmt的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/project/2021/09/07/webpack%E5%85%A5%E9%97%A8%E4%B8%80%E3%80%81%E5%89%8D%E7%AB%AF%E6%A8%A1%E5%9D%97%E5%8C%96/" class="post-title-link" itemprop="url">webpack入门一、前端模块化</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2021-09-07 16:53:08" itemprop="dateCreated datePublished" datetime="2021-09-07T16:53:08+08:00">2021-09-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2022-01-18 17:31:37" itemprop="dateModified" datetime="2022-01-18T17:31:37+08:00">2022-01-18</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="webpack是什么"><a href="#webpack是什么" class="headerlink" title="webpack是什么"></a>webpack是什么</h1><blockquote>
+<p>webpack 是一个用于现代 JavaScript 应用程序的 <em>静态模块打包工具</em>。当 webpack 处理应用程序时，它会在内部从一个或多个入口点构建一个 <a target="_blank" rel="noopener" href="https://webpack.docschina.org/concepts/dependency-graph/">依赖图(dependency graph)</a>，然后将你项目中所需的每一个模块组合成一个或多个 <em>bundles</em>，它们均为静态资源，用于展示你的内容。</p>
+</blockquote>
+<h4 id="1、首先，为什么需要打包？"><a href="#1、首先，为什么需要打包？" class="headerlink" title="1、首先，为什么需要打包？"></a>1、首先，为什么需要打包？</h4><p>逻辑多、文件多，项目复杂度提高了。</p>
+<h4 id="2、在打包之外，webpack还有哪些功能和特点？"><a href="#2、在打包之外，webpack还有哪些功能和特点？" class="headerlink" title="2、在打包之外，webpack还有哪些功能和特点？"></a>2、在打包之外，webpack还有哪些功能和特点？</h4><p><code>loader</code>：用于对模块的源代码进行转换。</p>
+<p><code>plugin</code>：打包优化，资源管理，注入环境变量。</p>
+<p><code>loader</code>和<code>plugin</code>的特点：可插拔 =&gt;webpack不仅强大，而且灵活</p>
+<h4 id="3、-课程重点："><a href="#3、-课程重点：" class="headerlink" title="3、 课程重点："></a>3、 课程重点：</h4><ul>
+<li>理解前端模块化</li>
+<li>理解wenpack打包的核心思路</li>
+<li>理解webpack中的“关键人物”—<code>loader</code>和<code>plugin</code></li>
+</ul>
+<h1 id="理解前端模块化"><a href="#理解前端模块化" class="headerlink" title="理解前端模块化"></a>理解前端模块化</h1><ul>
+<li>作用域</li>
+<li>命名空间</li>
+<li>模块化</li>
+</ul>
+<h4 id="1、作用域"><a href="#1、作用域" class="headerlink" title="1、作用域"></a>1、作用域</h4><p>作用域描述了代码<em>运行时</em>变量、函数、对象的<em>可访问性</em></p>
+<p>作用域决定了代码中变量和其他资源的可见性，JavaScript有全局作用域和局部作用域之分。全局作用域中的变量和资源都会挂载在全局对象，在浏览器中是window，在node中是global。以下是在全局作用域中声明变量和局部作用域的区别：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> a = <span class="number">1</span></span><br><span class="line"><span class="built_in">window</span>.a <span class="comment">// 1</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">test</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> b = <span class="number">2</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">b <span class="comment">// Uncaught ReferenceError</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="2、模块化的演化过程"><a href="#2、模块化的演化过程" class="headerlink" title="2、模块化的演化过程"></a>2、模块化的演化过程</h4><p>过去当一个页面想要组合多个功能时，使用引入多个JavaScript外链文件的方式：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;script src=<span class="string">&quot;./moduleA.js&quot;</span>&gt;&lt;/script&gt;</span><br><span class="line"><span class="xml"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">&quot;./moduleB.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line"><span class="xml"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">&quot;./moduleC.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>缺陷：moduleA、moduleB、moduleC共用一个全局作用域，在任何一个JavaScript文件中进行顶层的变量声明，都会暴露在全局中，使得其他脚本会获得它并不想要的变量。当应该规模和复杂度上升，这些脚本之间可能会发生<em>命名冲突</em>：</p>
+<p>解决方法：给不同文件不同的<em>命名空间</em></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ModuleA</span></span><br><span class="line"><span class="keyword">var</span> a = &#123;</span><br><span class="line">	<span class="attr">name</span>: <span class="string">&#x27;Susan&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ModuleB</span></span><br><span class="line"><span class="keyword">var</span> b = &#123;</span><br><span class="line">    name = <span class="string">&#x27;Jack&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ModuleC</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">&#x27;moduleA里的name: &#x27;</span>, a.name) <span class="comment">//moduleA里的name: Susan</span></span><br></pre></td></tr></table></figure>
+
+<p>新的缺陷：其他文件可以轻易修改命名空间中对象的属性。无法保护对象属性被随意访问和篡改：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ModuleA</span></span><br><span class="line"><span class="keyword">var</span> Susan = &#123;</span><br><span class="line">	<span class="attr">name</span>: <span class="string">&#x27;Susan&#x27;</span>,</span><br><span class="line">	<span class="attr">sex</span>: <span class="string">&#x27;女孩&#x27;</span>,</span><br><span class="line">	<span class="comment">// 自我介绍方法</span></span><br><span class="line">	<span class="attr">tell</span>: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">		<span class="built_in">console</span>.log(<span class="string">&#x27;我的名字是&#x27;</span>, <span class="built_in">this</span>.name)</span><br><span class="line">		<span class="built_in">console</span>.log(<span class="string">&#x27;我的性别是&#x27;</span>, <span class="built_in">this</span>.sex)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ModuleB</span></span><br><span class="line"><span class="keyword">var</span> Jack = &#123;</span><br><span class="line">	<span class="attr">name</span>: <span class="string">&#x27;Jack&#x27;</span>,</span><br><span class="line">	<span class="attr">sex</span>: <span class="string">&#x27;男孩&#x27;</span>,</span><br><span class="line">	<span class="comment">// 自我介绍方法</span></span><br><span class="line">	<span class="attr">tell</span>: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">		<span class="built_in">console</span>.log(<span class="string">&#x27;我的名字是&#x27;</span>, <span class="built_in">this</span>.name)</span><br><span class="line">		<span class="built_in">console</span>.log(<span class="string">&#x27;我的性别是&#x27;</span>, <span class="built_in">this</span>.sex)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Susan.name = <span class="string">&#x27;Jack&#x27;</span></span><br><span class="line">Susan.name <span class="comment">// Jack</span></span><br></pre></td></tr></table></figure>
+
+<p>举个例子，在自动登录功能中，对于用户账号密码这样的敏感信息，不希望被其他模块获取、修改：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ModuleA</span></span><br><span class="line">autoLogin=&#123;</span><br><span class="line">	userName=<span class="string">&quot;小明&quot;</span>,</span><br><span class="line">    <span class="attr">password</span>: <span class="string">&quot;123456&quot;</span>,</span><br><span class="line">    <span class="attr">login</span>: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="comment">// 利用useName和password登录</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ModuleB</span></span><br><span class="line">autoLogin.password = <span class="string">&quot;32&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>解决方法：利用函数作用域保护模块中的变量，形成模块作用域，隐藏该隐藏的，暴露该暴露的。实现一个立即执行函数，并返回<em>闭包函数</em>：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> Susanodule = (<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> name = <span class="string">&#x27;Susan&#x27;</span></span><br><span class="line">    <span class="keyword">var</span> sex = <span class="string">&#x27;女孩&#x27;</span></span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        <span class="attr">tell</span>: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">&#x27;我的名字是：&#x27;</span>, name)</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">&#x27;我的性别是：&#x27;</span>, sex)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)()</span><br><span class="line"></span><br><span class="line">SusanModule.tell <span class="comment">// 我的名字是我的性别是</span></span><br><span class="line">SusanModule.name <span class="comment">// undefined</span></span><br><span class="line">SusanModule.sex <span class="comment">// undefined</span></span><br></pre></td></tr></table></figure>
+
+<p>这样暴露了一个tell方法，但是其他模块无法直接访问修改name和sex的值。</p>
+<p>改进：在满足重用的基础上，将赋值过程写在立即执行函数内部</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="keyword">function</span>(<span class="params"><span class="built_in">window</span></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> name = <span class="string">&#x27;Susan&#x27;</span></span><br><span class="line">    <span class="keyword">var</span> sex = <span class="string">&#x27;女孩&#x27;</span></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">tell</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">&#x27;我的名字是：&#x27;</span>, name)</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">&#x27;我的性别是：&#x27;</span>, sex)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">window</span>.SusanModule = &#123;tell&#125;</span><br><span class="line">&#125;)(<span class="built_in">window</span>)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SusanModule <span class="comment">// &#123;tell: f&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>总结一下，模块化的优点：</p>
+<ul>
+<li>作用域封装 - 用模块把代码封装起来，保证模块内部的实现不会暴露在全局作用域中，只需要将模块的功能通过接口的方式暴露出去给其他模块调用，避免污染全局命名空间</li>
+<li>重用性</li>
+<li>接触耦合 - 模块间接口不变，模块内部的变化对其他模块没有影响</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="https://hmt0.github.io/project/2021/09/07/webpack%E5%85%A5%E9%97%A8%E4%BA%8C%E3%80%81%E6%A8%A1%E5%9D%97%E5%8C%96%E6%96%B9%E6%A1%88%E8%BF%9B%E5%8C%96%E5%8F%B2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -314,12 +431,12 @@
       <div class="site-state-item site-state-posts">
           <a href="/project/archives/">
         
-          <span class="site-state-item-count">21</span>
+          <span class="site-state-item-count">22</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">tags</span>
       </div>
   </nav>

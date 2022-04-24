@@ -145,6 +145,196 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://hmt0.github.io/project/2022/04/18/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%82%BA%E7%BB%93%E8%8A%82%E5%88%86%E5%89%B2%E9%A1%B9%E7%9B%AE%E5%AE%9E%E6%88%98%E4%B8%80-%E6%95%B0%E6%8D%AE%E9%A2%84%E5%A4%84%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/project/images/avatar.gif">
+      <meta itemprop="name" content="He Mengting">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="hmt的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/project/2022/04/18/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%82%BA%E7%BB%93%E8%8A%82%E5%88%86%E5%89%B2%E9%A1%B9%E7%9B%AE%E5%AE%9E%E6%88%98%E4%B8%80-%E6%95%B0%E6%8D%AE%E9%A2%84%E5%A4%84%E7%90%86/" class="post-title-link" itemprop="url">深度学习肺结节分割项目实战一-处理数据集</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2022-04-18 18:04:35" itemprop="dateCreated datePublished" datetime="2022-04-18T18:04:35+08:00">2022-04-18</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2022-04-23 22:22:27" itemprop="dateModified" datetime="2022-04-23T22:22:27+08:00">2022-04-23</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="一、LIDC-IDRI数据集简介"><a href="#一、LIDC-IDRI数据集简介" class="headerlink" title="一、LIDC-IDRI数据集简介"></a>一、LIDC-IDRI数据集简介</h2><p><a target="_blank" rel="noopener" href="https://wiki.cancerimagingarchive.net/display/Public/LIDC-IDRI">官方网站</a></p>
+<p>肺图像数据库协会的图像收集(LIDC-IDRI)包括<strong>诊断</strong>和<strong>带有病变注释标记的肺癌筛查胸部CT</strong>。这是一个网络公开的国际资源，用于肺癌检测和诊断的计算机辅助诊断(CAD)方法的开发、培训和评估。</p>
+<p>数据集包含1018个病例，每个病例包括来自临床胸部<strong>CT扫描的图像</strong>和一个相关的<strong>XML文件</strong>，该文件记录了由四名经验丰富的胸部放射科医生进行的两阶段图像注释过程的结果。在最初的盲读阶段，每个放射科医生独立审查每个CT扫描，并标记出属于三种类型之一的病变（“结节&gt;= 3mm”，“结节&lt;3mm”，“非结节&gt;= 3mm”）。在随后的非盲读阶段，每个放射科医生独立地回顾自己的评分以及其他三位放射科医生的匿名评分，以给出最终意见。</p>
+<h2 id="二、参数配置lung-conf"><a href="#二、参数配置lung-conf" class="headerlink" title="二、参数配置lung.conf"></a>二、参数配置lung.conf</h2><p>病例中有的有结节注释，有的没有结节注释，没有的保存在Clean文件夹：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[prepare_dataset]</span><br><span class="line">lidc_dicom_path = ./LIDC-IDRI</span><br><span class="line">mask_path = ./data/Mask</span><br><span class="line">image_path = ./data/Image</span><br><span class="line">clean_path_image = ./data/Clean/Image</span><br><span class="line">clean_path_mask = ./data/Clean/Mask</span><br><span class="line">meta_path = ./data/Meta/</span><br><span class="line">mask_threshold = 8</span><br><span class="line"></span><br><span class="line">[pylidc]</span><br><span class="line">confidence_level = 0.5</span><br><span class="line">padding_size = 512</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="三、创建数据集prepare-dataset-py："><a href="#三、创建数据集prepare-dataset-py：" class="headerlink" title="三、创建数据集prepare_dataset.py："></a>三、创建数据集prepare_dataset.py：</h2><p>通过MakeDataSet类的prepare_dataset方法创建数据集和标注信息文件，MakeDataSet实例的属性包括：</p>
+<ul>
+<li>LIRI_list：遍历保存LIDC_IDRI数据的文件夹，得到包含所有病例文件夹名字的列表：</li>
+<li>img_path，mask_path：包含结节的肺部图像和掩码的保存路径</li>
+<li>clean_path_img，clean_path_mask：不包含结节的肺部图像和掩码的保存路径</li>
+<li>meta_path：结节信息保存路径</li>
+<li>mask_threshold：最小的结节阈值</li>
+<li>c_level和padding：生成结节掩码时的输入参数</li>
+<li>meta：结节信息属性名</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>patient_id</th>
+<th>nodule_no</th>
+<th>slice_no</th>
+<th>original_image</th>
+<th>mask_image</th>
+<th>maliganancy</th>
+<th>is_cancer</th>
+<th>is_clean</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>病例id</td>
+<td>结节编号</td>
+<td>切片编号</td>
+<td>图像编号</td>
+<td>掩码编号</td>
+<td>恶性程度</td>
+<td>是否为癌症</td>
+<td>是否包含结节</td>
+</tr>
+</tbody></table>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MakeDataSet</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, LIDC_Patients_list, IMAGE_DIR, MASK_DIR,CLEAN_DIR_IMAGE,CLEAN_DIR_MASK,META_DIR, mask_threshold, padding, confidence_level=<span class="number">0.5</span></span>):</span></span><br><span class="line">        self.IDRI_list = LIDC_Patients_list</span><br><span class="line">        self.img_path = IMAGE_DIR</span><br><span class="line">        self.mask_path = MASK_DIR</span><br><span class="line">        self.clean_path_img = CLEAN_DIR_IMAGE</span><br><span class="line">        self.clean_path_mask = CLEAN_DIR_MASK</span><br><span class="line">        self.meta_path = META_DIR</span><br><span class="line">        self.mask_threshold = mask_threshold</span><br><span class="line">        self.c_level = confidence_level</span><br><span class="line">        self.padding = [(padding,padding),(padding,padding),(<span class="number">0</span>,<span class="number">0</span>)]</span><br><span class="line">        self.meta = pd.DataFrame(index=[],columns=[<span class="string">&#x27;patient_id&#x27;</span>,<span class="string">&#x27;nodule_no&#x27;</span>,<span class="string">&#x27;slice_no&#x27;</span>,<span class="string">&#x27;original_image&#x27;</span>,<span class="string">&#x27;mask_image&#x27;</span>,<span class="string">&#x27;malignancy&#x27;</span>,<span class="string">&#x27;is_cancer&#x27;</span>,<span class="string">&#x27;is_clean&#x27;</span>])</span><br><span class="line">	<span class="function"><span class="keyword">def</span> <span class="title">calculate_malignancy</span>(<span class="params">self,nodule</span>):</span></span><br><span class="line">        <span class="comment"># 计算结节恶性程度</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">save_meta</span>(<span class="params">self,meta_list</span>):</span></span><br><span class="line">        <span class="comment"># 保存结节信息到csv文件</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">prepare_dataset</span>(<span class="params">self</span>):</span></span><br><span class="line">        <span class="comment"># 创建数据集</span></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    LIDC_IDRI_list= [f <span class="keyword">for</span> f <span class="keyword">in</span> os.listdir(DICOM_DIR) <span class="keyword">if</span> <span class="keyword">not</span> f.startswith(<span class="string">&#x27;.&#x27;</span>)]</span><br><span class="line">    LIDC_IDRI_list.sort()</span><br><span class="line"></span><br><span class="line">    test= MakeDataSet(LIDC_IDRI_list,IMAGE_DIR,MASK_DIR,CLEAN_DIR_IMAGE,CLEAN_DIR_MASK,META_DIR,mask_threshold,padding,confidence_level)</span><br><span class="line">    test.prepare_dataset()</span><br></pre></td></tr></table></figure>
+
+<h3 id="1、使用到的库"><a href="#1、使用到的库" class="headerlink" title="1、使用到的库"></a>1、使用到的库</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://pylidc.github.io/index.html">pylidc</a>：pylidc不仅可用于分析和查询注释数据（不需要访问DICOM图像数据），也能用于处理与LIDC数据集相关联的DICOM文件。</li>
+<li><a target="_blank" rel="noopener" href="https://docs.python.org/3/library/pathlib.html?highlight=path#module-pathlib">pathlib</a>：这个模块提供了用适合不同操作系统的语义表示文件系统路径的类。路径类分为纯路径(提供没有I/O的纯计算操作)和具体路径(继承自纯路径，但也提供I/O操作)。</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/tqdm/tqdm">Tqdm</a> 是一个快速，可扩展的Python进度条，可以在 Python 长循环中添加一个进度提示信息，用户只需要封装任意的迭代器 tqdm(iterator)。</li>
+<li><a target="_blank" rel="noopener" href="https://docs.python.org/3/library/statistics.html#statistics.median_high">median_high</a>：高中位数始终是数据集的成员。当数据点的数量为奇数时，将返回中间值。当它是偶数时，将返回两个中间值中较大的一个。</li>
+</ul>
+<h3 id="2、生成数据集函数"><a href="#2、生成数据集函数" class="headerlink" title="2、生成数据集函数"></a>2、生成数据集函数</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">prepare_dataset</span>(<span class="params">self</span>):</span></span><br><span class="line">    <span class="comment"># 为image和mask命名</span></span><br><span class="line">    <span class="comment"># 0000,0001,0002,...,0999</span></span><br><span class="line">    prefix = [<span class="built_in">str</span>(x).zfill(<span class="number">3</span>) <span class="keyword">for</span> x <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1000</span>)]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 创建文件夹</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(self.img_path):</span><br><span class="line">        os.makedirs(self.img_path)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(self.mask_path):</span><br><span class="line">        os.makedirs(self.mask_path)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(self.clean_path_img):</span><br><span class="line">        os.makedirs(self.clean_path_img)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(self.clean_path_mask):</span><br><span class="line">        os.makedirs(self.clean_path_mask)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(self.meta_path):</span><br><span class="line">        os.makedirs(self.meta_path)</span><br><span class="line"></span><br><span class="line">    IMAGE_DIR = Path(self.img_path)</span><br><span class="line">    MASK_DIR = Path(self.mask_path)</span><br><span class="line">    CLEAN_DIR_IMAGE = Path(self.clean_path_img)</span><br><span class="line">    CLEAN_DIR_MASK = Path(self.clean_path_mask)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> patient <span class="keyword">in</span> tqdm(self.IDRI_list):</span><br><span class="line">        <span class="comment"># 处理每个病例</span></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Saved Meta data&quot;</span>)</span><br><span class="line">    self.meta.to_csv(self.meta_path+<span class="string">&#x27;meta_info.csv&#x27;</span>,index=<span class="literal">False</span>) <span class="comment"># 保存数据信息</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3、处理每个病例"><a href="#3、处理每个病例" class="headerlink" title="3、处理每个病例"></a>3、处理每个病例</h3><p>首先获得当前病例名字：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pid = patient #LIDC-IDRI-0001~</span><br></pre></td></tr></table></figure>
+
+<p>查找到一个名字相符的scan对象：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pylidc <span class="keyword">as</span> pl</span><br><span class="line">scan = pl.query(pl.Scan).<span class="built_in">filter</span>(pl.Scan.patient_id == pid).first()</span><br></pre></td></tr></table></figure>
+
+<p>scan对象中一个结节可能包含多个注释，可以使用pylidc.Scan.cluster_annotations()方法来确定哪些注释是指同一个结节，它使用距离函数来创建一个邻接图，以确定哪些注释在一次扫描中引用了同一个结节:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nodules_annotation = scan.cluster_annotations()</span><br></pre></td></tr></table></figure>
+
+<p>将扫描图像值转换为NumPy数组，便于进行图像处理:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">vol = scan.to_volume()</span><br><span class="line">print(&quot;Patient ID: &#123;&#125; Dicom Shape: &#123;&#125; Number of Annotated Nodules: &#123;&#125;&quot;.format(pid,vol.shape,len(nodules_annotation)))</span><br></pre></td></tr></table></figure>
+
+<p>输出示例：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Patient ID: LIDC-IDRI-0003 Dicom Shape: (512, 512, 140) Number of Annotated Nodules: 4</span><br></pre></td></tr></table></figure>
+
+<p>表示编号LIDC-IDRL-0003的病例的成像尺寸为512*512*140，有4个标注结节。</p>
+<p>对注释进行可视化可以得到：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scan.visualize(annotation_groups=nodules_annotation)</span><br></pre></td></tr></table></figure>
+
+<p><img src="E:\博客图\Figure_1.png"></p>
+<p>从图中可以看出编号为LIDC-IDRI-0003的病例有四个标注的结节，分别包含不同数量的注释，最多为4个（因为一共有四位医师）。</p>
+<p>有的病例中不包含结节注释，应区别处理：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> <span class="built_in">len</span>(nodules_annotation) &gt; <span class="number">0</span>:</span><br><span class="line">	<span class="comment"># 处理包含结节注释的病例</span></span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">	<span class="comment"># 处理不包含结节注释的病例</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4、处理包含结节注释的病例"><a href="#4、处理包含结节注释的病例" class="headerlink" title="4、处理包含结节注释的病例"></a>4、处理包含结节注释的病例</h3><p>使用pylidc.utils.consensus()方法获得结节掩码。</p>
+<p>输入参数：</p>
+<ul>
+<li><p>nodule：聚类后<strong>一个结节</strong>的注释列表，长度最大为4，例如：</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nodule <span class="number">1</span> : [Annotation(id=<span class="number">90</span>,scan_id=<span class="number">14</span>), Annotation(id=<span class="number">93</span>,scan_id=<span class="number">14</span>), Annotation(id=<span class="number">98</span>,scan_id=<span class="number">14</span>), </span><br></pre></td></tr></table></figure></li>
+<li><p>clevel：例如clevel=0.5，那么当各位医师注释的结节分割中有超过50%的结果包含该体素时，体素返回值为1，否则为0。</p>
+</li>
+<li><p>padding：如果提供了整数，则边界框将按此整数数量均匀填充。其他形式的参数可以参考文档。</p>
+</li>
+</ul>
+<p>返回值：</p>
+<ul>
+<li>mask[ndarray]：是根据clevel生成的注释掩码的布尔值数组。</li>
+<li>cbbox[tumple]：是一个3元组，可用于在相应位置对图像进行索引，根据不同的padding值，cddox的大小也不同。</li>
+<li>masks[,list]：是对应于每个Annotation对象的布尔值掩码的列表。掩码列表中的每个掩码具有相同的形状，并在cbbox提供的边界框中进行采样。</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> nodule_idx, nodule <span class="keyword">in</span> <span class="built_in">enumerate</span>(nodules_annotation): <span class="comment"># 遍历每个结节</span></span><br><span class="line">               </span><br><span class="line">    mask, cbbox, masks = consensus(nodule,self.c_level,self.padding)</span><br><span class="line"></span><br><span class="line">    lung_np_array = vol[cbbox]</span><br><span class="line"></span><br><span class="line">    malignancy, cancer_label = self.calculate_malignancy(nodule) <span class="comment"># 计算恶性程度</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> nodule_slice <span class="keyword">in</span> <span class="built_in">range</span>(mask.shape[<span class="number">2</span>]):</span><br><span class="line">        <span class="comment"># 处理每个CT切片</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="计算恶性程度"><a href="#计算恶性程度" class="headerlink" title="计算恶性程度"></a>计算恶性程度</h4><p>选取所有注释的中高位数：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">calculate_malignancy</span>(<span class="params">self,nodule</span>):</span></span><br><span class="line">list_of_malignancy =[]</span><br><span class="line"><span class="keyword">for</span> annotation <span class="keyword">in</span> nodule:</span><br><span class="line">	list_of_malignancy.append(annotation.malignancy)</span><br><span class="line"></span><br><span class="line">malignancy = median_high(list_of_malignancy)</span><br><span class="line"><span class="keyword">if</span>  malignancy &gt; <span class="number">3</span>:</span><br><span class="line">	<span class="keyword">return</span> malignancy,<span class="literal">True</span></span><br><span class="line"><span class="keyword">elif</span> malignancy &lt; <span class="number">3</span>:</span><br><span class="line">	<span class="keyword">return</span> malignancy, <span class="literal">False</span></span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">	<span class="keyword">return</span> malignancy, <span class="string">&#x27;Ambiguous&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="处理每个CT切片"><a href="#处理每个CT切片" class="headerlink" title="处理每个CT切片"></a>处理每个CT切片</h4><p>结节像素太小的跳过，有些遮罩尺寸太小。这些可能会阻碍训练：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> np.<span class="built_in">sum</span>(mask[:,:,nodule_slice]) &lt;= self.mask_threshold:</span><br><span class="line">	<span class="keyword">continue</span></span><br></pre></td></tr></table></figure>
+
+<p>对肺实质进行分割（segment_lung函数会在下一篇中单独介绍）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lung_segmented_np_array = segment_lung(lung_np_array[:,:,nodule_slice])</span><br></pre></td></tr></table></figure>
+
+<p>一些值被存储为-0，这可能导致pytorch训练中的数据类型错误：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lung_segmented_np_array[lung_segmented_np_array==-<span class="number">0</span>] =<span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+<p>每个文件的命名:NI=结节图像，MA=掩码原始：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">nodule_name = <span class="string">&quot;&#123;&#125;_NI&#123;&#125;_slice&#123;&#125;&quot;</span>.<span class="built_in">format</span>(pid[-<span class="number">4</span>:],prefix[nodule_idx],prefix[nodule_slice])</span><br><span class="line">mask_name = <span class="string">&quot;&#123;&#125;_MA&#123;&#125;_slice&#123;&#125;&quot;</span>.<span class="built_in">format</span>(pid[-<span class="number">4</span>:],prefix[nodule_idx],prefix[nodule_slice])</span><br><span class="line">meta_list = [pid[-<span class="number">4</span>:],nodule_idx,prefix[nodule_slice],nodule_name,mask_name,malignancy,cancer_label,<span class="literal">False</span>]</span><br></pre></td></tr></table></figure>
+
+<p>保存结节信息文件和图像：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">self.save_meta(meta_list)</span><br><span class="line">np.save(patient_image_dir / nodule_name,lung_segmented_np_array)</span><br><span class="line">np.save(patient_mask_dir / mask_name,mask[:,:,nodule_slice])</span><br></pre></td></tr></table></figure>
+
+<p><code>save_meta()</code>函数将结节信息添加到meta列表：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">save_meta</span>(<span class="params">self,meta_list</span>):</span></span><br><span class="line">    <span class="comment"># 将结节信息保存在csv文件中</span></span><br><span class="line">    tmp = pd.Series(meta_list,index=[<span class="string">&#x27;patient_id&#x27;</span>,<span class="string">&#x27;nodule_no&#x27;</span>,<span class="string">&#x27;slice_no&#x27;</span>,<span class="string">&#x27;original_image&#x27;</span>,<span class="string">&#x27;mask_image&#x27;</span>,<span class="string">&#x27;malignancy&#x27;</span>,<span class="string">&#x27;is_cancer&#x27;</span>,<span class="string">&#x27;is_clean&#x27;</span>])</span><br><span class="line">    self.meta = self.meta.append(tmp,ignore_index=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+
+<h3 id="5、处理不包含注释的病例"><a href="#5、处理不包含注释的病例" class="headerlink" title="5、处理不包含注释的病例"></a>5、处理不包含注释的病例</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">patient_clean_dir_image = CLEAN_DIR_IMAGE / pid</span><br><span class="line">patient_clean_dir_mask = CLEAN_DIR_MASK / pid</span><br><span class="line">Path(patient_clean_dir_image).mkdir(parents=<span class="literal">True</span>, exist_ok=<span class="literal">True</span>)</span><br><span class="line">Path(patient_clean_dir_mask).mkdir(parents=<span class="literal">True</span>, exist_ok=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"> <span class="keyword">for</span> <span class="built_in">slice</span> <span class="keyword">in</span> <span class="built_in">range</span>(vol.shape[<span class="number">2</span>]):</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">slice</span> &gt;<span class="number">50</span>:</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        <span class="comment"># 处理每一个切片</span></span><br></pre></td></tr></table></figure>
+
+<p>没有结节的切片对应的mask为全是黑色：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">lung_segmented_np_array = segment_lung(vol[:,:,<span class="built_in">slice</span>])</span><br><span class="line">lung_segmented_np_array[lung_segmented_np_array==-<span class="number">0</span>] =<span class="number">0</span></span><br><span class="line">lung_mask = np.zeros_like(lung_segmented_np_array)</span><br></pre></td></tr></table></figure>
+
+<p>保存图像和对应掩码，将信息添加到meta数组：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">nodule_name = <span class="string">&quot;&#123;&#125;_CN001_slice&#123;&#125;&quot;</span>.<span class="built_in">format</span>(pid[-<span class="number">4</span>:],prefix[<span class="built_in">slice</span>])</span><br><span class="line">mask_name = <span class="string">&quot;&#123;&#125;_CM001_slice&#123;&#125;&quot;</span>.<span class="built_in">format</span>(pid[-<span class="number">4</span>:],prefix[<span class="built_in">slice</span>])</span><br><span class="line"></span><br><span class="line">meta_list = [pid[-<span class="number">4</span>:],<span class="built_in">slice</span>,prefix[<span class="built_in">slice</span>],nodule_name,mask_name,<span class="number">0</span>,<span class="literal">False</span>,<span class="literal">True</span>]</span><br><span class="line">self.save_meta(meta_list)</span><br><span class="line">np.save(patient_clean_dir_image / nodule_name, lung_segmented_np_array)</span><br><span class="line">np.save(patient_clean_dir_mask / mask_name, lung_mask)</span><br></pre></td></tr></table></figure>
+
+<p>将信息保存到meta.csv文件：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Saved Meta data&quot;</span>)</span><br><span class="line">self.meta.to_csv(self.meta_path+<span class="string">&#x27;meta_info.csv&#x27;</span>,index=<span class="literal">False</span>)</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="https://hmt0.github.io/project/2022/04/11/blender%E5%85%A5%E9%97%A8%E4%B8%80%EF%BC%9A%E7%95%8C%E9%9D%A2UI%E5%92%8C%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1447,220 +1637,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="https://hmt0.github.io/project/2021/10/20/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAReact%E4%B8%8B/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/project/images/avatar.gif">
-      <meta itemprop="name" content="He Mengting">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="hmt的博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/project/2021/10/20/%E4%BB%8E0%E5%BC%80%E5%A7%8B%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AAReact%E4%B8%8B/" class="post-title-link" itemprop="url">从0开始实现一个React下</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2021-10-20 23:00:10" itemprop="dateCreated datePublished" datetime="2021-10-20T23:00:10+08:00">2021-10-20</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2022-01-18 17:31:37" itemprop="dateModified" datetime="2022-01-18T17:31:37+08:00">2022-01-18</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>书接上回，我们已经实现了<code>createElement</code>函数、<code>render</code>函数和Fibers，接下来就要开始处理组件更新的部分了~</p>
-<h2 id="5-Render和Commit阶段"><a href="#5-Render和Commit阶段" class="headerlink" title="5.Render和Commit阶段"></a>5.<code>Render</code>和<code>Commit</code>阶段</h2><p>但在这之前！不知道你有没有注意到一个问题：在<code>performUnitOfWork</code>中每次我们处理一个元素时都会在DOM 中添加一个新的节点。而且，浏览器还会在完成整棵树的渲染之前打断我们的工作。这样，用户将会看到一个不完整的<code>UI</code>，这是我们不希望的。</p>
-<p>所以我们把修改DOM的这部分代码移除：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">performUnitOfWork</span>(<span class="params">fiber</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">&quot;performUnitOfWork&quot;</span>, fiber)</span><br><span class="line">    <span class="comment">// TODO add dom node</span></span><br><span class="line">    <span class="keyword">if</span>(!fiber.dom) &#123;</span><br><span class="line">        fiber.dom = createDom(fiber)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// TODO create new fibers</span></span><br><span class="line">    <span class="keyword">const</span> elements = fiber.props.children</span><br><span class="line">    <span class="keyword">let</span> index = <span class="number">0</span></span><br><span class="line">    <span class="keyword">let</span> prevSibling = <span class="literal">null</span></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-
-<p>并且在render函数中去跟踪fiber树的根节点，我们叫它“正在进行的工作”root或者<code>wipRoot</code>。</p>
-<p>当我们完成了所有任务（也就是任务中没有下一个单元的时候），我们就把整个fiber树提交到DOM中：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">commitRoot</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="comment">// TODO add nodes to dom</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">render</span>(<span class="params">element, container</span>) </span>&#123;</span><br><span class="line">  wipRoot = &#123;</span><br><span class="line">    <span class="attr">dom</span>: container,</span><br><span class="line">    <span class="attr">props</span>: &#123;</span><br><span class="line">      <span class="attr">children</span>: [element],</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;</span><br><span class="line">  nextUnitOfWork = wipRoot</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> nextUnitOfWork = <span class="literal">null</span></span><br><span class="line"><span class="keyword">let</span> wipRoot = <span class="literal">null</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">workLoop</span>(<span class="params">deadline</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">let</span> shouldYield = <span class="literal">false</span></span><br><span class="line">  <span class="keyword">while</span> (nextUnitOfWork &amp;&amp; !shouldYield) &#123;</span><br><span class="line">    nextUnitOfWork = performUnitOfWork(</span><br><span class="line">      nextUnitOfWork</span><br><span class="line">    )</span><br><span class="line">    shouldYield = deadline.timeRemaining() &lt; <span class="number">1</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (!nextUnitOfWork &amp;&amp; wipRoot) &#123;</span><br><span class="line">    commitRoot()</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  requestIdleCallback(workLoop)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>我们在<code>commitRoot</code>函数中完成提交。这里我们递归地将所有节点添加到DOM中：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">commitRoot</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  commitWork(wipRoot.child)</span><br><span class="line">  wipRoot = <span class="literal">null</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">commitWork</span>(<span class="params">fiber</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (!fiber) &#123;</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">const</span> domParent = fiber.parent.dom</span><br><span class="line">  domParent.appendChild(fiber.dom)</span><br><span class="line">  commitWork(fiber.child)</span><br><span class="line">  commitWork(fiber.sibling)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>（也就是不断执行<code>requestIdleCallback(workLoop)</code>生成fiber树，修改DOM的操作集中在commit阶段）</p>
-<h2 id="6-协调"><a href="#6-协调" class="headerlink" title="6.协调"></a>6.协调</h2><p>带目前为止我们只是在DOM中添加东西，怎么去更新或者删除节点呢？</p>
-<p>这就是所谓的协调（reconciliation）了，我们需要将在<code>render</code>函数上接收到的元素与提交给DOM的最后一个fiber树进行比较。</p>
-<p>所以完成提交后，我们需要保存“上一个提交到DOM的fiber树”的引用。我们称它为<code>currentRoot</code>。</p>
-<p>我们还要为每一个fiber添加一个<code>alternate</code>属性。这个属性是到到旧fiber的链接，也就是我们在上一次提交阶段中提交到DOM中的fiber。</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">commitRoot</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">	...</span><br><span class="line">	currentRoot = wipRoot</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">funciton <span class="function"><span class="title">render</span>(<span class="params">element, container</span>)</span> &#123;</span><br><span class="line">	wipRoot = &#123;</span><br><span class="line">		...</span><br><span class="line">		<span class="attr">alternate</span>: currentRoot</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> currentRoot = <span class="literal">null</span></span><br></pre></td></tr></table></figure>
-
-<p>现在让我们把创建新fibers的代码从<code>performUnitOfWork</code>中提取出来，放在一个新的<code>reconcileChildren</code>函数中。在这里我们把旧fibers和新元素调和起来：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">performUnitOfWork</span>(<span class="params">fiber</span>) </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">const</span> elements = fiber.props.children</span><br><span class="line">    reconcileChildren(fiber, element)</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">reconcileChildren</span>(<span class="params">wipFiber, elements</span>) </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>我们同时迭代旧fiber的孩子（<code>wipFiber.alternate</code>）和我们想调和的元素数组。</p>
-<p>如果忽略同时遍历一个数组和链表的模板代码，在while循环中只剩下最重要的部分：<code>oldFiber</code>和<code>element</code>。**<code>element</code>是我们想渲染在DOM中的东西，<code>oldFiber</code>则是我们上次的渲染的内容。**</p>
-<p>我们需要比较它们，来看看是不是有需要应用在DOM中的更改：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> index = <span class="number">0</span></span><br><span class="line">  <span class="keyword">let</span> oldFiber =</span><br><span class="line">    wipFiber.alternate &amp;&amp; wipFiber.alternate.child</span><br><span class="line">  <span class="keyword">let</span> prevSibling = <span class="literal">null</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span> (</span><br><span class="line">    index &lt; elements.length ||</span><br><span class="line">    oldFiber != <span class="literal">null</span></span><br><span class="line">  ) &#123;</span><br><span class="line">    <span class="keyword">const</span> element = elements[index]</span><br><span class="line">    <span class="keyword">let</span> newFiber = <span class="literal">null</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// TODO compare oldFiber to element</span></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
-
-<p>我们使用类型来比较它们：</p>
-<ul>
-<li>如果旧fiber和新元素类型一样，我们可以保留DOM节点并且只更新的属性</li>
-<li>如果类型不同，并且存在新元素，意味着我们需要创建一个新的DOM节点</li>
-<li>如果类型不同，并且存在旧fiber，我们需要移除旧节点</li>
-</ul>
-<p>在这里React还用了keys，来实现更高效的调和。比如，它检测子元素在元素数组中的位置何时改变。</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> sameType =</span><br><span class="line">    oldFiber &amp;&amp;</span><br><span class="line">    element &amp;&amp;</span><br><span class="line">    element.type == oldFiber.type</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (sameType) &#123;</span><br><span class="line">    <span class="comment">// TODO update the node</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (element &amp;&amp; !sameType) &#123;</span><br><span class="line">    <span class="comment">// TODO add this node</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (oldFiber &amp;&amp; !sameType) &#123;</span><br><span class="line">    <span class="comment">// TODO delete the oldFiber&#x27;s node</span></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
-
-<p>当旧fiber和元素有相同的类型时，我们创建一个新fiber，使DOM节点和旧fiber保持一致，属性和元素保持一致。</p>
-<p>我们还给fiber添加了一个新的属性：<code>effectTag</code>。接下来，我们将在提交阶段使用这个属性：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> sameType =</span><br><span class="line">      oldFiber &amp;&amp;</span><br><span class="line">      element &amp;&amp;</span><br><span class="line">      element.type == oldFiber.type</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (sameType) &#123;</span><br><span class="line">      newFiber = &#123;</span><br><span class="line">        <span class="attr">type</span>: oldFiber.type,</span><br><span class="line">        <span class="attr">props</span>: element.props,</span><br><span class="line">        <span class="attr">dom</span>: oldFiber.dom,</span><br><span class="line">        <span class="attr">parent</span>: wipFiber,</span><br><span class="line">        <span class="attr">alternate</span>: oldFiber,</span><br><span class="line">        <span class="attr">effectTag</span>: <span class="string">&quot;UPDATE&quot;</span>,</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<p>对于需要一个新的DOM节点的元素，我们用<code>PLACEMENT</code>来标记新fiber：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (element &amp;&amp; !sameType) &#123;</span><br><span class="line">      newFiber = &#123;</span><br><span class="line">        <span class="attr">type</span>: element.type,</span><br><span class="line">        <span class="attr">props</span>: element.props,</span><br><span class="line">        <span class="attr">dom</span>: <span class="literal">null</span>,</span><br><span class="line">        <span class="attr">parent</span>: wipFiber,</span><br><span class="line">        <span class="attr">alternate</span>: <span class="literal">null</span>,</span><br><span class="line">        <span class="attr">effectTag</span>: <span class="string">&quot;PLACEMENT&quot;</span>,</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<p>对于需要删除节点的情况，我们不需要新fiber，只要在旧fiber上添加effect tag就好了：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (oldFiber &amp;&amp; !sameType) &#123;</span><br><span class="line">     oldFiber.effectTag = <span class="string">&quot;DELETION&quot;</span></span><br><span class="line">     deletions.push(oldFiber)</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
-
-<p>但是，当我们把fiber树提交到DOM时，我们从“正在工作中的”根执行，它并没有旧fibers呀。</p>
-<p>因此我们需要一个数组deletions来跟踪想要移除的节点。接着，当我们向DOM提交更改时，我们仍然使用deletions数组中的fibers：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">commitRoot</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  deletions.forEach(commitWork)</span><br><span class="line">  commitWork(wipRoot.child)</span><br><span class="line">  currentRoot = wipRoot</span><br><span class="line">  wipRoot = <span class="literal">null</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>现在，让我们修改<code>commitWork</code>函数来处理新的<code>effectTags</code>。</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">commitWork</span>(<span class="params">fiber</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (!fiber) &#123;</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">const</span> domParent = fiber.parent.dom</span><br><span class="line">  domParent.appendChild(fiber.dom)</span><br><span class="line">  commitWork(fiber.child)</span><br><span class="line">  commitWork(fiber.sibling)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>如果fiber的effect tag值是<code>PLACEMENT</code>，我们和之前做的一样，把DOM节点追加到父fiber的节点上；</p>
-<p>如果是<code>DELETION</code>,则相反，我们要删除子节点；</p>
-<p>如果是<code>UPDATE</code>，我们需要用更改后的属性更新现存的DOM节点：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">commitWork</span>(<span class="params">fiber</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (!fiber) &#123;</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">const</span> domParent = fiber.parent.dom</span><br><span class="line">   <span class="keyword">if</span> (</span><br><span class="line">    fiber.effectTag === <span class="string">&quot;PLACEMENT&quot;</span> &amp;&amp;</span><br><span class="line">    fiber.dom != <span class="literal">null</span></span><br><span class="line">   ) &#123;</span><br><span class="line">       domParent.appendChild(fiber.dom)</span><br><span class="line">   &#125; <span class="keyword">else</span> <span class="keyword">if</span> (</span><br><span class="line">    fiber.effectTag === <span class="string">&quot;UPDATE&quot;</span> &amp;&amp;</span><br><span class="line">    fiber.dom != <span class="literal">null</span></span><br><span class="line">   ) &#123;</span><br><span class="line">       updateDom(</span><br><span class="line">           fiber.dom,</span><br><span class="line">           fiber.alternate.props,</span><br><span class="line">           fiber.props</span><br><span class="line">       ) </span><br><span class="line">   &#125; <span class="keyword">else</span> <span class="keyword">if</span> (fiber.effectTag === <span class="string">&quot;DELETION&quot;</span>) &#123;</span><br><span class="line">     domParent.removeChild(fiber.dom)</span><br><span class="line">   &#125; </span><br><span class="line">  commitWork(fiber.child)</span><br><span class="line">  commitWork(fiber.sibling)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>我们把更新的操作写在<code>updateDom</code>函数中：我们对比新旧fibers的属性，移除无用属性，设置新的或改变的属性：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> isProperty = <span class="function"><span class="params">key</span> =&gt;</span> key !== <span class="string">&quot;children&quot;</span></span><br><span class="line"><span class="keyword">const</span> isNew = <span class="function">(<span class="params">prev, next</span>) =&gt;</span> <span class="function"><span class="params">key</span> =&gt;</span></span><br><span class="line">  prev[key] !== next[key]</span><br><span class="line"><span class="keyword">const</span> isGone = <span class="function">(<span class="params">prev, next</span>) =&gt;</span> <span class="function"><span class="params">key</span> =&gt;</span> !(key <span class="keyword">in</span> next)</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">updateDom</span>(<span class="params">dom, prevProps, nextProps</span>) </span>&#123;</span><br><span class="line">  <span class="comment">// Remove old properties</span></span><br><span class="line">  <span class="built_in">Object</span>.keys(prevProps)</span><br><span class="line">    .filter(isProperty)</span><br><span class="line">    .filter(isGone(prevProps, nextProps))</span><br><span class="line">    .forEach(<span class="function"><span class="params">name</span> =&gt;</span> &#123;</span><br><span class="line">      dom[name] = <span class="string">&quot;&quot;</span></span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Set new or changed properties</span></span><br><span class="line">  <span class="built_in">Object</span>.keys(nextProps)</span><br><span class="line">    .filter(isProperty)</span><br><span class="line">    .filter(isNew(prevProps, nextProps))</span><br><span class="line">    .forEach(<span class="function"><span class="params">name</span> =&gt;</span> &#123;</span><br><span class="line">      dom[name] = nextProps[name]</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>对于事件监听属性我们需要做特殊处理，也就是属性名以“on”前缀开头的属性：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> isEvent = <span class="function"><span class="params">key</span> =&gt;</span> key.startsWith(<span class="string">&quot;on&quot;</span>)</span><br><span class="line"><span class="keyword">const</span> isProperty = <span class="function"><span class="params">key</span> =&gt;</span></span><br><span class="line">  key !== <span class="string">&quot;children&quot;</span> &amp;&amp; !isEvent(key)</span><br></pre></td></tr></table></figure>
-
-<p>如果事件处理程序发生了改变，我们把它从节点中移除：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Remove old or changed event listeners</span></span><br><span class="line"><span class="built_in">Object</span>.keys(prevProps)</span><br><span class="line">  .filter(isEvent)</span><br><span class="line">  .filter(</span><br><span class="line">    <span class="function"><span class="params">key</span> =&gt;</span></span><br><span class="line">      !(key <span class="keyword">in</span> nextProps) ||</span><br><span class="line">      isNew(prevProps, nextProps)(key)</span><br><span class="line">  )</span><br><span class="line">  .forEach(<span class="function"><span class="params">name</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> eventType = name</span><br><span class="line">      .toLowerCase()</span><br><span class="line">      .substring(<span class="number">2</span>)</span><br><span class="line">    dom.removeEventListener(</span><br><span class="line">      eventType,</span><br><span class="line">      prevProps[name]</span><br><span class="line">    )</span><br><span class="line">  &#125;)</span><br></pre></td></tr></table></figure>
-
-<p>然后添加一个新的处理程序：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Add event listeners</span></span><br><span class="line"> <span class="built_in">Object</span>.keys(nextProps)</span><br><span class="line">   .filter(isEvent)</span><br><span class="line">   .filter(isNew(prevProps, nextProps))</span><br><span class="line">   .forEach(<span class="function"><span class="params">name</span> =&gt;</span> &#123;</span><br><span class="line">     <span class="keyword">const</span> eventType = name</span><br><span class="line">       .toLowerCase()</span><br><span class="line">       .substring(<span class="number">2</span>)</span><br><span class="line">     dom.addEventListener(</span><br><span class="line">       eventType,</span><br><span class="line">       nextProps[name]</span><br><span class="line">     )</span><br><span class="line">   &#125;)</span><br></pre></td></tr></table></figure>
-
-<p>（其实就是初次渲染的时候要从头（根）到尾（叶）生成一棵fiber树，之后有更新只需要调整部分节点，保留不变的节点）</p>
-<h2 id="7-函数组件"><a href="#7-函数组件" class="headerlink" title="7.函数组件"></a>7.函数组件</h2><p>接下来我们要做的是支持函数式组件。首先让我们把原来的例子修改成函数式组件，它返回一个<code>h1</code>元素：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** <span class="doctag">@jsx </span>Didact.createElement */</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">App</span>(<span class="params">props</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="xml"><span class="tag">&lt;<span class="name">h1</span>&gt;</span>Hi &#123;props.name&#125;<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> element = <span class="xml"><span class="tag">&lt;<span class="name">App</span> <span class="attr">name</span>=<span class="string">&quot;foo&quot;</span> /&gt;</span></span></span><br><span class="line"><span class="keyword">const</span> container = <span class="built_in">document</span>.getElementById(<span class="string">&quot;root&quot;</span>)</span><br><span class="line">Didact.render(element, container)</span><br></pre></td></tr></table></figure>
-
-<p>如果把JSX语法转换成JS呢，应该是下面这样的:</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">App</span>(<span class="params">props</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> Didact.createElement(</span><br><span class="line">    <span class="string">&quot;h1&quot;</span>,</span><br><span class="line">    <span class="literal">null</span>,</span><br><span class="line">    <span class="string">&quot;Hi &quot;</span>,</span><br><span class="line">    props.name</span><br><span class="line">  )</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> element = Didact.createElement(App, &#123;</span><br><span class="line">  <span class="attr">name</span>: <span class="string">&quot;foo&quot;</span>,</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
-
-<p>函数式组件有两个不同点：</p>
-<ul>
-<li>函数式组件的fiber（本身）没有DOM节点（本身是由其他由DOM节点的fiber组成的嘛）</li>
-<li>而且组件的孩子来自于函数的执行而不是直接来自于<code>props</code></li>
-</ul>
-<p>我们检查fiber type是不是一个函数，然后据此切换到一个不同的更新函数。</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> isFunctionComponent =</span><br><span class="line">    fiber.type <span class="keyword">instanceof</span> <span class="built_in">Function</span></span><br><span class="line">  <span class="keyword">if</span> (isFunctionComponent) &#123;</span><br><span class="line">    updateFunctionComponent(fiber)</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    updateHostComponent(fiber)</span><br></pre></td></tr></table></figure>
-
-<p>在<code>updateHostComponent</code>中我们做的事和之前一样：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">function <span class="title">updateFunctionComponent</span><span class="params">(fiber)</span> </span>&#123;</span><br><span class="line">  <span class="comment">// TODO</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">function <span class="title">updateHostComponent</span><span class="params">(fiber)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (!fiber.dom) &#123;</span><br><span class="line">    fiber.dom = createDom(fiber)</span><br><span class="line">  &#125;</span><br><span class="line">  reconcileChildren(fiber, fiber.props.children)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>而在<code>updateFunctionComponent</code>中我们运行函数来获得children。</p>
-<p>在我们的例子中，这里的<code>fiber.type</code>是<code>App</code>函数，当我们运行它时会返回一个<code>h1</code>元素。</p>
-<p>接着，一旦我们得到了children，调和函数也会以同样的方式执行，我们不需要对它做任何修改</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">updateFunctionComponent</span>(<span class="params">fiber</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> children = [fiber.type(fiber.props)]</span><br><span class="line">  reconcileChildren(fiber, children)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>我们需要修改的是<code>commitWork</code>函数，现在我们的到了一些没有DOM节点的fibers，我们要修改两件事。</p>
-<p>首先，为了找到DOM节点的父亲，我们需要在fiber tree中向上查找，直到找到了拥有DOM节点的fiber：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> domParentFiber = fiber.parent</span><br><span class="line"> <span class="keyword">while</span> (!domParentFiber.dom) &#123;</span><br><span class="line">   domParentFiber = domParentFiber.parent</span><br><span class="line"> &#125;</span><br><span class="line"> <span class="keyword">const</span> domParent = domParentFiber.dom</span><br><span class="line"></span><br><span class="line"> <span class="keyword">if</span> (</span><br><span class="line">   fiber.effectTag === <span class="string">&quot;PLACEMENT&quot;</span> &amp;&amp;</span><br><span class="line">   fiber.dom != <span class="literal">null</span></span><br><span class="line"> ) &#123;</span><br><span class="line">   domParent.appendChild(fiber.dom)</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
-
-<p>接着当删除节点时，我们也需要继续查找，直到找到一个具有DOM节点的子元素：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">commitDeletion</span>(<span class="params">fiber, domParent</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (fiber.dom) &#123;</span><br><span class="line">    domParent.removeChild(fiber.dom)</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    commitDeletion(fiber.child, domParent)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="8-Hooks"><a href="#8-Hooks" class="headerlink" title="8.Hooks"></a>8.<code>Hooks</code></h2><p>最后一步了！现在我们实现了函数式组件，现在让我们加入状态。</p>
-<p>让我们写一个经典的计数器例子。每次我们点击它，它的state就加一。注意我们用的是<code>Diadact.useState</code>来获取和更新counter值：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Counter</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> [state, setState] = Didact.useState(<span class="number">1</span>)</span><br><span class="line">  <span class="keyword">return</span> (</span><br><span class="line">    <span class="xml"><span class="tag">&lt;<span class="name">h1</span> <span class="attr">onClick</span>=<span class="string">&#123;()</span> =&gt;</span> setState(c =&gt; c + 1)&#125;&gt;</span></span><br><span class="line"><span class="xml">      Count: &#123;state&#125;</span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span></span><br><span class="line">  )</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> element = <span class="xml"><span class="tag">&lt;<span class="name">Counter</span> /&gt;</span></span></span><br></pre></td></tr></table></figure>
-
-<p><code>updateFunctionComponent</code>是我们调用示例中<code>Counter</code>函数的地方，在<strong>函数内部</strong>我们还调用了<code>useState</code>：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">updateFunctionComponent</span>(<span class="params">fiber</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> children = [fiber.type(fiber.props)]</span><br><span class="line">  reconcileChildren(fiber, children)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">useState</span>(<span class="params">initial</span>) </span>&#123;</span><br><span class="line">  <span class="comment">// TODO</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在调用函数组件之前，我们需要初始化一些全局变量，供我们在<code>useState</code>函数中使用。</p>
-<p>首先，我们定义“正在工作的”fiber。</p>
-<p>我们还在fiber中添加了<code>hooks</code>数组，来实现在一个组件中多次调用<code>useState</code>。同时我们跟踪当前的hook下标：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> wipFiber = <span class="literal">null</span></span><br><span class="line"><span class="keyword">let</span> hookIndex = <span class="literal">null</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">updateFunctionComponent</span>(<span class="params">fiber</span>) </span>&#123;</span><br><span class="line">  wipFiber = fiber</span><br><span class="line">  hookIndex = <span class="number">0</span></span><br><span class="line">  wipFiber.hooks = []</span><br><span class="line">  <span class="keyword">const</span> children = [fiber.type(fiber.props)]</span><br><span class="line">  reconcileChildren(fiber, children)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>当函数式组件调用<code>useState</code>时，我们检查是否有一个旧hook。我们用hook下标在fiber的<code>alternate</code>属性中检查。</p>
-<p>如果我们有一个旧hook，就把旧hook中的state复制到新hook中，没有的话呢就初始化state。</p>
-<p>接着我们把新hook添加到fiber，把hook下标加一，并且返回state：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">useState</span>(<span class="params">initial</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> oldHook =</span><br><span class="line">    wipFiber.alternate &amp;&amp;</span><br><span class="line">    wipFiber.alternate.hooks &amp;&amp;</span><br><span class="line">    wipFiber.alternate.hooks[hookIndex]</span><br><span class="line">  <span class="keyword">const</span> hook = &#123;</span><br><span class="line">    <span class="attr">state</span>: oldHook ? oldHook.state : initial,</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  wipFiber.hooks.push(hook)</span><br><span class="line">  hookIndex++</span><br><span class="line">  <span class="keyword">return</span> [hook.state]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>useState</code>还应该返回一个更新state的函数，所以我们定义一个<code>setState</code>函数来接收一个动作（在<code>Counter</code>例子中这个动作是把state加一的函数）。</p>
-<p>我们把这个动作推入一个队列，这个队列是添加在hook上的。</p>
-<p>接下来我们要做的事和之前在<code>render</code>函数中的类似，设置一个新的“工作中的”root作为任务的下一个单元，使workLoop能开启一个新的渲染阶段：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> hook = &#123;</span><br><span class="line">    <span class="attr">state</span>: oldHook ? oldHook.state : initial,</span><br><span class="line">    <span class="attr">queue</span>: [],</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> setState = <span class="function"><span class="params">action</span> =&gt;</span> &#123;</span><br><span class="line">    hook.queue.push(action)</span><br><span class="line">    wipRoot = &#123;</span><br><span class="line">      <span class="attr">dom</span>: currentRoot.dom,</span><br><span class="line">      <span class="attr">props</span>: currentRoot.props,</span><br><span class="line">      <span class="attr">alternate</span>: currentRoot,</span><br><span class="line">    &#125;</span><br><span class="line">    nextUnitOfWork = wipRoot</span><br><span class="line">    deletions = []</span><br><span class="line">  &#125;</span><br><span class="line">​</span><br><span class="line">  wipFiber.hooks.push(hook)</span><br><span class="line">  hookIndex++</span><br><span class="line">  <span class="keyword">return</span> [hook.state, setState]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>我们还没执行动作呢！</p>
-<p>我们在<strong>下次渲染组件的时候</strong>再执行，我们从旧hook队列中拿到所有动作，再把他们一个个应用在新hook state上，所以当我们返回state的时候它已经更新过了：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> actions = oldHook ? oldHook.queue : []</span><br><span class="line">actions.forEach(<span class="function"><span class="params">action</span> =&gt;</span> &#123;</span><br><span class="line">    hook.state = action(hook.state)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
-
-<p>大功告成！我们写了一个自己的React😀</p>
-<p>下面我们来复习一下整个过程8：</p>
-<p>render:</p>
-<p><img src="C:\Users\luna6\AppData\Roaming\Typora\typora-user-images\image-20211028180235291.png" alt="image-20211028180235291"></p>
-<p>hookindex是干嘛的？</p>
-<p>每次触发一个更新，调用setState函数，都会更新nextUnitOfWork，开始新一轮的重新渲染</p>
-<p>此时fiber一定是函数组件，index在更新函数中初始化为0</p>
-<p>生成children的就是执行函数的过程</p>
-<p>会挨个执行useState函数</p>
-<p>初始化的时候不执行setState的回调</p>
-<p>但是在之后的更新中，需要拿到上一个fiber状态中保存的对应useState,setState回调队列，因为不是每一个setState都执行</p>
-<p>可能再一次事件中调用了多个setState</p>
-<p>在执行setState的过程中，并不会直接改变状态的值</p>
-<p>而是把回调函数推到hook队列中，同时更新nextUnitOfWork，浏览器一旦有空闲就会重新渲染</p>
-<p>比如调用了5个useState，在第三个useState的时候浏览器重新渲染</p>
-<p>前两个useState是没有被打断的，那么hookIndex递增到了2</p>
-<p>第三个的时候，又有五个useState要执行，就要从0开始了</p>
-<p>则意味着hookIndex置为0，而且又要重新执行5个useState</p>
-<p>由于idle的存在，可能队列中有多个action</p>
-<p>当执行perform的时候，index初始化为0，又开始执行useState</p>
-<p>这时wipFiber.alternate.hooks不为空，而且hookindex也有值</p>
-<p>主要是setState和useState执行顺序的问题</p>
-<p>栈</p>
-<p>为了让新的hook能够和旧的hook联系起来</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1730,12 +1706,12 @@
       <div class="site-state-item site-state-posts">
           <a href="/project/archives/">
         
-          <span class="site-state-item-count">21</span>
+          <span class="site-state-item-count">22</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">tags</span>
       </div>
   </nav>
